@@ -13,10 +13,30 @@ The system consists of four independent agents:
 
 Each agent operates independently with its own LLM interface. The system aggregates scores from all agents to produce a final score.
 
+This system is designed with a fully decoupled, modular architecture where:
+
+- Each agent operates independently with its own LLM handler
+- No shared base classes or inheritance is used
+- LLM interfaces can be easily replaced per agent
+- Agents have clear, well-defined inputs and outputs
+- Each agent encapsulates its own LLM logic
+
+This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
+
 ## Architecture
 
 ![64a8eee158e3d15ab80b02f189ece38](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
 
+### Multi-agent Scoring System:
+
+The system consists of four independent agents:
+
+1. **Agent A (Resume Parser)**: Extracts structured information from a plain text resume.
+2. **Agent B (Technical Skill Scorer)**: Evaluates how well the resume's technical skills match the job requirements.
+3. **Agent C (Experience Relevance Scorer)**: Assesses the relevance of the candidate's work experience.
+4. **Agent D (Soft Skills Scorer)**: Evaluates the candidate's soft skills.
+
+Each agent operates independently with its own LLM interface. The system aggregates scores from all agents to produce a final score.
 
 This system is designed with a fully decoupled, modular architecture where:
 
@@ -27,6 +47,43 @@ This system is designed with a fully decoupled, modular architecture where:
 - Each agent encapsulates its own LLM logic
 
 This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
+
+### Performance Evaluation:
+
+1. Simulate 5 Diverse Candidate Resumes
+I've generated 5 candidate resumes with the specified distribution:
+Resume 1 (ALEX ZHANG): Clear mismatch - lacks US work authorization (requires sponsorship as noted in the job description) and is missing required technical skills (Python, JavaScript, React).
+Resume 2 (SARAH JOHNSON): Strong match - exceptional candidate with all required skills, appropriate experience, strong soft skills, and US citizenship.
+Resume 3 (DAVID KIM): Moderate match with strength in technical skills - has excellent technical skills but less leadership experience.
+Resume 4 (MICHAEL WILSON): Moderate match with strength in experience - has extensive management experience but fewer modern technical skills.
+Resume 5 (RACHEL GARCIA): Moderate match with strength in soft skills - excellent at communication and user-focused development but more limited technical depth.
+
+
+3. Implemented Performance Evaluation Pipeline
+
+- Single Resume Scorer Function: Refactored the original scoring logic into a reusable function that processes a single resume.
+
+- Ranking Accuracy Evaluator: Added a function to compare system rankings with human rankings using:
+  Exact position match accuracy
+  Spearman rank correlation coefficient (which considers relative positions)
+
+- Performance Evaluation Runner: Created a function that:
+  Processes all 5 candidate resumes
+  Scores each one using the multi-agent system
+
+ - Ranks candidates based on scores
+  Compares to predefined human expert rankings
+  Calculates and displays accuracy metrics
+
+
+
+4. Enhanced Output
+The evaluation pipeline produces detailed output including:
+ - Individual scores for each candidate
+ - System-generated ranking
+ - Human expert ranking
+ - Accuracy metrics
+
 
 ## Prerequisites
 
