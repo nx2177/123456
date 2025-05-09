@@ -66,8 +66,8 @@ Evaluate the following 4 combinations:
 
 combinations = [
    - ['A1', 'B1', 'C', 'D'],  # baseline
-   - ['A2', 'B1', 'C', 'D'],  # change in prompt style
-   - ['A1', 'B2', 'C', 'D'],  # change in LLM model
+   - ['A2', 'B1', 'C', 'D'],  # change in prompt style (A1's prompt style is concise, A2's prompt style is detailed)
+   - ['A1', 'B2', 'C', 'D'],  # change in LLM model (B1 use llama3.2, B2 use deepseek-r1:8b)
    - ['A2', 'B2', 'C', 'D'],  # change in both
 ]
 
