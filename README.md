@@ -80,7 +80,7 @@ Rank the agent combinations based on the accuracy and output the best combinatio
 
 - Python 3.8+
 - [Ollama](https://ollama.ai/) installed and running locally
-- LLaMA 3.2 model pulled in Ollama
+- LLaMA 3.2 and deepseek-r1:8b pulled in Ollama
 
 ## Setup
 
