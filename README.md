@@ -1,0 +1,88 @@
+# Multi-Agent Resume Scoring System
+
+A system that uses multiple specialized agents to evaluate resumes against job descriptions. This implementation uses LLaMA 3.2 via the Ollama API.
+
+## System Overview
+
+The system consists of four independent agents:
+
+1. **Agent A (Resume Parser)**: Extracts structured information from a plain text resume.
+2. **Agent B (Technical Skill Scorer)**: Evaluates how well the resume's technical skills match the job requirements.
+3. **Agent C (Experience Relevance Scorer)**: Assesses the relevance of the candidate's work experience.
+4. **Agent D (Soft Skills Scorer)**: Evaluates the candidate's soft skills.
+
+Each agent operates independently with its own LLM interface. The system aggregates scores from all agents to produce a final score.
+
+## Architecture
+
+This system is designed with a fully decoupled, modular architecture where:
+
+- Each agent operates independently with its own LLM handler
+- No shared base classes or inheritance is used
+- LLM interfaces can be easily replaced per agent
+- Agents have clear, well-defined inputs and outputs
+- Each agent encapsulates its own LLM logic
+
+This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
+
+## Prerequisites
+
+- Python 3.8+
+- [Ollama](https://ollama.ai/) installed and running locally
+- LLaMA 3.2 model pulled in Ollama
+
+## Setup
+
+1. Install Ollama by following the instructions at [https://ollama.ai/](https://ollama.ai/)
+2. Pull the LLaMA 3.2 model:
+   ```
+   ollama pull llama3.2
+   ```
+3. Install required Python packages:
+   ```
+   pip install requests
+   ```
+
+## Usage
+
+1. Ensure the Ollama server is running locally:
+   ```
+   ollama serve
+   ```
+
+2. Run the main application:
+   ```
+   python main.py
+   ```
+
+The system will:
+1. Generate a sample resume and job description
+2. Parse the resume using Agent A
+3. Evaluate technical skills match using Agent B
+4. Assess experience relevance using Agent C
+5. Evaluate soft skills using Agent D
+6. Calculate and display the final score
+
+## Customization
+
+To use your own resume and job description, modify the `main.py` file to read from files instead of using the sample generator.
+
+To replace an LLM implementation for a specific agent, simply modify the LLM handler class within that agent's file.
+
+## Implementation Details
+
+- `agents/parser.py`: Agent A implementation with its own LLM handler
+- `agents/technical_scorer.py`: Agent B implementation with its own LLM handler
+- `agents/experience_scorer.py`: Agent C implementation with its own LLM handler
+- `agents/soft_skills_scorer.py`: Agent D implementation with its own LLM handler
+- `utils/data_generator.py`: Generates sample data for testing
+- `main.py`: Orchestrates the system by calling each agent sequentially
+
+## Note
+
+This system demonstrates a fully decoupled multi-agent architecture. In a production environment, you might want to:
+1. Implement error handling and logging
+2. Add validation for input/output
+3. Optimize prompts for better extraction and evaluation
+4. Implement caching to reduce API calls
+5. Add additional agents for more specialized evaluations 

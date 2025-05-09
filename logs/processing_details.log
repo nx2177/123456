@@ -1,0 +1,2302 @@
+===== RESUME SCORING SYSTEM PROCESSING DETAILS =====
+
+
+==================== RESUME RANKING SYSTEM EVALUATION ====================
+
+FULL JOB DESCRIPTION:
+
+SENIOR FULL-STACK ENGINEER
+AI Products Team | InnovateAI Inc.
+
+ABOUT THE ROLE
+We are looking for an experienced Full-Stack Engineer to join our AI Products team. In this role, you'll work on building and scaling our machine learning-powered applications that help businesses automate document processing and extract insights from unstructured data. You'll collaborate with a cross-functional team of engineers, data scientists, and product managers to deliver high-quality software solutions.
+
+RESPONSIBILITIES
+- Design, build and maintain scalable web applications using Python, React, and cloud technologies
+- Develop efficient and reliable APIs to support our machine learning models and front-end applications
+- Implement and optimize database designs for performance, reliability, and scalability
+- Work closely with the ML team to integrate and deploy machine learning models
+- Lead technical initiatives and mentor junior engineers
+- Participate in code reviews and ensure high quality standards in the codebase
+- Troubleshoot and resolve complex technical issues in production environments
+- Stay up-to-date with emerging technologies and industry best practices
+
+REQUIRED SKILLS & EXPERIENCE
+- 5+ years of experience in software development with focus on web applications
+- Strong proficiency in Python and JavaScript/TypeScript
+- Experience with modern web frameworks such as React, Angular, or Vue.js
+- Expertise in building RESTful APIs and working with databases (SQL and NoSQL)
+- Experience with cloud platforms (AWS, Google Cloud, or Azure)
+- Solid understanding of CI/CD pipelines and DevOps practices
+- Familiarity with containerization technologies like Docker and Kubernetes
+- Basic understanding of machine learning concepts and NLP
+- Experience with version control systems (Git) and collaborative development
+- Must have US work authorization (this position does not qualify for sponsorship)
+
+NICE TO HAVE
+- Experience with real-time data processing systems (Kafka, Spark)
+- Background in developing ML-powered applications
+- Knowledge of GraphQL and modern API patterns
+- Experience with serverless architectures
+- Open-source contributions
+- Security best practices implementation
+
+EDUCATION
+Bachelor's degree in Computer Science, Engineering or related field, or equivalent practical experience
+
+SOFT SKILLS WE VALUE
+- Excellent communication and collaboration abilities
+- Strong problem-solving and analytical thinking
+- Ability to work effectively in a fast-paced environment
+- Leadership and mentoring capabilities
+- Self-motivated with ability to work independently
+- Adaptability and willingness to learn new technologies
+
+BENEFITS & PERKS
+- Competitive salary and equity package
+- Health, dental, and vision insurance
+- 401(k) matching
+- Flexible working hours and remote options
+- Professional development budget
+- Generous paid time off
+- Modern office with catered meals
+- Regular team events and activities
+
+
+==================================================
+
+Human Expert Ranking (Ground Truth): [2, 3, 5, 4, 1]
+
+
+============================== EVALUATING COMBINATION: A1+B1+C+D ==============================
+
+
+==================================================
+CANDIDATE 1: ALEX ZHANG
+AGENT COMBINATION: A1 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+ALEX ZHANG
+Software Developer
+alex.zhang@email.com | (555) 987-6543 | Vancouver, Canada | linkedin.com/in/alexzhang
+
+SUMMARY
+Detail-oriented backend developer with 3 years of experience building data...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "C++",
+    "Java",
+    "Ruby",
+    "PHP",
+    "Ruby on Rails",
+    "Laravel",
+    "Google Cloud Platform",
+    "Git",
+    "SVN",
+    "Jenkins",
+    "MySQL",
+    "PostgreSQL"
+  ],
+  "job_experience": [
+    {
+      "title": "Junior Software Developer",
+      "company": "TechStartup Inc.",
+      "duration": "Jun 2021 - Present",
+      "responsibilities": "Built backend services for e-commerce applications using Ruby on Rails, Optimized SQL queries improving database performance by 30%, Implemented payment processing integration with Stripe and PayPal, Collaborated with UX team to improve checkout flow conversion rates"
+    },
+    {
+      "title": "Web Developer",
+      "company": "CanadaTech Solutions",
+      "duration": "Aug 2019 - May 2021",
+      "responsibilities": "Developed and maintained PHP-based web applications for small businesses, Created custom WordPress themes and plugins for client websites, Implemented responsive design principles for mobile compatibility, Managed hosting infrastructure for over 20 client websites"
+    }
+  ],
+  "soft_skills": [
+    "Collaborative team player",
+    "Strong written communication",
+    "Detail-oriented and organized",
+    "Fast learner with strong research skills"
+  ],
+  "education_level": "Bachelor of Science in Computer Science"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'java' (similarity: 0.684)Required: 'react' ¡ú Best match: 'mysql' (similarity: 0.511)Required: 'javascripttypescript' ¡ú Best match: 'java' (similarity: 0.488)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.730)Required: 'nosql' ¡ú Best match: 'mysql' (similarity: 0.592)Required: 'aws' ¡ú Best match: 'jenkins' (similarity: 0.531)Required: 'google cloud' ¡ú Best match: 'google cloud platform' (similarity: 0.706)Required: 'azure' ¡ú Best match: 'google cloud platform' (similarity: 0.588)Required: 'cicd pipelines' ¡ú Best match: 'google cloud platform' (similarity: 0.599)Required: 'devops practices' ¡ú Best match: 'google cloud platform' (similarity: 0.632)Required: 'docker' ¡ú Best match: 'git' (similarity: 0.544)Required: 'kubernetes' ¡ú Best match: 'google cloud platform' (similarity: 0.512)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'google cloud platform' (similarity: 0.582)Required: 'nlp' ¡ú Best match: 'jenkins' (similarity: 0.552)Required: 'kafka' ¡ú Best match: 'mysql' (similarity: 0.528)Required: 'spark' ¡ú Best match: 'jenkins' (similarity: 0.431)Required: 'graphql' ¡ú Best match: 'mysql' (similarity: 0.471)Required: 'serverless architectures' ¡ú Best match: 'google cloud platform' (similarity: 0.621)Required: 'open-source contributions' ¡ú Best match: 'google cloud platform' (similarity: 0.542)
+Technical Skill Match Score (S1): 0.59
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.43
+Justification: The candidate has relevant experience in software development and web applications, but lacks expertise in Python and cloud technologies required for the role. They have experience with Ruby on Rails and PHP, but not with modern frameworks like React or Vue.js. Their leadership experience is also limited to a junior position.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.60
+Justification: The candidate demonstrates strong technical skills in software development, particularly in backend services and API integration. However, their soft skills evaluation is limited by a lack of experience with cloud platforms like AWS, Google Cloud, or Azure, as well as modern web frameworks like React, Angular, or Vue.js. Additionally, the candidate's project experience lacks relevance to machine learning-powered applications, which are emphasized in the job description.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.59
+Experience Relevance (S2): 0.43
+Soft Skills (S3): 0.60
+Final Score: 1.62/3.00
+
+==================================================
+CANDIDATE 2: SARAH JOHNSON
+AGENT COMBINATION: A1 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+SARAH JOHNSON
+Senior Software Engineer
+sarah.johnson@email.com | (555) 234-5678 | San Francisco, CA | linkedin.com/in/sarahjohnson
+U.S. Citizen
+
+SUMMARY
+Highly accomplished full-stack engineer with 8...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Node.js",
+    "Django",
+    "Flask",
+    "Express",
+    "Next.js",
+    "AWS",
+    "Google Cloud Platform",
+    "Azure",
+    "Docker",
+    "Kubernetes",
+    "Git",
+    "Jenkins",
+    "GitHub Actions",
+    "CircleCI",
+    "Terraform",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Elasticsearch",
+    "Snowflake",
+    "PyTorch",
+    "TensorFlow",
+    "scikit-learn",
+    "NLP",
+    "Computer Vision"
+  ],
+  "job_experience": [
+    {
+      "title": "Lead Software Engineer",
+      "company": "AITech Solutions",
+      "duration": "Jan 2020 - Present",
+      "responsibilities": "Architected and built a scalable ML platform processing 100M+ documents monthly using AWS and TensorFlow; Led migration from monolith to microservices, reducing deployment time by 80% and improving system resilience"
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataViz Inc.",
+      "duration": "Feb 2017 - Dec 2019",
+      "responsibilities": "Built RESTful and GraphQL APIs powering enterprise-grade applications used by Fortune 500 companies; Led frontend development using React and TypeScript with 98% test coverage"
+    },
+    {
+      "title": "Software Engineer",
+      "company": "WebScale Technologies",
+      "duration": "Jun 2015 - Jan 2017",
+      "responsibilities": "Developed responsive web applications using modern JavaScript frameworks; Implemented authentication and authorization systems with robust security practices"
+    }
+  ],
+  "soft_skills": [
+    "Outstanding written and verbal communication",
+    "Strong leadership and team mentoring capabilities",
+    "Excellent problem-solving and analytical thinking",
+    "Highly adaptable to changing requirements and technologies",
+    "Exceptional time management and prioritization skills"
+  ],
+  "education_level": "Master of Science in Computer Science"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.743)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'google cloud' ¡ú Best match: 'google cloud platform' (similarity: 0.706)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'sql' (similarity: 0.619)Required: 'cicd pipelines' ¡ú Best match: 'google cloud platform' (similarity: 0.599)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'computer vision' (similarity: 0.663)Required: 'nlp' ¡ú Best match: 'nlp' (similarity: 1.000)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'spark' ¡ú Best match: 'nlp' (similarity: 0.458)Required: 'kafka' ¡ú Best match: 'nlp' (similarity: 0.566)Required: 'serverless architectures' ¡ú Best match: 'computer vision' (similarity: 0.648)Required: 'open-source contributions' ¡ú Best match: 'computer vision' (similarity: 0.615)Required: 'security best practices' ¡ú Best match: 'google cloud platform' (similarity: 0.632)
+Technical Skill Match Score (S1): 0.79
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.85
+Justification: The candidate has relevant experience in software development, particularly in building web applications and APIs using Python, React, and cloud technologies. Their experience with AWS and TensorFlow also aligns with the job requirements. However, their background in machine learning is limited compared to the required expertise.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.87
+Justification: Their ability to work effectively in a fast-paced environment (as shown through their experience with agile development processes) is also an asset for this role.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.79
+Experience Relevance (S2): 0.85
+Soft Skills (S3): 0.87
+Final Score: 2.51/3.00
+
+==================================================
+CANDIDATE 3: DAVID KIM
+AGENT COMBINATION: A1 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+DAVID KIM
+Full-Stack Developer
+david.kim@email.com | (555) 345-6789 | Austin, TX | linkedin.com/in/davidkim
+U.S. Citizen
+
+SUMMARY
+Versatile developer with 4 years of experience specializing in modern...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Rust",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Vue.js",
+    "Node.js",
+    "Express",
+    "FastAPI",
+    "Svelte",
+    "Docker",
+    "Kubernetes",
+    "Terraform",
+    "Ansible",
+    "Git",
+    "GitHub Actions",
+    "ArgoCD",
+    "PostgreSQL",
+    "MongoDB",
+    "DynamoDB",
+    "Neo4j",
+    "Cassandra",
+    "Redis",
+    "PyTorch",
+    "TensorFlow",
+    "Hugging Face Transformers"
+  ],
+  "job_experience": [
+    {
+      "title": "Software Engineer",
+      "company": "CloudTech Systems",
+      "duration": "Mar 2021 - Present",
+      "responsibilities": [
+        "Implemented serverless architectures using AWS Lambda and API Gateway",
+        "Built microservices with Kubernetes and Docker handling 30M+ daily requests",
+        "Developed real-time data processing systems using Kafka and Kinesis",
+        "Optimized CI/CD pipelines reducing deployment time by 70%",
+        "Implemented GraphQL APIs for improved frontend data fetching"
+      ]
+    },
+    {
+      "title": "Junior Developer",
+      "company": "WebApps Inc.",
+      "duration": "Jun 2019 - Feb 2021",
+      "responsibilities": [
+        "Developed feature-rich web applications using React and TypeScript",
+        "Built RESTful APIs with Express.js and PostgreSQL",
+        "Implemented automated testing strategies with Jest and Cypress",
+        "Participated in code reviews and agile development processes"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Good written communication",
+    "Independent worker",
+    "Analytical problem solver",
+    "Quick learner with new technologies"
+  ],
+  "education_level": "Bachelor of Science"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.743)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'angular' ¡ú Best match: 'express' (similarity: 0.423)Required: 'vuejs' ¡ú Best match: 'vuejs' (similarity: 1.000)Required: 'aws' ¡ú Best match: 'nodejs' (similarity: 0.536)Required: 'google cloud' ¡ú Best match: 'kubernetes' (similarity: 0.375)Required: 'azure' ¡ú Best match: 'kubernetes' (similarity: 0.479)Required: 'cicd pipelines' ¡ú Best match: 'github actions' (similarity: 0.526)Required: 'devops practices' ¡ú Best match: 'python' (similarity: 0.512)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'nlp' ¡ú Best match: 'htmlcss' (similarity: 0.558)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'sql' (similarity: 0.619)Required: 'kafka' ¡ú Best match: 'cassandra' (similarity: 0.537)Required: 'spark' ¡ú Best match: 'rust' (similarity: 0.415)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'serverless architectures' ¡ú Best match: 'python' (similarity: 0.461)Required: 'machine learning' ¡ú Best match: 'python' (similarity: 0.588)
+Technical Skill Match Score (S1): 0.68
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: The candidate has strong experience in full-stack development with Python, React, and cloud technologies, as well as expertise in building RESTful APIs, working with databases, and containerization using Docker and Kubernetes. Their experience with serverless architectures using AWS Lambda and API Gateway also aligns with the job requirements. However, their lack of direct experience with machine learning concepts and NLP is a notable gap.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.83
+Justification: The candidate has excellent communication skills as shown in their work experience at CloudTech Systems and WebApps Inc., where they participated in code reviews and agile development processes. They also have strong analytical problem-solving skills, demonstrated by their implementation of real-time data processing systems using Kafka and Kinesis. Additionally, their leadership experience as a Junior Developer and certifications such as Kubernetes Administrator (CKA) show their ability to work independently and lead technical initiatives.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.68
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.83
+Final Score: 2.31/3.00
+
+==================================================
+CANDIDATE 4: MICHAEL WILSON
+AGENT COMBINATION: A1 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+MICHAEL WILSON
+Software Engineering Manager
+michael.wilson@email.com | (555) 456-7890 | Seattle, WA | linkedin.com/in/michaelwilson
+U.S. Citizen
+
+SUMMARY
+Experienced engineering leader with 12+ years...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "Java",
+    "C#",
+    "React",
+    "Angular",
+    "Django",
+    "Spring Boot",
+    "AWS",
+    "Azure",
+    "Git",
+    "Jenkins",
+    "JIRA",
+    "Confluence",
+    "SQL Server",
+    "MySQL",
+    "MongoDB"
+  ],
+  "job_experience": [
+    {
+      "title": "Engineering Manager",
+      "company": "Enterprise Systems Inc.",
+      "duration": "Jan 2019 - Present",
+      "responsibilities": [
+        "Led team of 15 engineers developing enterprise SaaS platform used by 200+ corporations",
+        "Managed delivery of 4 major product releases annually with 99.9% uptime SLA",
+        "Established code quality processes improving stability and reducing bugs by 45%",
+        "Coordinated with product management to align technical roadmap with business objectives",
+        "Implemented agile methodologies improving team velocity by 30%"
+      ]
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataSoft Corp",
+      "duration": "Mar 2015 - Dec 2018",
+      "responsibilities": [
+        "Led development of distributed data processing pipeline handling 2TB daily",
+        "Architected migration from monolith to microservices architecture",
+        "Mentored junior engineers and conducted technical interviews",
+        "Implemented monitoring and alerting systems reducing incident response time by 60%"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "TechSolutions LLC",
+      "duration": "Jun 2011 - Feb 2015",
+      "responsibilities": [
+        "Developed web applications using JavaScript frameworks and RESTful APIs",
+        "Built reporting systems integrating data from multiple enterprise sources",
+        "Optimized SQL queries and database schemas improving application performance",
+        "Implemented automated testing frameworks to ensure code quality"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Exceptional leadership and team management",
+    "Strong communication with technical and non-technical stakeholders",
+    "Strategic planning and roadmap development",
+    "Excellent conflict resolution and problem-solving",
+    "Mentoring and career development"
+  ],
+  "education_level": "Bachelor of Science in Computer Science"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'javascript' (similarity: 0.573)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'google cloud' ¡ú Best match: 'azure' (similarity: 0.570)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.730)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.613)Required: 'docker' ¡ú Best match: 'git' (similarity: 0.544)Required: 'kubernetes' ¡ú Best match: 'python' (similarity: 0.534)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'cicd pipelines' ¡ú Best match: 'jenkins' (similarity: 0.525)Required: 'devops practices' ¡ú Best match: 'confluence' (similarity: 0.528)Required: 'machine learning concepts' ¡ú Best match: 'python' (similarity: 0.495)Required: 'nlp' ¡ú Best match: 'jenkins' (similarity: 0.552)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'kafka' ¡ú Best match: 'mysql' (similarity: 0.528)Required: 'spark' ¡ú Best match: 'jenkins' (similarity: 0.431)Required: 'serverless architectures' ¡ú Best match: 'confluence' (similarity: 0.484)Required: 'open-source contributions' ¡ú Best match: 'confluence' (similarity: 0.515)Required: 'security best practices' ¡ú Best match: 'confluence' (similarity: 0.509)
+Technical Skill Match Score (S1): 0.65
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.64
+Justification: The candidate has relevant experience in software development, particularly in web applications and cloud technologies. Their expertise in Python, JavaScript/TypeScript, React, and databases aligns with the job requirements. However, their lack of direct experience with machine learning concepts and NLP, as well as specific tools like GraphQL and serverless architectures, slightly reduces the overall score.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.80
+Justification: The candidate has strong technical skills and experience in software development, which aligns well with the job requirements. The example of leading a team of 15 engineers and managing delivery of 4 major product releases annually demonstrates leadership and problem-solving skills, but could be improved upon with more specific examples related to AI products and machine learning. Overall, the candidate's soft skills, such as communication, teamwork, and adaptability, are well-suited for this role.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.65
+Experience Relevance (S2): 0.64
+Soft Skills (S3): 0.80
+Final Score: 2.09/3.00
+
+==================================================
+CANDIDATE 5: RACHEL GARCIA
+AGENT COMBINATION: A1 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+RACHEL GARCIA
+Product-Focused Developer
+rachel.garcia@email.com | (555) 567-8901 | Chicago, IL | linkedin.com/in/rachelgarcia
+U.S. Citizen
+
+SUMMARY
+Empathetic and collaborative developer with 5 years...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "HTML/CSS",
+    "SQL",
+    "React",
+    "Express.js",
+    "Bootstrap",
+    "Tailwind CSS",
+    "AWS",
+    "Git",
+    "Figma",
+    "Trello",
+    "Notion",
+    "PostgreSQL",
+    "MongoDB",
+    "Jest",
+    "Cypress"
+  ],
+  "job_experience": [
+    {
+      "title": "Frontend Engineer",
+      "company": "UserFirst Technologies",
+      "duration": "Apr 2020 - Present",
+      "responsibilities": [
+        "Collaborated closely with UX designers to implement pixel-perfect, accessible interfaces",
+        "Facilitated 20+ user research sessions to gather feedback and inform development priorities",
+        "Reduced customer support tickets by 35% through intuitive UI improvements"
+      ]
+    },
+    {
+      "title": "Full-Stack Developer",
+      "company": "WebSolutions Agency",
+      "duration": "Jul 2018 - Mar 2020",
+      "responsibilities": [
+        "Served as primary client liaison for 10+ projects, translating business needs into technical requirements",
+        "Built custom web applications with focus on exceptional user experience"
+      ]
+    },
+    {
+      "title": "Customer Success Specialist",
+      "company": "TechStart Inc.",
+      "duration": "Jan 2017 - Jun 2018",
+      "responsibilities": [
+        "Onboarded and supported enterprise customers using technical products"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Outstanding verbal and written communication",
+    "Excellent client and stakeholder management",
+    "Strong empathy and active listening",
+    "Exceptional presentation and documentation skills",
+    "Highly collaborative team player with ability to work across departments",
+    "Creative problem-solving with focus on user needs"
+  ],
+  "education_level": "Bachelor of Arts in Communications"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'htmlcss' (similarity: 0.574)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'sql' (similarity: 0.619)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'google cloud' ¡ú Best match: 'aws' (similarity: 0.447)Required: 'azure' ¡ú Best match: 'aws' (similarity: 0.576)Required: 'cicd pipelines' ¡ú Best match: 'python' (similarity: 0.518)Required: 'devops practices' ¡ú Best match: 'python' (similarity: 0.512)Required: 'docker' ¡ú Best match: 'expressjs' (similarity: 0.549)Required: 'kubernetes' ¡ú Best match: 'expressjs' (similarity: 0.540)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'python' (similarity: 0.495)Required: 'nlp' ¡ú Best match: 'htmlcss' (similarity: 0.558)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'spark' ¡ú Best match: 'aws' (similarity: 0.422)Required: 'serverless architectures' ¡ú Best match: 'tailwind css' (similarity: 0.465)Required: 'open-source contributions' ¡ú Best match: 'python' (similarity: 0.459)
+Technical Skill Match Score (S1): 0.65
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.42
+Justification: The candidate has experience in web development with Python and JavaScript, which is relevant to the job requirements. However, their specific responsibilities do not directly align with the job description, and they lack direct experience with machine learning and cloud platforms. Additionally, their lack of leadership and mentoring experience is noted.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.50
+Justification: Unable to generate proper justification due to technical issues.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.65
+Experience Relevance (S2): 0.42
+Soft Skills (S3): 0.50
+Final Score: 1.57/3.00
+
+System Ranking: [2, 3, 4, 1, 5]
+Human Ranking:  [2, 3, 5, 4, 1]
+
+Exact Position Accuracy: 0.40
+Spearman Rank Correlation: 0.70
+
+
+============================== EVALUATING COMBINATION: A2+B1+C+D ==============================
+
+
+==================================================
+CANDIDATE 1: ALEX ZHANG
+AGENT COMBINATION: A2 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+ALEX ZHANG
+Software Developer
+alex.zhang@email.com | (555) 987-6543 | Vancouver, Canada | linkedin.com/in/alexzhang
+
+SUMMARY
+Detail-oriented backend developer with 3 years of experience building data...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "C++",
+    "Java",
+    "Ruby",
+    "PHP",
+    "Google Cloud Platform",
+    "Git",
+    "SVN",
+    "Jenkins",
+    "MySQL",
+    "PostgreSQL",
+    "Laravel",
+    "Ruby on Rails"
+  ],
+  "job_experience": [
+    {
+      "title": "Junior Software Developer",
+      "company": "TechStartup Inc.",
+      "duration": [
+        "Jun 2021 - Present"
+      ],
+      "responsibilities": [
+        "Built backend services for e-commerce applications using Ruby on Rails",
+        "Optimized SQL queries improving database performance by 30%",
+        "Implemented payment processing integration with Stripe and PayPal",
+        "Collaborated with UX team to improve checkout flow conversion rates"
+      ],
+      "technologies": [
+        "Ruby on Rails",
+        "MySQL"
+      ],
+      "team_leadership": true
+    },
+    {
+      "title": "Web Developer",
+      "company": "CanadaTech Solutions",
+      "duration": [
+        "Aug 2019 - May 2021"
+      ],
+      "responsibilities": [
+        "Developed and maintained PHP-based web applications for small businesses",
+        "Created custom WordPress themes and plugins for client websites",
+        "Implemented responsive design principles for mobile compatibility",
+        "Managed hosting infrastructure for over 20 client websites"
+      ],
+      "technologies": [
+        "PHP",
+        "WordPress"
+      ],
+      "team_leadership": false
+    }
+  ],
+  "soft_skills": [
+    "Collaborative team player",
+    "Strong written communication",
+    "Detail-oriented and organized",
+    "Fast learner with strong research skills"
+  ],
+  "education_level": "Bachelor of Science in Computer Science"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'java' (similarity: 0.684)Required: 'react' ¡ú Best match: 'mysql' (similarity: 0.511)Required: 'javascripttypescript' ¡ú Best match: 'java' (similarity: 0.488)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.730)Required: 'nosql' ¡ú Best match: 'mysql' (similarity: 0.592)Required: 'aws' ¡ú Best match: 'jenkins' (similarity: 0.531)Required: 'google cloud' ¡ú Best match: 'google cloud platform' (similarity: 0.706)Required: 'azure' ¡ú Best match: 'google cloud platform' (similarity: 0.588)Required: 'cicd pipelines' ¡ú Best match: 'google cloud platform' (similarity: 0.599)Required: 'devops practices' ¡ú Best match: 'google cloud platform' (similarity: 0.632)Required: 'docker' ¡ú Best match: 'git' (similarity: 0.544)Required: 'kubernetes' ¡ú Best match: 'google cloud platform' (similarity: 0.512)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'google cloud platform' (similarity: 0.582)Required: 'nlp' ¡ú Best match: 'jenkins' (similarity: 0.552)Required: 'graphql' ¡ú Best match: 'mysql' (similarity: 0.471)Required: 'serverless architectures' ¡ú Best match: 'google cloud platform' (similarity: 0.621)
+Technical Skill Match Score (S1): 0.61
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.40
+Justification: The candidate has experience in web development with PHP and WordPress, but lacks relevant experience in Python, React, and cloud technologies required for the role. They also lack expertise in machine learning concepts, APIs, and DevOps practices. However, their team leadership experience is a positive aspect that aligns with the job requirements.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.40
+Justification: The candidate's soft skills match the job requirements in terms of communication and collaboration, but lack experience with real-time data processing systems (Kafka, Spark) and machine learning concepts. The candidate's ability to work effectively in a fast-paced environment and leadership capabilities are also notable, but not explicitly highlighted as strengths in their resume. Overall, while the candidate has some relevant soft skills, they fall short of the requirements in several key areas.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.61
+Experience Relevance (S2): 0.40
+Soft Skills (S3): 0.40
+Final Score: 1.41/3.00
+
+==================================================
+CANDIDATE 2: SARAH JOHNSON
+AGENT COMBINATION: A2 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+SARAH JOHNSON
+Senior Software Engineer
+sarah.johnson@email.com | (555) 234-5678 | San Francisco, CA | linkedin.com/in/sarahjohnson
+U.S. Citizen
+
+SUMMARY
+Highly accomplished full-stack engineer with 8...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "AWS",
+    "Docker",
+    "Kubernetes",
+    "Git",
+    "Jenkins",
+    "GitHub Actions",
+    "CircleCI",
+    "Terraform",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Elasticsearch",
+    "Snowflake",
+    "PyTorch",
+    "TensorFlow",
+    "scikit-learn",
+    "NLP",
+    "Computer Vision",
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Node.js",
+    "Django",
+    "Flask",
+    "Express",
+    "Next.js"
+  ],
+  "job_experience": [
+    {
+      "title": "Lead Software Engineer",
+      "company": "AITech Solutions",
+      "duration": "Jan 2020 - Present",
+      "responsibilities": [
+        "Architected and built a scalable ML platform processing 100M+ documents monthly using AWS and TensorFlow",
+        "Led migration from monolith to microservices, reducing deployment time by 80% and improving system resilience",
+        "Mentored team of 8 engineers and established agile development processes"
+      ],
+      "technologies": [
+        "AWS",
+        "TensorFlow",
+        "Kafka",
+        "Spark",
+        "Docker",
+        "Kubernetes"
+      ]
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataViz Inc.",
+      "duration": "Feb 2017 - Dec 2019",
+      "responsibilities": [
+        "Built RESTful and GraphQL APIs powering enterprise-grade applications used by Fortune 500 companies",
+        "Led frontend development using React and TypeScript with 98% test coverage",
+        "Implemented CI/CD pipelines reducing release cycles from weeks to days"
+      ],
+      "technologies": [
+        "React",
+        "TypeScript",
+        "CI/CD pipelines",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "WebScale Technologies",
+      "duration": "Jun 2015 - Jan 2017",
+      "responsibilities": [
+        "Developed responsive web applications using modern JavaScript frameworks",
+        "Implemented authentication and authorization systems with robust security practices"
+      ],
+      "technologies": [
+        "JavaScript",
+        "Authentication systems"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Outstanding written and verbal communication",
+    "Strong leadership and team mentoring capabilities",
+    "Excellent problem-solving and analytical thinking",
+    "Highly adaptable to changing requirements and technologies",
+    "Exceptional time management and prioritization skills"
+  ],
+  "education_level": "Master of Science in Computer Science, Stanford University (2015), Bachelor of Science in Computer Engineering, MIT (2013)"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'cloud technologies' ¡ú Best match: 'computer vision' (similarity: 0.672)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.743)Required: 'modern web frameworks' ¡ú Best match: 'computer vision' (similarity: 0.604)Required: 'restful apis' ¡ú Best match: 'computer vision' (similarity: 0.540)Required: 'databases sql and nosql' ¡ú Best match: 'computer vision' (similarity: 0.504)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'google cloud' ¡ú Best match: 'aws' (similarity: 0.447)Required: 'azure' ¡ú Best match: 'aws' (similarity: 0.576)Required: 'cicd pipelines' ¡ú Best match: 'computer vision' (similarity: 0.550)Required: 'devops practices' ¡ú Best match: 'computer vision' (similarity: 0.625)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'computer vision' (similarity: 0.663)Required: 'nlp' ¡ú Best match: 'nlp' (similarity: 1.000)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'collaborative development' ¡ú Best match: 'computer vision' (similarity: 0.653)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'serverless architectures' ¡ú Best match: 'computer vision' (similarity: 0.648)
+Technical Skill Match Score (S1): 0.74
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.64
+Justification: The candidate has experience with Python and JavaScript, relevant technologies for the job description, but lacks direct experience with cloud platforms and machine learning concepts. They also have strong leadership and mentoring skills mentioned in their Experience 1 summary. However, some required skills like expertise in RESTful APIs and CI/CD pipelines are not explicitly mentioned in their work experience.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.50
+Justification: Unable to generate proper justification due to technical issues.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.74
+Experience Relevance (S2): 0.64
+Soft Skills (S3): 0.50
+Final Score: 1.88/3.00
+
+==================================================
+CANDIDATE 3: DAVID KIM
+AGENT COMBINATION: A2 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+DAVID KIM
+Full-Stack Developer
+david.kim@email.com | (555) 345-6789 | Austin, TX | linkedin.com/in/davidkim
+U.S. Citizen
+
+SUMMARY
+Versatile developer with 4 years of experience specializing in modern...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Rust",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Vue.js",
+    "Node.js",
+    "Express",
+    "FastAPI",
+    "Svelte",
+    "Docker",
+    "Kubernetes",
+    "Terraform",
+    "Ansible",
+    "Git",
+    "GitHub Actions",
+    "ArgoCD",
+    "PostgreSQL",
+    "MongoDB",
+    "DynamoDB",
+    "Neo4j",
+    "Cassandra",
+    "Redis",
+    "PyTorch",
+    "TensorFlow",
+    "Hugging Face Transformers"
+  ],
+  "job_experience": [
+    {
+      "title": "Software Engineer",
+      "company": "CloudTech Systems",
+      "duration": "Mar 2021 - Present",
+      "responsibilities": [
+        "Implemented serverless architectures using AWS Lambda and API Gateway",
+        "Built microservices with Kubernetes and Docker handling 30M+ daily requests",
+        "Developed real-time data processing systems using Kafka and Kinesis",
+        "Optimized CI/CD pipelines reducing deployment time by 70%",
+        "Implemented GraphQL APIs for improved frontend data fetching"
+      ],
+      "technologies": [
+        "AWS",
+        "Kubernetes",
+        "Docker",
+        "Git",
+        "GitHub Actions",
+        "ArgoCD",
+        "PostgreSQL",
+        "MongoDB",
+        "DynamoDB",
+        "Neo4j",
+        "Cassandra",
+        "Redis",
+        "PyTorch",
+        "TensorFlow",
+        "Hugging Face Transformers"
+      ],
+      "metrics": [
+        "30M+ daily requests",
+        "70% reduction in deployment time"
+      ],
+      "management": [
+        "Managed team of 5 engineers"
+      ]
+    },
+    {
+      "title": "Junior Developer",
+      "company": "WebApps Inc.",
+      "duration": "Jun 2019 - Feb 2021",
+      "responsibilities": [
+        "Developed feature-rich web applications using React and TypeScript",
+        "Built RESTful APIs with Express.js and PostgreSQL",
+        "Implemented automated testing strategies with Jest and Cypress",
+        "Participated in code reviews and agile development processes"
+      ],
+      "technologies": [
+        "React",
+        "TypeScript",
+        "Express",
+        "PostgreSQL",
+        "Jest",
+        "Cypress"
+      ],
+      "metrics": [],
+      "management": []
+    }
+  ],
+  "soft_skills": [
+    "Good written communication",
+    "Independent worker",
+    "Analytical problem solver",
+    "Quick learner with new technologies",
+    "Team collaboration",
+    "Conflict resolution",
+    "Time management",
+    "Emotional intelligence"
+  ],
+  "education_level": ""
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.743)Required: 'aws' ¡ú Best match: 'nodejs' (similarity: 0.536)Required: 'google cloud' ¡ú Best match: 'kubernetes' (similarity: 0.375)Required: 'azure' ¡ú Best match: 'kubernetes' (similarity: 0.479)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'sql' (similarity: 0.619)Required: 'cicd pipelines' ¡ú Best match: 'github actions' (similarity: 0.526)Required: 'devops practices' ¡ú Best match: 'python' (similarity: 0.512)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'machine learning concepts' ¡ú Best match: 'python' (similarity: 0.495)Required: 'nlp' ¡ú Best match: 'htmlcss' (similarity: 0.558)Required: 'spark' ¡ú Best match: 'rust' (similarity: 0.415)Required: 'kafka' ¡ú Best match: 'cassandra' (similarity: 0.537)Required: 'serverless architectures' ¡ú Best match: 'python' (similarity: 0.461)Required: 'open-source contributions' ¡ú Best match: 'python' (similarity: 0.459)Required: 'security best practices' ¡ú Best match: 'python' (similarity: 0.504)
+Technical Skill Match Score (S1): 0.65
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.40
+Justification: The candidate's experience in software engineering and web development aligns partially with the job description, but lacks expertise in specific areas such as Python, React, and cloud technologies required for the role. Additionally, their experience in real-time data processing systems and machine learning concepts is not directly applicable to the job description. The candidate's management experience is also relevant, given the leadership requirements of the position.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.80
+Justification: However, there is room for improvement in terms of soft skills that require direct interaction with non-technical stakeholders, as the candidate's only mention of 'good written communication' does not explicitly highlight their experience in this area.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.65
+Experience Relevance (S2): 0.40
+Soft Skills (S3): 0.80
+Final Score: 1.85/3.00
+
+==================================================
+CANDIDATE 4: MICHAEL WILSON
+AGENT COMBINATION: A2 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+MICHAEL WILSON
+Software Engineering Manager
+michael.wilson@email.com | (555) 456-7890 | Seattle, WA | linkedin.com/in/michaelwilson
+U.S. Citizen
+
+SUMMARY
+Experienced engineering leader with 12+ years...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "AWS",
+    "Azure",
+    "JavaScript",
+    "Python",
+    "Java",
+    "C#",
+    "React",
+    "Angular",
+    "Django",
+    "Spring Boot",
+    "Git",
+    "Jenkins",
+    "JIRA",
+    "Confluence",
+    "SQL Server",
+    "MySQL",
+    "MongoDB"
+  ],
+  "job_experience": [
+    {
+      "title": "Engineering Manager",
+      "company": "Enterprise Systems Inc.",
+      "duration": "Jan 2019 - Present",
+      "responsibilities": [
+        "Led team of 15 engineers developing enterprise SaaS platform used by 200+ corporations",
+        "Managed delivery of 4 major product releases annually with 99.9% uptime SLA",
+        "Established code quality processes improving stability and reducing bugs by 45%",
+        "Coordinated with product management to align technical roadmap with business objectives",
+        "Implemented agile methodologies improving team velocity by 30%"
+      ],
+      "technologies": [
+        "Agile",
+        "Scrum",
+        "Kanban"
+      ]
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataSoft Corp",
+      "duration": "Mar 2015 - Dec 2018",
+      "responsibilities": [
+        "Led development of distributed data processing pipeline handling 2TB daily",
+        "Architected migration from monolith to microservices architecture",
+        "Mentored junior engineers and conducted technical interviews",
+        "Implemented monitoring and alerting systems reducing incident response time by 60%"
+      ],
+      "technologies": [
+        "Agile"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "TechSolutions LLC",
+      "duration": "Jun 2011 - Feb 2015",
+      "responsibilities": [
+        "Developed web applications using JavaScript frameworks and RESTful APIs",
+        "Built reporting systems integrating data from multiple enterprise sources",
+        "Optimized SQL queries and database schemas improving application performance",
+        "Implemented automated testing frameworks to ensure code quality"
+      ],
+      "technologies": []
+    }
+  ],
+  "soft_skills": [
+    "Exceptional leadership and team management",
+    "Strong communication with technical and non-technical stakeholders",
+    "Strategic planning and roadmap development",
+    "Excellent conflict resolution and problem-solving",
+    "Mentoring and career development"
+  ],
+  "education_level": "Bachelor of Science in Computer Science, University of Washington"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'javascript' (similarity: 0.573)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.730)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.613)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'google cloud' ¡ú Best match: 'azure' (similarity: 0.570)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'cicd pipelines' ¡ú Best match: 'jenkins' (similarity: 0.525)Required: 'devops practices' ¡ú Best match: 'confluence' (similarity: 0.528)Required: 'docker' ¡ú Best match: 'git' (similarity: 0.544)Required: 'kubernetes' ¡ú Best match: 'python' (similarity: 0.534)Required: 'machine learning concepts' ¡ú Best match: 'python' (similarity: 0.495)Required: 'nlp' ¡ú Best match: 'jenkins' (similarity: 0.552)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'spark' ¡ú Best match: 'jenkins' (similarity: 0.431)Required: 'kafka' ¡ú Best match: 'mysql' (similarity: 0.528)Required: 'serverless architectures' ¡ú Best match: 'confluence' (similarity: 0.484)Required: 'open-source contributions' ¡ú Best match: 'confluence' (similarity: 0.515)Required: 'security best practices' ¡ú Best match: 'confluence' (similarity: 0.509)
+Technical Skill Match Score (S1): 0.65
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.70
+Justification: The candidate has relevant experience in building scalable web applications and developing RESTful APIs, as well as expertise in Python, JavaScript, and cloud technologies. However, the candidate lacks direct experience with modern full-stack frameworks like React and machine learning concepts, which are essential for the job description. Additionally, the candidate's lack of experience with serverless architectures and GraphQL is a notable omission.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.70
+Justification: The candidate's leadership experience, as evident from their role as Engineering Manager at Enterprise Systems Inc., aligns well with the job requirements. They have demonstrated strong problem-solving skills by establishing code quality processes that improved stability and reduced bugs by 45%. However, their lack of explicit mention of machine learning concepts and NLP in their resume is a drawback, which prevented me from assigning a perfect score.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.65
+Experience Relevance (S2): 0.70
+Soft Skills (S3): 0.70
+Final Score: 2.05/3.00
+
+==================================================
+CANDIDATE 5: RACHEL GARCIA
+AGENT COMBINATION: A2 + B1 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+RACHEL GARCIA
+Product-Focused Developer
+rachel.garcia@email.com | (555) 567-8901 | Chicago, IL | linkedin.com/in/rachelgarcia
+U.S. Citizen
+
+SUMMARY
+Empathetic and collaborative developer with 5 years...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "HTML/CSS",
+    "SQL",
+    "React",
+    "Express.js",
+    "Bootstrap",
+    "Tailwind CSS",
+    "AWS",
+    "Netlify",
+    "Vercel",
+    "Git",
+    "Figma",
+    "Trello",
+    "Notion",
+    "PostgreSQL",
+    "MongoDB",
+    "Jest",
+    "Cypress",
+    "User testing methods"
+  ],
+  "job_experience": [
+    {
+      "title": "Frontend Engineer",
+      "company": "UserFirst Technologies",
+      "duration": "Apr 2020 - Present",
+      "responsibilities": [
+        "Collaborated closely with UX designers to implement pixel-perfect, accessible interfaces",
+        "Facilitated 20+ user research sessions to gather feedback and inform development priorities",
+        "Reduced customer support tickets by 35% through intuitive UI improvements",
+        "Presented technical concepts to non-technical stakeholders in clear, understandable terms",
+        "Mentored junior developers on user-centered development practices"
+      ],
+      "technologies": [
+        "React",
+        "Express.js",
+        "Bootstrap",
+        "Tailwind CSS",
+        "AWS",
+        "Netlify",
+        "Vercel",
+        "Git",
+        "Figma",
+        "Trello",
+        "Notion",
+        "PostgreSQL",
+        "MongoDB",
+        "Jest",
+        "Cypress"
+      ]
+    },
+    {
+      "title": "Full-Stack Developer",
+      "company": "WebSolutions Agency",
+      "duration": "Jul 2018 - Mar 2020",
+      "responsibilities": [
+        "Served as primary client liaison for 10+ projects, translating business needs into technical requirements",
+        "Built custom web applications with focus on exceptional user experience",
+        "Collaborated with cross-functional teams to ensure alignment between design and implementation",
+        "Implemented analytics tracking to measure user engagement and conversion metrics"
+      ],
+      "technologies": [
+        "JavaScript",
+        "Python",
+        "React",
+        "Express.js",
+        "Bootstrap",
+        "Tailwind CSS",
+        "AWS",
+        "Netlify",
+        "Vercel",
+        "Git",
+        "Figma",
+        "Trello",
+        "Notion",
+        "PostgreSQL",
+        "MongoDB"
+      ]
+    },
+    {
+      "title": "Customer Success Specialist",
+      "company": "TechStart Inc.",
+      "duration": "Jan 2017 - Jun 2018",
+      "responsibilities": [
+        "Onboarded and supported enterprise customers using technical products",
+        "Documented user pain points and collaborated with engineering to implement solutions",
+        "Created training materials and conducted webinars for product users"
+      ],
+      "technologies": []
+    }
+  ],
+  "soft_skills": [
+    "Outstanding verbal and written communication",
+    "Excellent client and stakeholder management",
+    "Strong empathy and active listening",
+    "Exceptional presentation and documentation skills",
+    "Highly collaborative team player with ability to work across departments",
+    "Creative problem-solving with focus on user needs"
+  ],
+  "education_level": "Bachelor of Arts in Communications, Northwestern University (2016)"
+}
+
+Running Agent B1: Technical Skill Scorer...
+technical match details: Required: 'python' ¡ú Best match: 'python' (similarity: 1.000)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'htmlcss' (similarity: 0.574)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'google cloud' ¡ú Best match: 'aws' (similarity: 0.447)Required: 'azure' ¡ú Best match: 'aws' (similarity: 0.576)Required: 'docker' ¡ú Best match: 'expressjs' (similarity: 0.549)Required: 'kubernetes' ¡ú Best match: 'expressjs' (similarity: 0.540)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'sql' (similarity: 0.619)Required: 'cicd pipelines' ¡ú Best match: 'user testing methods' (similarity: 0.646)Required: 'devops practices' ¡ú Best match: 'user testing methods' (similarity: 0.795)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'kafka' ¡ú Best match: 'aws' (similarity: 0.518)Required: 'spark' ¡ú Best match: 'aws' (similarity: 0.422)Required: 'graphql' ¡ú Best match: 'mongodb' (similarity: 0.524)Required: 'serverless architectures' ¡ú Best match: 'user testing methods' (similarity: 0.775)Required: 'machine learning concepts' ¡ú Best match: 'user testing methods' (similarity: 0.788)Required: 'nlp' ¡ú Best match: 'htmlcss' (similarity: 0.558)Required: 'restful apis' ¡ú Best match: 'user testing methods' (similarity: 0.660)
+Technical Skill Match Score (S1): 0.70
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: The candidate's experience in building web applications, working with modern frameworks such as React and Python, and collaborating with cross-functional teams aligns well with the job requirements. However, the lack of experience with machine learning concepts and NLP, as well as real-time data processing systems, slightly reduces the score. The candidate's skills in cloud platforms, databases, and CI/CD pipelines also demonstrate a strong foundation for the role.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.80
+Justification: The candidate's soft skills match the job requirements in several areas, including excellent communication and collaboration abilities, strong problem-solving and analytical thinking, leadership and mentoring capabilities, self-motivation, adaptability, and willingness to learn new technologies. Their experience with user-centered development practices and ability to facilitate user research sessions demonstrate their empathy and active listening skills. However, the candidate's lack of experience with real-time data processing systems and serverless architectures holds them back from a perfect score.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.70
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.80
+Final Score: 2.30/3.00
+
+System Ranking: [5, 4, 2, 3, 1]
+Human Ranking:  [2, 3, 5, 4, 1]
+
+Exact Position Accuracy: 0.20
+Spearman Rank Correlation: 0.20
+
+
+============================== EVALUATING COMBINATION: A1+B2+C+D ==============================
+
+
+==================================================
+CANDIDATE 1: ALEX ZHANG
+AGENT COMBINATION: A1 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+ALEX ZHANG
+Software Developer
+alex.zhang@email.com | (555) 987-6543 | Vancouver, Canada | linkedin.com/in/alexzhang
+
+SUMMARY
+Detail-oriented backend developer with 3 years of experience building data...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "C++",
+    "Java",
+    "Ruby",
+    "PHP",
+    "Ruby on Rails",
+    "Laravel",
+    "Git",
+    "SVN",
+    "Jenkins",
+    "MySQL",
+    "PostgreSQL"
+  ],
+  "job_experience": [
+    {
+      "title": "Junior Software Developer",
+      "company": "TechStartup Inc.",
+      "duration": "Jun 2021 - Present",
+      "responsibilities": [
+        "Built backend services for e-commerce applications using Ruby on Rails",
+        "Optimized SQL queries improving database performance by 30%",
+        "Implemented payment processing integration with Stripe and PayPal",
+        "Collaborated with UX team to improve checkout flow conversion rates"
+      ]
+    },
+    {
+      "title": "Web Developer",
+      "company": "CanadaTech Solutions",
+      "duration": "Aug 2019 - May 2021",
+      "responsibilities": [
+        "Developed and maintained PHP-based web applications for small businesses",
+        "Created custom WordPress themes and plugins for client websites",
+        "Implemented responsive design principles for mobile compatibility",
+        "Managed hosting infrastructure for over 20 client websites"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Collaborative team player",
+    "Strong written communication",
+    "Detail-oriented and organized",
+    "Fast learner with strong research skills"
+  ],
+  "education_level": "Bachelor of Science in Computer Science"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'jenkins' (similarity: 0.158)Required: 'i need to extract the technical skills from this job description let me start by reading through each section carefully first' ¡ú Best match: 'postgresql' (similarity: 0.103)Required: 'in the responsibilities section' ¡ú Best match: 'jenkins' (similarity: 0.122)Required: 'it mentions designing and building web applications using python' ¡ú Best match: 'ruby on rails' (similarity: 0.239)Required: 'react' ¡ú Best match: 'laravel' (similarity: 0.459)Required: 'and cloud technologies so i should note those down python' ¡ú Best match: 'ruby' (similarity: 0.380)Required: 'cloud technologies next' ¡ú Best match: 'jenkins' (similarity: 0.156)Required: 'they talk about developing apis for ml models and front-end apps so api development is another skill to include implementing and optimizing database designsso database design' ¡ú Best match: 'postgresql' (similarity: 0.164)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.651)Required: 'nosql are relevant here working with the ml team to integrate models means machine learning integration also' ¡ú Best match: 'postgresql' (similarity: 0.190)Required: 'since its ai products' ¡ú Best match: 'jenkins' (similarity: 0.187)Required: 'maybe nlp is a must' ¡ú Best match: 'jenkins' (similarity: 0.146)Required: 'but i should confirm if its required or just nice to have the job says machine learning concepts and nlp in another section' ¡ú Best match: 'ruby on rails' (similarity: 0.183)Required: 'so ill include that as basic machine learning concepts and nlp leading technical initiatives and mentoring juniors doesnt directly add a skill but more of a role capability' ¡ú Best match: 'ruby on rails' (similarity: 0.165)Required: 'which might be part of the soft skills they mentioned participating in code reviews for high quality standards code review is something to note troubleshooting complex issues in productionso production environment troubleshooting staying updated with emerging technologies and best practices emerging technologies and industry best practices are important moving to required skills experience' ¡ú Best match: 'ruby on rails' (similarity: 0.117)Required: 'they list 5 years in software development' ¡ú Best match: 'ruby on rails' (similarity: 0.150)Required: 'web applications thats a general skill but not specific' ¡ú Best match: 'ruby on rails' (similarity: 0.159)Required: 'so i wont list it as a technical skill strong proficiency in python and javascripttypescriptso those should be included python' ¡ú Best match: 'ruby' (similarity: 0.261)Required: 'javascripttypescript experience with modern frameworks like react' ¡ú Best match: 'laravel' (similarity: 0.311)Required: 'angular' ¡ú Best match: 'laravel' (similarity: 0.369)Required: 'vuejsso react is already noted' ¡ú Best match: 'ruby on rails' (similarity: 0.308)Required: 'but angular and vuejs are also mentioned here so add them to the list angular' ¡ú Best match: 'laravel' (similarity: 0.396)Required: 'vuejs building restful apis and working with databases sql' ¡ú Best match: 'postgresql' (similarity: 0.358)Required: 'nosqlalready covered in database design cloud platforms aws' ¡ú Best match: 'postgresql' (similarity: 0.355)Required: 'google cloud' ¡ú Best match: 'ruby on rails' (similarity: 0.392)Required: 'azureso include each as separate skills aws' ¡ú Best match: 'jenkins' (similarity: 0.339)Required: 'google cloud platform' ¡ú Best match: 'ruby on rails' (similarity: 0.483)Required: 'microsoft azure cicd pipelines and devops practices are next so cicd pipelines and devops practices containerization technologies like docker and kubernetesadd them as docker and kubernetes basic understanding of ml concepts and nlpalready noted earlier experience with version control using gitso git is another skill nice to have real-time data processing kafka' ¡ú Best match: 'postgresql' (similarity: 0.264)Required: 'sparkso kafka' ¡ú Best match: 'postgresql' (similarity: 0.503)Required: 'apache spark ml-powered applications backgroundalready covered in machine learning concepts graphql and modern api patternsgraphql' ¡ú Best match: 'postgresql' (similarity: 0.401)Required: 'modern api patterns serverless architecturesserverless architecture open-source contributions arent required but nice' ¡ú Best match: 'jenkins' (similarity: 0.244)Required: 'so maybe not include unless specified soft skills communication' ¡ú Best match: 'laravel' (similarity: 0.216)Required: 'problem-solving' ¡ú Best match: 'jenkins' (similarity: 0.347)Required: 'etcnot technical skills benefits are about salary' ¡ú Best match: 'jenkins' (similarity: 0.117)Required: 'insurance' ¡ú Best match: 'jenkins' (similarity: 0.377)Required: 'etc' ¡ú Best match: 'c' (similarity: 0.291)Required: 'not skills so compiling all the technical skills - python - react - angular - vuejs - javascripttypescript - restful apis - sql - nosql - database design - machine learning integration - machine learning concepts - nlp - cloud technologies i think its better to list them as separate aws' ¡ú Best match: 'ruby on rails' (similarity: 0.220)Required: 'microsoft azure - cicd pipelines - devops practices - docker - kubernetes - git - code review - production environment troubleshooting - emerging technologies - industry best practices - basic machine learning concepts and nlp maybe combine them if possible but they are separate areas wait' ¡ú Best match: 'jenkins' (similarity: 0.188)Required: 'the job also mentions building scalable web applicationsso maybe include scalable web applications and real-time data processing is a nice-to-have but not required' ¡ú Best match: 'ruby on rails' (similarity: 0.146)Required: 'so kafka and apache spark can be included as nice-to-haves but since the user asked for required skills' ¡ú Best match: 'ruby on rails' (similarity: 0.180)Required: 'perhaps only include whats specified under required skills wait' ¡ú Best match: 'jenkins' (similarity: 0.160)Required: 'nothe user wants all technical skills mentioned in the job' ¡ú Best match: 'laravel' (similarity: 0.103)Required: 'regardless of required or nice to have wait' ¡ú Best match: 'jenkins' (similarity: 0.201)Required: 'the instruction says extract all technical skills required for the position so including both required and nice-to-have as they are all technical skills so ill list all of them think python' ¡ú Best match: 'ruby' (similarity: 0.314)Required: 'vuejs' ¡ú Best match: 'laravel' (similarity: 0.556)Required: 'javascripttypescript' ¡ú Best match: 'ruby on rails' (similarity: 0.426)Required: 'restful apis' ¡ú Best match: 'ruby on rails' (similarity: 0.445)Required: 'nosql' ¡ú Best match: 'postgresql' (similarity: 0.548)Required: 'database design' ¡ú Best match: 'postgresql' (similarity: 0.365)Required: 'machine learning integration' ¡ú Best match: 'ruby on rails' (similarity: 0.392)Required: 'machine learning concepts' ¡ú Best match: 'ruby on rails' (similarity: 0.340)Required: 'nlp' ¡ú Best match: 'jenkins' (similarity: 0.490)Required: 'aws' ¡ú Best match: 'jenkins' (similarity: 0.381)Required: 'microsoft azure' ¡ú Best match: 'ruby on rails' (similarity: 0.381)Required: 'cicd pipelines' ¡ú Best match: 'jenkins' (similarity: 0.464)Required: 'devops practices' ¡ú Best match: 'ruby on rails' (similarity: 0.363)Required: 'docker' ¡ú Best match: 'postgresql' (similarity: 0.523)Required: 'kubernetes' ¡ú Best match: 'postgresql' (similarity: 0.595)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'code review' ¡ú Best match: 'ruby on rails' (similarity: 0.421)Required: 'production environment troubleshooting' ¡ú Best match: 'ruby on rails' (similarity: 0.354)Required: 'emerging technologies' ¡ú Best match: 'jenkins' (similarity: 0.256)Required: 'industry best practices' ¡ú Best match: 'ruby on rails' (similarity: 0.266)Required: 'scalable web applications' ¡ú Best match: 'ruby on rails' (similarity: 0.323)Required: 'kafka' ¡ú Best match: 'jenkins' (similarity: 0.463)Required: 'apache spark' ¡ú Best match: 'postgresql' (similarity: 0.525)
+Technical Skill Match Score (S1): 0.33
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.45
+Justification: The candidate has relevant experience in web development and software engineering, but lacks specific experience in machine learning, Python, and full-stack engineering as required by the job description. Their expertise in Ruby on Rails, PHP, and WordPress is also not directly applicable to the role. However, their leadership experience and problem-solving skills are notable.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.56
+Justification: The candidate has strong technical skills in software development, but shows a lack of direct experience in full-stack engineering and machine learning. The resume highlights their detail-oriented nature and collaborative team player skill, which are valuable for a senior full-stack engineer role. However, the candidate's soft skills do not perfectly match the job requirements, hence the lower score.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.33
+Experience Relevance (S2): 0.45
+Soft Skills (S3): 0.56
+Final Score: 1.34/3.00
+
+==================================================
+CANDIDATE 2: SARAH JOHNSON
+AGENT COMBINATION: A1 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+SARAH JOHNSON
+Senior Software Engineer
+sarah.johnson@email.com | (555) 234-5678 | San Francisco, CA | linkedin.com/in/sarahjohnson
+U.S. Citizen
+
+SUMMARY
+Highly accomplished full-stack engineer with 8...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Node.js",
+    "Django",
+    "Flask",
+    "Express",
+    "Next.js",
+    "AWS (EC2, S3, Lambda, DynamoDB, SageMaker)",
+    "Google Cloud Platform",
+    "Azure",
+    "Docker",
+    "Kubernetes",
+    "Git",
+    "Jenkins",
+    "GitHub Actions",
+    "CircleCI",
+    "Terraform",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Elasticsearch",
+    "Snowflake",
+    "PyTorch",
+    "TensorFlow",
+    "scikit-learn",
+    "NLP",
+    "Computer Vision"
+  ],
+  "job_experience": [
+    {
+      "title": "Lead Software Engineer",
+      "company": "AITech Solutions",
+      "duration": "Jan 2020 - Present",
+      "responsibilities": [
+        "Architected and built a scalable ML platform processing 100M+ documents monthly using AWS and TensorFlow",
+        "Led migration from monolith to microservices, reducing deployment time by 80% and improving system resilience",
+        "Mentored team of 8 engineers and established agile development processes",
+        "Implemented real-time data processing pipeline using Kafka and Spark",
+        "Reduced infrastructure costs by 40% through optimization and serverless architecture"
+      ]
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataViz Inc.",
+      "duration": "Feb 2017 - Dec 2019",
+      "responsibilities": [
+        "Built RESTful and GraphQL APIs powering enterprise-grade applications used by Fortune 500 companies",
+        "Led frontend development using React and TypeScript with 98% test coverage",
+        "Implemented CI/CD pipelines reducing release cycles from weeks to days",
+        "Created analytics dashboard visualizing complex datasets for executive decision making",
+        "Optimized application performance improving page load time by 65%"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "WebScale Technologies",
+      "duration": "Jun 2015 - Jan 2017",
+      "responsibilities": [
+        "Developed responsive web applications using modern JavaScript frameworks",
+        "Implemented authentication and authorization systems with robust security practices",
+        "Built automated testing suite reducing QA time by 40%",
+        "Contributed to open-source projects including core framework improvements"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Outstanding written and verbal communication",
+    "Strong leadership and team mentoring capabilities",
+    "Excellent problem-solving and analytical thinking",
+    "Highly adaptable to changing requirements and technologies",
+    "Exceptional time management and prioritization skills"
+  ],
+  "education_level": "Master of Science in Computer Science"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'google cloud platform' (similarity: 0.249)Required: 'so i need to help extract all the technical skills required for this senior full-stack engineer position let me start by reading through the job description carefully first' ¡ú Best match: 'google cloud platform' (similarity: 0.220)Required: 'the role is for a senior full-stack engineer on the ai products team at innovateai inc the responsibilities include designing and building scalable web applications using python' ¡ú Best match: 'python' (similarity: 0.256)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'and cloud technologies they also mention developing efficient apis' ¡ú Best match: 'google cloud platform' (similarity: 0.403)Required: 'implementing database designs' ¡ú Best match: 'computer vision' (similarity: 0.388)Required: 'working with ml teams to integrate models' ¡ú Best match: 'computer vision' (similarity: 0.335)Required: 'leading initiatives' ¡ú Best match: 'google cloud platform' (similarity: 0.317)Required: 'mentoring juniors' ¡ú Best match: 'google cloud platform' (similarity: 0.377)Required: 'participating in code reviews' ¡ú Best match: 'google cloud platform' (similarity: 0.324)Required: 'troubleshooting issues' ¡ú Best match: 'google cloud platform' (similarity: 0.310)Required: 'and staying updated with tech trends looking at the required skills experience section they want 5 years of experience in software development focusing on web apps proficiency in python and javascripttypescript is required experience with modern frameworks like react' ¡ú Best match: 'react' (similarity: 0.300)Required: 'angular' ¡ú Best match: 'nextjs' (similarity: 0.426)Required: 'or vuejs building restful apis and working with databases sql and nosql cloud platforms like aws' ¡ú Best match: 'aws ec2 s3 lambda dynamodb sagemaker' (similarity: 0.465)Required: 'google cloud' ¡ú Best match: 'google cloud platform' (similarity: 0.727)Required: 'or azure cicd pipelines and devops practices familiarity with docker and kubernetes basic ml concepts and nlp git experience and collaboration in the nice to have section real-time data systems like kafka' ¡ú Best match: 'kubernetes' (similarity: 0.342)Required: 'spark ml applications graphql serverless architectures open-source contributions security practices soft skills include communication' ¡ú Best match: 'google cloud platform' (similarity: 0.389)Required: 'problem-solving' ¡ú Best match: 'snowflake' (similarity: 0.426)Required: 'leadership' ¡ú Best match: 'snowflake' (similarity: 0.422)Required: 'etc' ¡ú Best match: 'nlp' (similarity: 0.293)Required: 'but those are not technical skills i should list all the technical skills as a comma-separated list lets go through each point technical skills - python - javascripttypescript - react and other frameworks like angular' ¡ú Best match: 'nextjs' (similarity: 0.274)Required: 'vuejs - restful apis - sql and nosql databases - cloud platforms aws' ¡ú Best match: 'aws ec2 s3 lambda dynamodb sagemaker' (similarity: 0.480)Required: 'azure - cicd pipelines - devops practices - docker - kubernetes - machine learning concepts - nlp - git wait' ¡ú Best match: 'github actions' (similarity: 0.298)Required: 'the required skills include proficiency in python and javascripttypescript so i should list them as separate points also' ¡ú Best match: 'google cloud platform' (similarity: 0.320)Required: 'the responsibilities mention building scalable web apps with these techs' ¡ú Best match: 'google cloud platform' (similarity: 0.293)Required: 'so theyre definitely required the cloud platforms are aws' ¡ú Best match: 'google cloud platform' (similarity: 0.471)Required: 'azureso all three should be included cicd pipelines and devops practices are also required' ¡ú Best match: 'google cloud platform' (similarity: 0.388)Required: 'so add those docker and kubernetes for containerization ml concepts and nlp as part of the skills git is necessary for version control i think ive covered everything in the required section the nice-to-haves like kafka' ¡ú Best match: 'kubernetes' (similarity: 0.362)Required: 'spark' ¡ú Best match: 'flask' (similarity: 0.481)Required: 'arent required but might be good to include if the user wants more details' ¡ú Best match: 'google cloud platform' (similarity: 0.229)Required: 'but the instruction was about required skills only so putting it all together as a comma-separated list think python' ¡ú Best match: 'python' (similarity: 0.531)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.628)Required: 'reactangularvuejs' ¡ú Best match: 'htmlcss' (similarity: 0.575)Required: 'restful apis' ¡ú Best match: 'google cloud platform' (similarity: 0.564)Required: 'sqlnosql databases' ¡ú Best match: 'google cloud platform' (similarity: 0.559)Required: 'awsgoogle cloudazure' ¡ú Best match: 'google cloud platform' (similarity: 0.587)Required: 'cicd pipelines' ¡ú Best match: 'google cloud platform' (similarity: 0.620)Required: 'devops practices' ¡ú Best match: 'google cloud platform' (similarity: 0.576)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'computer vision' (similarity: 0.570)Required: 'nlp' ¡ú Best match: 'nlp' (similarity: 1.000)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)
+Technical Skill Match Score (S1): 0.48
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: 
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.85
+Justification: The candidate's soft skills align well with the job requirements, particularly in communication and collaboration abilities, problem-solving and analytical thinking, leadership and mentoring capabilities, adaptability, and self-motivation. The examples of leading a team at AITech Solutions and collaborating with product managers and designers at DataViz Inc. demonstrate these skills effectively. However, the lack of explicit experience with real-time data processing systems or GraphQL is notable.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.48
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.85
+Final Score: 2.13/3.00
+
+==================================================
+CANDIDATE 3: DAVID KIM
+AGENT COMBINATION: A1 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+DAVID KIM
+Full-Stack Developer
+david.kim@email.com | (555) 345-6789 | Austin, TX | linkedin.com/in/davidkim
+U.S. Citizen
+
+SUMMARY
+Versatile developer with 4 years of experience specializing in modern...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "AWS",
+    "Google Cloud",
+    "Azure",
+    "Docker",
+    "Kubernetes",
+    "Terraform",
+    "Ansible",
+    "Git",
+    "GitHub Actions",
+    "ArgoCD",
+    "PostgreSQL",
+    "MongoDB",
+    "DynamoDB",
+    "Neo4j",
+    "Cassandra",
+    "Redis",
+    "PyTorch",
+    "TensorFlow",
+    "Hugging Face Transformers",
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Rust",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Vue.js",
+    "Node.js",
+    "Express",
+    "FastAPI",
+    "Svelte"
+  ],
+  "job_experience": [
+    {
+      "title": "Software Engineer",
+      "company": "CloudTech Systems",
+      "duration": "Mar 2021 - Present",
+      "responsibilities": [
+        "Implemented serverless architectures using AWS Lambda and API Gateway",
+        "Built microservices with Kubernetes and Docker handling 30M+ daily requests",
+        "Developed real-time data processing systems using Kafka and Kinesis",
+        "Optimized CI/CD pipelines reducing deployment time by 70%",
+        "Implemented GraphQL APIs for improved frontend data fetching"
+      ]
+    },
+    {
+      "title": "Junior Developer",
+      "company": "WebApps Inc.",
+      "duration": "Jun 2019 - Feb 2021",
+      "responsibilities": [
+        "Developed feature-rich web applications using React and TypeScript",
+        "Built RESTful APIs with Express.js and PostgreSQL",
+        "Implemented automated testing strategies with Jest and Cypress",
+        "Participated in code reviews and agile development processes"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Good written communication",
+    "Independent worker",
+    "Analytical problem solver",
+    "Quick learner with new technologies"
+  ],
+  "education_level": "Bachelor of Science"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'hugging face transformers' (similarity: 0.213)Required: 'so i need to extract all the technical skills required for this senior full-stack engineer position let me go through each section of the job description carefully first' ¡ú Best match: 'hugging face transformers' (similarity: 0.206)Required: 'looking at the responsibilities section the role involves designing and building scalable web applications using python and react so' ¡ú Best match: 'google cloud' (similarity: 0.201)Required: 'ill note down python and react as technical skills they also mention developing efficient apis to support ml models and front-end applications that adds api development to the list' ¡ú Best match: 'hugging face transformers' (similarity: 0.213)Required: 'but more specifically' ¡ú Best match: 'hugging face transformers' (similarity: 0.158)Required: 'since its built with python and react' ¡ú Best match: 'react' (similarity: 0.486)Required: 'those are already covered implementing and optimizing database designsso sql and nosql databases are important here ill include both under databases working closely with the ml team means integrating machine learning models into the applications so' ¡ú Best match: 'google cloud' (similarity: 0.218)Required: 'machine learning concepts should be included' ¡ú Best match: 'hugging face transformers' (similarity: 0.299)Required: 'as well as natural language processing nlp since its mentioned in the required skills experience section later on moving to required skills experience 5 years of experience is more about qualification than a skill' ¡ú Best match: 'hugging face transformers' (similarity: 0.179)Required: 'so i can skip that strong proficiency in python and javascripttypescriptso those are key programming languages experience with modern web frameworks like react' ¡ú Best match: 'react' (similarity: 0.342)Required: 'angular' ¡ú Best match: 'typescript' (similarity: 0.391)Required: 'or vuejs means all three should be included as theyre mentioned individually building restful apis is explicitly stated' ¡ú Best match: 'hugging face transformers' (similarity: 0.232)Required: 'so thats another skill working with sql and nosql databases again reinforces that point cloud platforms aws' ¡ú Best match: 'google cloud' (similarity: 0.418)Required: 'google cloud' ¡ú Best match: 'google cloud' (similarity: 1.000)Required: 'or azure are mentioned' ¡ú Best match: 'hugging face transformers' (similarity: 0.139)Required: 'so those need to be listed solid understanding of cicd pipelines and devops practicesthose are methodologies and tools related to software development processes' ¡ú Best match: 'hugging face transformers' (similarity: 0.180)Required: 'so they should be included as technical skills familiarity with containerization technologies like docker and kubernetes is another point' ¡ú Best match: 'hugging face transformers' (similarity: 0.234)Required: 'so both go into the list basic understanding of machine learning concepts and nlp even though its basic' ¡ú Best match: 'hugging face transformers' (similarity: 0.276)Required: 'its still a required skill that needs to be mentioned experience with version control using git is essential for collaborative development' ¡ú Best match: 'hugging face transformers' (similarity: 0.251)Required: 'so git is included as well looking at nice to have section real-time data processing systems like kafka and spark are nice but not required' ¡ú Best match: 'hugging face transformers' (similarity: 0.323)Required: 'so they might be in the nice to have but since the user only asks for required skills' ¡ú Best match: 'hugging face transformers' (similarity: 0.255)Required: 'i wont include them unless specified however' ¡ú Best match: 'hugging face transformers' (similarity: 0.245)Required: 'if theres any mention of them being required elsewhere' ¡ú Best match: 'hugging face transformers' (similarity: 0.122)Required: 'but here its under nice to have' ¡ú Best match: 'hugging face transformers' (similarity: 0.260)Required: 'which is more of a preference experience with ml-powered applications and knowledge of graphql are also in the nice-to-have section' ¡ú Best match: 'hugging face transformers' (similarity: 0.246)Required: 'so they arent required but could be preferred security best practices might come under methodologies or tools' ¡ú Best match: 'hugging face transformers' (similarity: 0.273)Required: 'but since its not explicitly mentioned as a required skill' ¡ú Best match: 'hugging face transformers' (similarity: 0.195)Required: 'ill exclude it unless specified otherwise in education' ¡ú Best match: 'hugging face transformers' (similarity: 0.203)Required: 'a bachelors degree is mentioned' ¡ú Best match: 'hugging face transformers' (similarity: 0.191)Required: 'which is more about educational background rather than a technical skill' ¡ú Best match: 'hugging face transformers' (similarity: 0.180)Required: 'so i wont include that soft skills we value are communication' ¡ú Best match: 'hugging face transformers' (similarity: 0.224)Required: 'problem-solving' ¡ú Best match: 'fastapi' (similarity: 0.362)Required: 'etc' ¡ú Best match: 'express' (similarity: 0.235)Required: 'but those are soft skills and not technical' ¡ú Best match: 'google cloud' (similarity: 0.182)Required: 'so they dont count for this task benefits perks are about compensation and work environment' ¡ú Best match: 'hugging face transformers' (similarity: 0.197)Required: 'not technical skills putting it all together' ¡ú Best match: 'hugging face transformers' (similarity: 0.293)Required: 'the required technical skills from the job description are - python - react - javascripttypescript - restful apis - sql - nosql - aws' ¡ú Best match: 'aws' (similarity: 0.463)Required: 'azure - cicd pipelines - devops practices - docker - kubernetes - machine learning concepts - nlp - git i think that covers all the technical skills mentioned i should make sure not to include any soft skills or preferences beyond whats explicitly stated as required think python' ¡ú Best match: 'python' (similarity: 0.420)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.628)Required: 'restful apis' ¡ú Best match: 'fastapi' (similarity: 0.485)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.568)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'cicd pipelines' ¡ú Best match: 'github actions' (similarity: 0.581)Required: 'devops practices' ¡ú Best match: 'hugging face transformers' (similarity: 0.461)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'machine learning concepts' ¡ú Best match: 'hugging face transformers' (similarity: 0.513)Required: 'nlp' ¡ú Best match: 'python' (similarity: 0.492)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)
+Technical Skill Match Score (S1): 0.41
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: The candidate has relevant experience in software development with a focus on web applications, cloud technologies, and modern frameworks such as React and Python. Their experience with database designs, API development, and CI/CD pipelines aligns well with the job requirements. However, their lack of experience with machine learning concepts and NLP, as well as serverless architectures, prevents them from scoring higher.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.64
+Justification: However, the candidate lacks explicit leadership and mentoring capabilities mentioned in the job description. Their 'APISecure' project demonstrates security best practices implementation, but it's not directly related to leading technical initiatives or mentoring junior engineers.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.41
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.64
+Final Score: 1.85/3.00
+
+==================================================
+CANDIDATE 4: MICHAEL WILSON
+AGENT COMBINATION: A1 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+MICHAEL WILSON
+Software Engineering Manager
+michael.wilson@email.com | (555) 456-7890 | Seattle, WA | linkedin.com/in/michaelwilson
+U.S. Citizen
+
+SUMMARY
+Experienced engineering leader with 12+ years...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "Java",
+    "C#",
+    "React",
+    "Angular",
+    "Django",
+    "Spring Boot",
+    "AWS",
+    "Azure",
+    "Git",
+    "Jenkins",
+    "JIRA",
+    "Confluence",
+    "SQL Server",
+    "MySQL",
+    "MongoDB"
+  ],
+  "job_experience": [
+    {
+      "title": "Engineering Manager",
+      "company": "Enterprise Systems Inc.",
+      "duration": "Jan 2019 - Present",
+      "responsibilities": [
+        "Led team of 15 engineers developing enterprise SaaS platform used by 200+ corporations",
+        "Managed delivery of 4 major product releases annually with 99.9% uptime SLA",
+        "Established code quality processes improving stability and reducing bugs by 45%",
+        "Coordinated with product management to align technical roadmap with business objectives",
+        "Implemented agile methodologies improving team velocity by 30%"
+      ]
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataSoft Corp",
+      "duration": "Mar 2015 - Dec 2018",
+      "responsibilities": [
+        "Led development of distributed data processing pipeline handling 2TB daily",
+        "Architected migration from monolith to microservices architecture",
+        "Mentored junior engineers and conducted technical interviews",
+        "Implemented monitoring and alerting systems reducing incident response time by 60%"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "TechSolutions LLC",
+      "duration": "Jun 2011 - Feb 2015",
+      "responsibilities": [
+        "Developed web applications using JavaScript frameworks and RESTful APIs",
+        "Built reporting systems integrating data from multiple enterprise sources",
+        "Optimized SQL queries and database schemas improving application performance",
+        "Implemented automated testing frameworks to ensure code quality"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Exceptional leadership and team management",
+    "Strong communication with technical and non-technical stakeholders",
+    "Strategic planning and roadmap development",
+    "Excellent conflict resolution and problem-solving",
+    "Mentoring and career development"
+  ],
+  "education_level": "Bachelor of Science in Computer Science"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'confluence' (similarity: 0.217)Required: 'so i need to extract all the technical skills from this job description let me go through each part step by step first' ¡ú Best match: 'sql server' (similarity: 0.113)Required: 'under responsibilities' ¡ú Best match: 'confluence' (similarity: 0.325)Required: 'it mentions designing and building scalable web applications using python' ¡ú Best match: 'python' (similarity: 0.290)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'and cloud technologies so i should include those python' ¡ú Best match: 'python' (similarity: 0.541)Required: 'cloud technologies then' ¡ú Best match: 'confluence' (similarity: 0.190)Required: 'developing efficient apis to support ml models and front-end apps that adds restful apis and maybe machine learning integration so restful apis and machine learning models implementing database designsboth sql and nosql so databases sql and nosql also' ¡ú Best match: 'spring boot' (similarity: 0.245)Required: 'working with the ml team on integrating models' ¡ú Best match: 'confluence' (similarity: 0.240)Required: 'so machine learning integration leading technical initiatives and mentoring juniors doesnt directly add a skill but is more about soft skills' ¡ú Best match: 'confluence' (similarity: 0.176)Required: 'so ill skip that for now participating in code reviews and ensuring quality code review and quality assurance troubleshooting production issues troubleshooting and production environment issues staying updated with emerging tech and best practices emerging technologies and industry best practices not specific' ¡ú Best match: 'confluence' (similarity: 0.194)Required: 'but they are more about knowledge areas under required skills experience' ¡ú Best match: 'confluence' (similarity: 0.209)Required: 'the first point is 5 years in software development focusing on web appsage requirement' ¡ú Best match: 'confluence' (similarity: 0.295)Required: 'not a skill next' ¡ú Best match: 'confluence' (similarity: 0.207)Required: 'strong proficiency in python and javascripttypescript' ¡ú Best match: 'javascript' (similarity: 0.441)Required: 'so those should be included python' ¡ú Best match: 'python' (similarity: 0.740)Required: 'javascripttypescript experience with modern frameworks like react' ¡ú Best match: 'react' (similarity: 0.462)Required: 'angular' ¡ú Best match: 'angular' (similarity: 1.000)Required: 'or vuejs web frameworks react' ¡ú Best match: 'react' (similarity: 0.496)Required: 'vuejs building restful apis already mentioned that as restful apis working with databases again databases sql and nosql cloud platforms aws' ¡ú Best match: 'aws' (similarity: 0.364)Required: 'google cloud' ¡ú Best match: 'azure' (similarity: 0.468)Required: 'azure so those are separate solid understanding of cicd and devops cicd pipelines and devops practices familiarity with containerization docker and kubernetes basic ml concepts and nlp machine learning concepts and nlp version control git and collaborative development must have us work authorization thats a legal requirement' ¡ú Best match: 'confluence' (similarity: 0.186)Required: 'not a skill nice to have includes real-time processing kafka' ¡ú Best match: 'mongodb' (similarity: 0.387)Required: 'spark real-time data processing kafka' ¡ú Best match: 'spring boot' (similarity: 0.453)Required: 'spark developing ml-powered apps machine learning applications graphql and modern api patterns graphql and api patterns serverless architectures serverless open-source contributions open source contributions security best practices security best practices soft skills are communication' ¡ú Best match: 'confluence' (similarity: 0.196)Required: 'problem-solving' ¡ú Best match: 'confluence' (similarity: 0.404)Required: 'etc' ¡ú Best match: 'c' (similarity: 0.291)Required: 'but im only focusing on technical skills here so putting it all together' ¡ú Best match: 'confluence' (similarity: 0.123)Required: 'the list would include python' ¡ú Best match: 'python' (similarity: 0.649)Required: 'javascripttypescript' ¡ú Best match: 'javascript' (similarity: 0.540)Required: 'vuejs' ¡ú Best match: 'javascript' (similarity: 0.618)Required: 'restful apis' ¡ú Best match: 'spring boot' (similarity: 0.446)Required: 'databases sql and nosql' ¡ú Best match: 'sql server' (similarity: 0.393)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'cicd pipelines' ¡ú Best match: 'jenkins' (similarity: 0.464)Required: 'devops' ¡ú Best match: 'jenkins' (similarity: 0.566)Required: 'docker' ¡ú Best match: 'python' (similarity: 0.540)Required: 'kubernetes' ¡ú Best match: 'mongodb' (similarity: 0.578)Required: 'machine learning concepts' ¡ú Best match: 'confluence' (similarity: 0.371)Required: 'nlp' ¡ú Best match: 'python' (similarity: 0.492)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'collaborative development' ¡ú Best match: 'confluence' (similarity: 0.423)Required: 'real-time data processing kafka' ¡ú Best match: 'spring boot' (similarity: 0.495)Required: 'spark' ¡ú Best match: 'jenkins' (similarity: 0.416)Required: 'machine learning applications' ¡ú Best match: 'confluence' (similarity: 0.361)Required: 'graphql' ¡ú Best match: 'django' (similarity: 0.585)Required: 'api patterns' ¡ú Best match: 'confluence' (similarity: 0.473)Required: 'serverless' ¡ú Best match: 'jenkins' (similarity: 0.438)Required: 'open source contributions' ¡ú Best match: 'confluence' (similarity: 0.404)Required: 'security best practices wait' ¡ú Best match: 'confluence' (similarity: 0.250)Required: 'but the user asked to include each as separate points' ¡ú Best match: 'javascript' (similarity: 0.099)Required: 'so ill list them all separated by commas without any additional text think python' ¡ú Best match: 'python' (similarity: 0.535)Required: 'devops practices' ¡ú Best match: 'confluence' (similarity: 0.396)Required: 'serverless architectures' ¡ú Best match: 'confluence' (similarity: 0.345)Required: 'security best practices' ¡ú Best match: 'confluence' (similarity: 0.348)
+Technical Skill Match Score (S1): 0.44
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: The candidate has extensive experience in software development, particularly in building and maintaining web applications, APIs, and databases. Their experience in managing teams and implementing agile methodologies is also relevant to the role. However, a direct match with machine learning concepts and NLP is lacking, hence the slightly lower score.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.80
+Justification: The candidate's soft skills score is high due to their extensive experience in leadership and team management, as evident from their 5+ years of managing teams and delivering complex projects. Their technical background in Python, JavaScript, and cloud technologies also aligns well with the job requirements, showcasing their adaptability and willingness to learn new technologies. The only reason for a slight deduction is that the candidate's experience in AI and machine learning is limited, but they have mentioned working on 'machine learning-powered applications' in the past, which can be considered as a positive aspect.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.44
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.80
+Final Score: 2.04/3.00
+
+==================================================
+CANDIDATE 5: RACHEL GARCIA
+AGENT COMBINATION: A1 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+RACHEL GARCIA
+Product-Focused Developer
+rachel.garcia@email.com | (555) 567-8901 | Chicago, IL | linkedin.com/in/rachelgarcia
+U.S. Citizen
+
+SUMMARY
+Empathetic and collaborative developer with 5 years...
+
+Running Agent A1: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "HTML/CSS",
+    "SQL",
+    "React",
+    "Express.js",
+    "Bootstrap",
+    "Tailwind CSS",
+    "AWS (basic)",
+    "Netlify",
+    "Vercel",
+    "Git",
+    "Figma",
+    "Trello",
+    "Notion",
+    "PostgreSQL",
+    "MongoDB",
+    "Jest",
+    "Cypress",
+    "user testing methods"
+  ],
+  "job_experience": [
+    {
+      "title": "Frontend Engineer",
+      "company": "UserFirst Technologies",
+      "duration": "Apr 2020 - Present",
+      "responsibilities": "Collaborated closely with UX designers to implement pixel-perfect, accessible interfaces; Facilitated 20+ user research sessions to gather feedback and inform development priorities; Reduced customer support tickets by 35% through intuitive UI improvements; Presented technical concepts to non-technical stakeholders in clear, understandable terms; Mentored junior developers on user-centered development practices"
+    }
+  ],
+  "soft_skills": [
+    "Outstanding verbal and written communication",
+    "Excellent client and stakeholder management",
+    "Strong empathy and active listening",
+    "Exceptional presentation and documentation skills",
+    "Highly collaborative team player with ability to work across departments",
+    "Creative problem-solving with focus on user needs"
+  ],
+  "education_level": "Bachelor of Arts in Communications"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'user testing methods' (similarity: 0.383)Required: 'so i need to extract all the technical skills required for this senior full-stack engineer position let me go through the job description step by step first' ¡ú Best match: 'user testing methods' (similarity: 0.393)Required: 'looking at the responsibilities section' ¡ú Best match: 'user testing methods' (similarity: 0.535)Required: 'it mentions designing and building scalable web applications using python' ¡ú Best match: 'user testing methods' (similarity: 0.366)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'and cloud technologies so thats python' ¡ú Best match: 'python' (similarity: 0.433)Required: 'and cloud platforms like aws' ¡ú Best match: 'aws basic' (similarity: 0.433)Required: 'google cloud' ¡ú Best match: 'aws basic' (similarity: 0.452)Required: 'or azure next' ¡ú Best match: 'expressjs' (similarity: 0.253)Required: 'developing efficient apis for ml models and front-end apps that adds api development to the skills list implementing database designsboth sql and nosql so ill include databases as a category' ¡ú Best match: 'user testing methods' (similarity: 0.318)Required: 'probably under sql and nosql specifics working with ml teams to integrate and deploy models means machine learning integration is important also' ¡ú Best match: 'user testing methods' (similarity: 0.362)Required: 'basic understanding of nlp from the required skills leading technical initiatives and mentoring junior engineers doesnt directly add new technical skills but reinforces existing ones like python and react participating in code reviews and ensuring quality standards relate more to software practices than specific technical skills troubleshooting production issues is a standard part of a senior engineers role' ¡ú Best match: 'user testing methods' (similarity: 0.362)Required: 'so its implied but not a specific skill staying updated with emerging tech implies knowledge of current trends but isnt a specific skill moving to required skills experience 5 years in software development focusing on web apps proficiency in python and javascripttypescript' ¡ú Best match: 'expressjs' (similarity: 0.276)Required: 'which i can list separately since typescript is related to react experience with modern frameworks like react' ¡ú Best match: 'react' (similarity: 0.449)Required: 'angular' ¡ú Best match: 'bootstrap' (similarity: 0.468)Required: 'or vuejsreact is already mentioned' ¡ú Best match: 'user testing methods' (similarity: 0.427)Required: 'so maybe vue or angular if required building restful apis and working with databases sql and nosql as mentioned earlier cloud platforms aws' ¡ú Best match: 'aws basic' (similarity: 0.344)Required: 'azure cicd pipelines and devops practices are also part of the skills containerization with docker and kubernetes is another key area version control with git and collaborationgit is a specific tool nice to have includes real-time processing systems like kafka and spark' ¡ú Best match: 'postgresql' (similarity: 0.231)Required: 'ml applications' ¡ú Best match: 'user testing methods' (similarity: 0.614)Required: 'graphql' ¡ú Best match: 'expressjs' (similarity: 0.590)Required: 'serverless architectures' ¡ú Best match: 'user testing methods' (similarity: 0.581)Required: 'security best practices' ¡ú Best match: 'user testing methods' (similarity: 0.695)Required: 'and open-source contributions these are nice but not required' ¡ú Best match: 'user testing methods' (similarity: 0.335)Required: 'so maybe only list the must-haves education bachelors in cs or related field soft skills communication' ¡ú Best match: 'user testing methods' (similarity: 0.284)Required: 'problem-solving' ¡ú Best match: 'user testing methods' (similarity: 0.415)Required: 'etc' ¡ú Best match: 'expressjs' (similarity: 0.250)Required: 'arent technical skills' ¡ú Best match: 'user testing methods' (similarity: 0.403)Required: 'so they can be excluded putting it all together' ¡ú Best match: 'user testing methods' (similarity: 0.489)Required: 'the technical skills would include programming languages python' ¡ú Best match: 'user testing methods' (similarity: 0.385)Required: 'javascripttypescript' ¡ú Best match: 'expressjs' (similarity: 0.648)Required: 'frameworks react' ¡ú Best match: 'react' (similarity: 0.728)Required: 'possibly angular or vue if mentioned more' ¡ú Best match: 'user testing methods' (similarity: 0.408)Required: 'databases sql' ¡ú Best match: 'sql' (similarity: 0.622)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.568)Required: 'cloud platforms' ¡ú Best match: 'user testing methods' (similarity: 0.616)Required: 'cicd' ¡ú Best match: 'expressjs' (similarity: 0.512)Required: 'docker' ¡ú Best match: 'python' (similarity: 0.540)Required: 'kubernetes' ¡ú Best match: 'postgresql' (similarity: 0.595)Required: 'ml concepts' ¡ú Best match: 'user testing methods' (similarity: 0.572)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'apis' ¡ú Best match: 'expressjs' (similarity: 0.448)Required: 'etc think python' ¡ú Best match: 'python' (similarity: 0.512)Required: 'reactangularvuejs' ¡ú Best match: 'expressjs' (similarity: 0.678)Required: 'restful apis' ¡ú Best match: 'expressjs' (similarity: 0.533)Required: 'sqlnosql' ¡ú Best match: 'expressjs' (similarity: 0.562)Required: 'awsgoogle cloudazure' ¡ú Best match: 'aws basic' (similarity: 0.385)Required: 'dockerkubernetes' ¡ú Best match: 'expressjs' (similarity: 0.650)Required: 'machine learningnlp' ¡ú Best match: 'expressjs' (similarity: 0.355)Required: 'api integration' ¡ú Best match: 'user testing methods' (similarity: 0.537)Required: 'web applications' ¡ú Best match: 'user testing methods' (similarity: 0.609)Required: 'containerization' ¡ú Best match: 'expressjs' (similarity: 0.519)Required: 'cloud technologies' ¡ú Best match: 'user testing methods' (similarity: 0.595)Required: 'devops practices' ¡ú Best match: 'user testing methods' (similarity: 0.685)
+Technical Skill Match Score (S1): 0.50
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.43
+Justification: The candidate has relevant experience in web development with a focus on Python and JavaScript, as well as experience with modern web frameworks such as React. However, their experience is not directly related to AI-powered applications or machine learning, which are key requirements for the role. The candidate also lacks experience with cloud platforms, CI/CD pipelines, and containerization technologies, which are also important skills for the position.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.85
+Justification: However, the candidate's lack of direct experience with real-time data processing systems and machine learning concepts might be considered a drawback. Nevertheless, their solid understanding of CI/CD pipelines, DevOps practices, and version control systems makes up for this. Overall, the candidate's soft skills demonstrate a strong fit for the job requirements.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.50
+Experience Relevance (S2): 0.43
+Soft Skills (S3): 0.85
+Final Score: 1.78/3.00
+
+System Ranking: [2, 4, 3, 5, 1]
+Human Ranking:  [2, 3, 5, 4, 1]
+
+Exact Position Accuracy: 0.40
+Spearman Rank Correlation: 0.70
+
+
+============================== EVALUATING COMBINATION: A2+B2+C+D ==============================
+
+
+==================================================
+CANDIDATE 1: ALEX ZHANG
+AGENT COMBINATION: A2 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+ALEX ZHANG
+Software Developer
+alex.zhang@email.com | (555) 987-6543 | Vancouver, Canada | linkedin.com/in/alexzhang
+
+SUMMARY
+Detail-oriented backend developer with 3 years of experience building data...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "C++",
+    "Java",
+    "Ruby",
+    "PHP",
+    "Google Cloud Platform",
+    "Git",
+    "SVN",
+    "Jenkins",
+    "MySQL",
+    "PostgreSQL",
+    "Laravel",
+    "Ruby on Rails"
+  ],
+  "job_experience": [
+    {
+      "title": "Junior Software Developer",
+      "company": "TechStartup Inc.",
+      "duration": "Jun 2021 - Present",
+      "responsibilities": [
+        "Built backend services for e-commerce applications using Ruby on Rails",
+        "Optimized SQL queries improving database performance by 30%",
+        "Implemented payment processing integration with Stripe and PayPal",
+        "Collaborated with UX team to improve checkout flow conversion rates"
+      ],
+      "technologies_used": [
+        "Ruby on Rails",
+        "SQL",
+        "Stripe",
+        "PayPal"
+      ]
+    },
+    {
+      "title": "Web Developer",
+      "company": "CanadaTech Solutions",
+      "duration": "Aug 2019 - May 2021",
+      "responsibilities": [
+        "Developed and maintained PHP-based web applications for small businesses",
+        "Created custom WordPress themes and plugins for client websites",
+        "Implemented responsive design principles for mobile compatibility",
+        "Managed hosting infrastructure for over 20 client websites"
+      ],
+      "technologies_used": [
+        "PHP",
+        "WordPress",
+        "Responsive Design"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Collaborative team player",
+    "Strong written communication",
+    "Detail-oriented and organized",
+    "Fast learner with strong research skills"
+  ],
+  "education_level": "Bachelor of Science in Computer Science, University of British Columbia (2019)"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think alright' ¡ú Best match: 'google cloud platform' (similarity: 0.206)Required: 'i need to extract all the technical skills from this job description let me go through each section step by step first' ¡ú Best match: 'google cloud platform' (similarity: 0.191)Required: 'under responsibilities' ¡ú Best match: 'google cloud platform' (similarity: 0.276)Required: 'it mentions designing and building scalable web applications using python and react' ¡ú Best match: 'google cloud platform' (similarity: 0.312)Required: 'so those are technical skills python' ¡ú Best match: 'google cloud platform' (similarity: 0.391)Required: 'react it also talks about cloud technologies' ¡ú Best match: 'google cloud platform' (similarity: 0.538)Required: 'but doesnt specify which ones yet so ill note that as a placeholder for now next' ¡ú Best match: 'google cloud platform' (similarity: 0.231)Required: 'developing apis with python' ¡ú Best match: 'google cloud platform' (similarity: 0.415)Required: 'react' ¡ú Best match: 'laravel' (similarity: 0.459)Required: 'and integrating ml models that adds api development to the list implementing database designs using sql and nosql' ¡ú Best match: 'google cloud platform' (similarity: 0.310)Required: 'so those are specific databases sql' ¡ú Best match: 'postgresql' (similarity: 0.382)Required: 'nosql leading technical initiatives and mentoring juniors isnt directly a skill but more of a responsibility' ¡ú Best match: 'google cloud platform' (similarity: 0.297)Required: 'so maybe not needed here participating in code reviews for high quality standardsmaybe not a skill' ¡ú Best match: 'google cloud platform' (similarity: 0.187)Required: 'more a process troubleshooting complex issues is a task' ¡ú Best match: 'google cloud platform' (similarity: 0.202)Required: 'not a skill per se staying updated with tech and best practices isnt specific' ¡ú Best match: 'google cloud platform' (similarity: 0.235)Required: 'but perhaps its implied as part of being up-to-date looking at required skills experience' ¡ú Best match: 'google cloud platform' (similarity: 0.310)Required: 'they mention 5 years in web dev focusing on web apps proficiency in python and javascripttypescriptso those are skills experience with react' ¡ú Best match: 'google cloud platform' (similarity: 0.255)Required: 'angular' ¡ú Best match: 'laravel' (similarity: 0.369)Required: 'or vuejs as frameworks building restful apis with sql and nosql so thats confirmed for sql and nosql cloud platforms aws' ¡ú Best match: 'google cloud platform' (similarity: 0.418)Required: 'google cloud' ¡ú Best match: 'google cloud platform' (similarity: 0.727)Required: 'azureso i should list them separately cicd pipelines and devops practices are mentioned' ¡ú Best match: 'google cloud platform' (similarity: 0.330)Required: 'so those go in docker and kubernetes for containerization basic ml concepts and nlpso machine learning and natural language processing version control with gitso git is a skill in the nice to have section' ¡ú Best match: 'google cloud platform' (similarity: 0.355)Required: 'real-time processing with kafka and spark' ¡ú Best match: 'postgresql' (similarity: 0.322)Required: 'serverless arch' ¡ú Best match: 'google cloud platform' (similarity: 0.228)Required: 'graphql' ¡ú Best match: 'postgresql' (similarity: 0.563)Required: 'security best practices since its nice-to-have' ¡ú Best match: 'google cloud platform' (similarity: 0.276)Required: 'but still technical skills' ¡ú Best match: 'google cloud platform' (similarity: 0.243)Required: 'i should include them as optional or add notes under education' ¡ú Best match: 'google cloud platform' (similarity: 0.236)Required: 'its a bs in cs or equivalent experiencedoesnt add new skills beyond whats already mentioned soft skills are about communication' ¡ú Best match: 'google cloud platform' (similarity: 0.170)Required: 'problem-solving' ¡ú Best match: 'jenkins' (similarity: 0.347)Required: 'etcnot technical benefits and perks dont add skills putting it all together' ¡ú Best match: 'google cloud platform' (similarity: 0.394)Required: 'the required technical skills are python' ¡ú Best match: 'google cloud platform' (similarity: 0.331)Required: 'javascripttypescript' ¡ú Best match: 'ruby on rails' (similarity: 0.426)Required: 'vuejs' ¡ú Best match: 'laravel' (similarity: 0.556)Required: 'restful apis' ¡ú Best match: 'google cloud platform' (similarity: 0.564)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.651)Required: 'nosql' ¡ú Best match: 'postgresql' (similarity: 0.548)Required: 'aws' ¡ú Best match: 'jenkins' (similarity: 0.381)Required: 'azure' ¡ú Best match: 'jenkins' (similarity: 0.457)Required: 'cicd' ¡ú Best match: 'jenkins' (similarity: 0.545)Required: 'docker' ¡ú Best match: 'postgresql' (similarity: 0.523)Required: 'kubernetes' ¡ú Best match: 'postgresql' (similarity: 0.595)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'machine learning ml' ¡ú Best match: 'google cloud platform' (similarity: 0.512)Required: 'nlp' ¡ú Best match: 'jenkins' (similarity: 0.490)Required: 'devops' ¡ú Best match: 'jenkins' (similarity: 0.566)Required: 'cloud technologies wait' ¡ú Best match: 'google cloud platform' (similarity: 0.286)Required: 'i should check if cloud platforms are considered separate from each other or as a category maybe list them all aws' ¡ú Best match: 'google cloud platform' (similarity: 0.481)Required: 'azure also' ¡ú Best match: 'google cloud platform' (similarity: 0.511)Required: 'since react is mentioned in frameworks and api development' ¡ú Best match: 'google cloud platform' (similarity: 0.415)Required: 'its already covered so the final list includes all these areas think python' ¡ú Best match: 'java' (similarity: 0.409)Required: 'cloud technologies' ¡ú Best match: 'google cloud platform' (similarity: 0.550)
+Technical Skill Match Score (S1): 0.40
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.40
+Justification: The candidate has experience in web development and backend services, but most of their skills are not directly relevant to the job description. They lack expertise in Full-Stack Engineering, Python, React, cloud technologies, machine learning concepts, and CI/CD pipelines. However, they do possess strong problem-solving and analytical thinking skills.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.40
+Justification: The candidate's strong written communication skills are mentioned in their resume, but it is unclear how this skill will be applied in a fast-paced environment like AI Products team.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.40
+Experience Relevance (S2): 0.40
+Soft Skills (S3): 0.40
+Final Score: 1.20/3.00
+
+==================================================
+CANDIDATE 2: SARAH JOHNSON
+AGENT COMBINATION: A2 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+SARAH JOHNSON
+Senior Software Engineer
+sarah.johnson@email.com | (555) 234-5678 | San Francisco, CA | linkedin.com/in/sarahjohnson
+U.S. Citizen
+
+SUMMARY
+Highly accomplished full-stack engineer with 8...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "AWS",
+    "DynamoDB",
+    "Lambda",
+    "SageMaker",
+    "Google Cloud Platform",
+    "Azure",
+    "Docker",
+    "Kubernetes",
+    "Git",
+    "Jenkins",
+    "GitHub Actions",
+    "CircleCI",
+    "Terraform",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Elasticsearch",
+    "Snowflake",
+    "PyTorch",
+    "TensorFlow",
+    "scikit-learn",
+    "NLP",
+    "Computer Vision",
+    "React",
+    "Node.js",
+    "Django",
+    "Flask",
+    "Express",
+    "Next.js",
+    "JavaScript",
+    "TypeScript",
+    "Go",
+    "SQL",
+    "HTML/CSS"
+  ],
+  "job_experience": [
+    {
+      "title": "Lead Software Engineer",
+      "company": "AITech Solutions",
+      "duration": "Jan 2020 - Present",
+      "responsibilities": [
+        "Architected and built a scalable ML platform processing 100M+ documents monthly using AWS and TensorFlow",
+        "Led migration from monolith to microservices, reducing deployment time by 80% and improving system resilience",
+        "Mentored team of 8 engineers and established agile development processes",
+        "Implemented real-time data processing pipeline using Kafka and Spark",
+        "Reduced infrastructure costs by 40% through optimization and serverless architecture",
+        "Collaborated with product managers and designers to create intuitive user interfaces with React"
+      ],
+      "achievements": [
+        "Processed 100M+ documents monthly",
+        "Reduced deployment time by 80%",
+        "Improved system resilience",
+        "Reduced infrastructure costs by 40%"
+      ],
+      "technologies_used": [
+        "AWS",
+        "TensorFlow"
+      ],
+      "team_leadership": true
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataViz Inc.",
+      "duration": "Feb 2017 - Dec 2019",
+      "responsibilities": [
+        "Built RESTful and GraphQL APIs powering enterprise-grade applications used by Fortune 500 companies",
+        "Led frontend development using React and TypeScript with 98% test coverage",
+        "Implemented CI/CD pipelines reducing release cycles from weeks to days",
+        "Created analytics dashboard visualizing complex datasets for executive decision making"
+      ],
+      "achievements": [
+        "Improved page load time by 65%",
+        "Reduced release cycles to days"
+      ],
+      "technologies_used": [
+        "React",
+        "TypeScript",
+        "CI/CD pipelines"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "WebScale Technologies",
+      "duration": "Jun 2015 - Jan 2017",
+      "responsibilities": [
+        "Developed responsive web applications using modern JavaScript frameworks",
+        "Implemented authentication and authorization systems with robust security practices",
+        "Built automated testing suite reducing QA time by 40%",
+        "Contributed to open-source projects including core framework improvements"
+      ]
+    }
+  ],
+  "education": {
+    "Master of Science in Computer Science": "Stanford University",
+    "Bachelor of Science in Computer Engineering": "MIT"
+  },
+  "projects": [
+    "NLPEngine",
+    "CloudArchitect",
+    "SecurityFirst"
+  ],
+  "soft_skills": [
+    "Outstanding written and verbal communication",
+    "Strong leadership and team mentoring capabilities",
+    "Excellent problem-solving and analytical thinking",
+    "Highly adaptable to changing requirements and technologies",
+    "Exceptional time management and prioritization skills"
+  ],
+  "education_level": ""
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'google cloud platform' (similarity: 0.249)Required: 'i need to help extract all the technical skills required for this senior full-stack engineer position let me go through the job description step by step starting with the responsibilities section' ¡ú Best match: 'google cloud platform' (similarity: 0.287)Required: 'it mentions using python' ¡ú Best match: 'nodejs' (similarity: 0.396)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'and cloud technologies so ill note those down python' ¡ú Best match: 'nodejs' (similarity: 0.456)Required: 'cloud technologies next' ¡ú Best match: 'google cloud platform' (similarity: 0.243)Required: 'they talk about developing apis using restful standards that adds restful apis to my list they also mention integrating machine learning models' ¡ú Best match: 'google cloud platform' (similarity: 0.341)Required: 'so machine learning is another skill implementing database designs leads me to include both sql and nosql databases moving on to required skills experience' ¡ú Best match: 'google cloud platform' (similarity: 0.307)Required: 'the first point is 5 years in software development with a focus on web applications thats more about experience than a specific skill' ¡ú Best match: 'google cloud platform' (similarity: 0.177)Required: 'but ill note it as years of experience strong proficiency in python and javascripttypescript adds those individually they mention modern frameworks like react' ¡ú Best match: 'react' (similarity: 0.312)Required: 'angular' ¡ú Best match: 'nextjs' (similarity: 0.426)Required: 'or vuejs so adding all three react' ¡ú Best match: 'react' (similarity: 0.538)Required: 'vuejs building restful apis again is already there' ¡ú Best match: 'google cloud platform' (similarity: 0.403)Required: 'so thats covered experience with cloud platforms aws' ¡ú Best match: 'google cloud platform' (similarity: 0.507)Required: 'google cloud' ¡ú Best match: 'google cloud platform' (similarity: 0.727)Required: 'azure ill list each separately solid understanding of cicd and devops practices are important' ¡ú Best match: 'google cloud platform' (similarity: 0.417)Required: 'so both go on the list familiarity with containerization using docker and kubernetes adds those two basic understanding of ml concepts and nlp is another point' ¡ú Best match: 'google cloud platform' (similarity: 0.338)Required: 'so machine learning and nlp are included again but maybe as sub-skills under their respective categories version control systems like git and collaborative development practices are mentioned' ¡ú Best match: 'google cloud platform' (similarity: 0.314)Required: 'so git gets added must have us work authorization isnt a technical skill per se' ¡ú Best match: 'google cloud platform' (similarity: 0.326)Required: 'so i might exclude that unless its a requirement for the role itself' ¡ú Best match: 'google cloud platform' (similarity: 0.232)Required: 'which it is' ¡ú Best match: 'google cloud platform' (similarity: 0.138)Required: 'but since its not a tech skill' ¡ú Best match: 'google cloud platform' (similarity: 0.198)Required: 'maybe its better to leave it out as per instructions looking at nice to have section real-time processing with kafka and spark so kafka and spark are added ml-powered applications background is nice' ¡ú Best match: 'snowflake' (similarity: 0.264)Required: 'so that could be part of the machine learning category knowledge of graphql adds that as a separate skill serverless architectures are mentioned' ¡ú Best match: 'google cloud platform' (similarity: 0.402)Required: 'so thats another point open-source contributions arent technical skills but more about community involvement' ¡ú Best match: 'google cloud platform' (similarity: 0.244)Required: 'so i might not list them unless specified security best practices implementation is a bit broad but maybe falls under a methodology or practice' ¡ú Best match: 'google cloud platform' (similarity: 0.275)Required: 'which perhaps isnt needed here soft skills like communication and problem-solving are non-technical' ¡ú Best match: 'google cloud platform' (similarity: 0.252)Required: 'so they should be excluded as per the instructions the same goes for adaptability' ¡ú Best match: 'google cloud platform' (similarity: 0.299)Required: 'leadership' ¡ú Best match: 'snowflake' (similarity: 0.422)Required: 'etc looking at education' ¡ú Best match: 'computer vision' (similarity: 0.320)Required: 'its about degrees or equivalent experience' ¡ú Best match: 'google cloud platform' (similarity: 0.233)Required: 'not technical skills under benefits perks' ¡ú Best match: 'google cloud platform' (similarity: 0.306)Required: 'none of these are technical skills' ¡ú Best match: 'google cloud platform' (similarity: 0.265)Required: 'so i can ignore them i think that covers all the technical skills mentioned in the job description let me make sure i havent missed any python' ¡ú Best match: 'google cloud platform' (similarity: 0.333)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.628)Required: 'restful apis' ¡ú Best match: 'google cloud platform' (similarity: 0.564)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.568)Required: 'cloud aws' ¡ú Best match: 'google cloud platform' (similarity: 0.703)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'cicd' ¡ú Best match: 'jenkins' (similarity: 0.545)Required: 'devops' ¡ú Best match: 'kubernetes' (similarity: 0.578)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'machine learning' ¡ú Best match: 'computer vision' (similarity: 0.715)Required: 'nlp' ¡ú Best match: 'nlp' (similarity: 1.000)Required: 'git i should structure these as a comma-separated list without any additional text think python' ¡ú Best match: 'nodejs' (similarity: 0.482)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)
+Technical Skill Match Score (S1): 0.48
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.60
+Justification: The candidate has relevant experience in full-stack development, including Python and JavaScript/TypeScript proficiency, cloud platforms, database management, and CI/CD pipelines. However, the specific technologies mentioned (e.g., React, AWS, TensorFlow) do not perfectly align with the job description's requirements for modern web frameworks like React, Python, and cloud platforms. Still, their experience in building scalable applications and working with machine learning models shows promise for adapting to this role.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.83
+Justification: The candidate's experience and skills match most of the job requirements, with strong proficiency in Python, JavaScript/TypeScript, React, AWS, cloud platforms, CI/CD pipelines, and machine learning concepts. However, their soft skills do not fully align with the job description, lacking explicit examples of excellent communication and collaboration abilities. Their leadership and mentoring capabilities are mentioned, but no specific examples or metrics are provided.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.48
+Experience Relevance (S2): 0.60
+Soft Skills (S3): 0.83
+Final Score: 1.91/3.00
+
+==================================================
+CANDIDATE 3: DAVID KIM
+AGENT COMBINATION: A2 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+DAVID KIM
+Full-Stack Developer
+david.kim@email.com | (555) 345-6789 | Austin, TX | linkedin.com/in/davidkim
+U.S. Citizen
+
+SUMMARY
+Versatile developer with 4 years of experience specializing in modern...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Rust",
+    "Go",
+    "SQL",
+    "HTML/CSS",
+    "React",
+    "Vue.js",
+    "Node.js",
+    "Express",
+    "FastAPI",
+    "Svelte",
+    "AWS (complete suite)",
+    "Google Cloud",
+    "Azure",
+    "Docker",
+    "Kubernetes",
+    "Terraform",
+    "Ansible",
+    "Git",
+    "GitHub Actions",
+    "ArgoCD",
+    "PostgreSQL",
+    "MongoDB",
+    "DynamoDB",
+    "Neo4j",
+    "Cassandra",
+    "Redis",
+    "PyTorch",
+    "TensorFlow",
+    "Hugging Face Transformers"
+  ],
+  "job_experience": [
+    {
+      "title": "Software Engineer",
+      "company": "CloudTech Systems",
+      "duration": "Mar 2021 - Present",
+      "responsibilities": [
+        "Implemented serverless architectures using AWS Lambda and API Gateway",
+        "Built microservices with Kubernetes and Docker handling 30M+ daily requests",
+        "Developed real-time data processing systems using Kafka and Kinesis",
+        "Optimized CI/CD pipelines reducing deployment time by 70%",
+        "Implemented GraphQL APIs for improved frontend data fetching"
+      ],
+      "technologies": [
+        "AWS Lambda",
+        "API Gateway",
+        "Kubernetes",
+        "Docker",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "title": "Junior Developer",
+      "company": "WebApps Inc.",
+      "duration": "Jun 2019 - Feb 2021",
+      "responsibilities": [
+        "Developed feature-rich web applications using React and TypeScript",
+        "Built RESTful APIs with Express.js and PostgreSQL",
+        "Implemented automated testing strategies with Jest and Cypress"
+      ],
+      "technologies": [
+        "React",
+        "TypeScript",
+        "Express.js",
+        "PostgreSQL",
+        "Jest",
+        "Cypress"
+      ]
+    }
+  ],
+  "soft_skills": [
+    "Good written communication",
+    "Independent worker",
+    "Analytical problem solver",
+    "Quick learner with new technologies"
+  ],
+  "education_level": "Bachelor of Science in Computer Science, University of Texas (2019)"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'aws complete suite' (similarity: 0.353)Required: 'so i need to extract all the technical skills from this job description let me go through each section step by step first' ¡ú Best match: 'aws complete suite' (similarity: 0.188)Required: 'the responsibilities section lists several tasks the first one mentions designing and building scalable web applications using python' ¡ú Best match: 'aws complete suite' (similarity: 0.310)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'and cloud technologies so ill note down python' ¡ú Best match: 'python' (similarity: 0.542)Required: 'and cloud technologies as separate skills then' ¡ú Best match: 'aws complete suite' (similarity: 0.311)Required: 'developing efficient apis using python and cloud platforms like aws' ¡ú Best match: 'google cloud' (similarity: 0.377)Required: 'google cloud' ¡ú Best match: 'google cloud' (similarity: 1.000)Required: 'or azure' ¡ú Best match: 'azure' (similarity: 0.740)Required: 'so those go in too next' ¡ú Best match: 'aws complete suite' (similarity: 0.312)Required: 'implementing and optimizing database designs for sql and nosql that adds sql and nosql to the list working closely with ml teams implies a need for machine learning integration' ¡ú Best match: 'aws complete suite' (similarity: 0.451)Required: 'so thats another skill leading technical initiatives and mentoring juniors doesnt directly add skills but maybe leadership is more about soft skills' ¡ú Best match: 'aws complete suite' (similarity: 0.235)Required: 'so i might skip it unless specified participating in code reviews relates to quality assurance practices' ¡ú Best match: 'aws complete suite' (similarity: 0.395)Required: 'which could be a methodology or process' ¡ú Best match: 'aws complete suite' (similarity: 0.314)Required: 'but not a specific technical skill troubleshooting in production environments suggests problem-solving' ¡ú Best match: 'aws complete suite' (similarity: 0.281)Required: 'another soft skill perhaps staying updated with emerging technologies and industry best practices falls under continuous learning' ¡ú Best match: 'aws complete suite' (similarity: 0.297)Required: 'more of a mindset than a specific skill moving on to required skills experience' ¡ú Best match: 'aws complete suite' (similarity: 0.417)Required: 'the first point is 5 years of experience in software development focusing on web applications proficiency in python and javascripttypescript is mentioned' ¡ú Best match: 'aws complete suite' (similarity: 0.281)Required: 'so ill list those experience with modern frameworks like react' ¡ú Best match: 'react' (similarity: 0.477)Required: 'angular' ¡ú Best match: 'typescript' (similarity: 0.391)Required: 'or vuejs adds those as skills building restful apis and working with databases sql and nosql are already covered cloud platforms aws' ¡ú Best match: 'google cloud' (similarity: 0.413)Required: 'azure are noted again but are already included solid understanding of cicd pipelines and devops practices is a methodology' ¡ú Best match: 'aws complete suite' (similarity: 0.403)Required: 'so thats another skill familiarity with containerization technologies like docker and kubernetes adds those basic understanding of machine learning concepts and nlp natural language processing is important' ¡ú Best match: 'aws complete suite' (similarity: 0.381)Required: 'so those go in as well experience with version control using git and collaborative development is another point' ¡ú Best match: 'aws complete suite' (similarity: 0.379)Required: 'adding git to the list in nice to have' ¡ú Best match: 'aws complete suite' (similarity: 0.385)Required: 'real-time data processing systems like kafka and spark are mentioned' ¡ú Best match: 'aws complete suite' (similarity: 0.280)Required: 'which can be added background in ml-powered applications' ¡ú Best match: 'aws complete suite' (similarity: 0.521)Required: 'graphql' ¡ú Best match: 'fastapi' (similarity: 0.612)Required: 'serverless architectures' ¡ú Best match: 'aws complete suite' (similarity: 0.543)Required: 'open-source contributions' ¡ú Best match: 'aws complete suite' (similarity: 0.491)Required: 'and security practices are bonus skills but not required the education section doesnt add any technical skills soft skills like communication' ¡ú Best match: 'aws complete suite' (similarity: 0.209)Required: 'problem-solving' ¡ú Best match: 'aws complete suite' (similarity: 0.366)Required: 'leadership' ¡ú Best match: 'cassandra' (similarity: 0.355)Required: 'etc' ¡ú Best match: 'express' (similarity: 0.235)Required: 'are more about personality traits than specific technical abilities so compiling all the technical skills from the job description python' ¡ú Best match: 'python' (similarity: 0.519)Required: 'cloud technologies aws' ¡ú Best match: 'aws complete suite' (similarity: 0.569)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'restful apis' ¡ú Best match: 'aws complete suite' (similarity: 0.552)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.568)Required: 'javascripttypescript' ¡ú Best match: 'typescript' (similarity: 0.628)Required: 'cicd' ¡ú Best match: 'cassandra' (similarity: 0.514)Required: 'devops' ¡ú Best match: 'kubernetes' (similarity: 0.578)Required: 'docker' ¡ú Best match: 'docker' (similarity: 1.000)Required: 'kubernetes' ¡ú Best match: 'kubernetes' (similarity: 1.000)Required: 'machine learning' ¡ú Best match: 'hugging face transformers' (similarity: 0.513)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'nlp the other areas like leadership and soft skills are more about personal qualities rather than technical skills i should make sure im not including methodologies or processes unless they directly relate to specific technologies for example' ¡ú Best match: 'aws complete suite' (similarity: 0.339)Required: 'understanding of cicd is a methodology but its also a skill in itself similarly' ¡ú Best match: 'aws complete suite' (similarity: 0.336)Required: 'devops practices involve tools and processes' ¡ú Best match: 'aws complete suite' (similarity: 0.381)Required: 'so thats included as a skill wait' ¡ú Best match: 'aws complete suite' (similarity: 0.361)Required: 'the job mentions cloud platforms' ¡ú Best match: 'aws complete suite' (similarity: 0.449)Required: 'which are specific aws' ¡ú Best match: 'google cloud' (similarity: 0.462)Required: 'azure so i should include those as separate skills' ¡ú Best match: 'aws complete suite' (similarity: 0.358)Required: 'not just cloud technologies also' ¡ú Best match: 'aws complete suite' (similarity: 0.329)Required: 'in the responsibilities' ¡ú Best match: 'aws complete suite' (similarity: 0.362)Required: 'it says stay updated with emerging technologies' ¡ú Best match: 'aws complete suite' (similarity: 0.427)Required: 'but thats more about continuous learning than specific skills' ¡ú Best match: 'aws complete suite' (similarity: 0.252)Required: 'so i wont list that i think thats all now compiling everything into a comma-separated list think python' ¡ú Best match: 'python' (similarity: 0.526)Required: 'aws' ¡ú Best match: 'azure' (similarity: 0.473)Required: 'nlp' ¡ú Best match: 'python' (similarity: 0.492)
+Technical Skill Match Score (S1): 0.48
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.40
+Justification: The candidate has relevant experience in building web applications using Python and React, as well as expertise in cloud technologies such as AWS Lambda and API Gateway. However, their experience in machine learning concepts and NLP is limited, which is a requirement for the job. The candidate's skills in RESTful APIs and database design are also not entirely aligned with the job description.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.85
+Justification: The candidate's soft skills align well with the job requirements, particularly in excellent communication and collaboration abilities, strong problem-solving and analytical thinking, and leadership and mentoring capabilities. The resume highlights David Kim's ability to work independently and as part of a team through his experience in code reviews and agile development processes. Additionally, the candidate's certifications in AWS and Kubernetes demonstrate their adaptability and willingness to learn new technologies.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.48
+Experience Relevance (S2): 0.40
+Soft Skills (S3): 0.85
+Final Score: 1.73/3.00
+
+==================================================
+CANDIDATE 4: MICHAEL WILSON
+AGENT COMBINATION: A2 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+MICHAEL WILSON
+Software Engineering Manager
+michael.wilson@email.com | (555) 456-7890 | Seattle, WA | linkedin.com/in/michaelwilson
+U.S. Citizen
+
+SUMMARY
+Experienced engineering leader with 12+ years...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "Java",
+    "C#",
+    "React",
+    "Angular",
+    "Django",
+    "Spring Boot",
+    "AWS",
+    "Azure",
+    "Git",
+    "Jenkins",
+    "JIRA",
+    "Confluence",
+    "SQL Server",
+    "MySQL",
+    "MongoDB",
+    "Agile",
+    "Scrum",
+    "Kanban"
+  ],
+  "job_experience": [
+    {
+      "title": "Engineering Manager",
+      "company": "Enterprise Systems Inc.",
+      "duration": "Jan 2019 - Present",
+      "responsibilities": [
+        "Led team of 15 engineers developing enterprise SaaS platform used by 200+ corporations",
+        "Managed delivery of 4 major product releases annually with 99.9% uptime SLA",
+        "Established code quality processes improving stability and reducing bugs by 45%",
+        "Coordinated with product management to align technical roadmap with business objectives",
+        "Implemented agile methodologies improving team velocity by 30%"
+      ],
+      "technologies": [
+        "AWS",
+        "Azure",
+        "Git",
+        "Jenkins",
+        "JIRA",
+        "Confluence"
+      ]
+    },
+    {
+      "title": "Senior Software Engineer",
+      "company": "DataSoft Corp",
+      "duration": "Mar 2015 - Dec 2018",
+      "responsibilities": [
+        "Led development of distributed data processing pipeline handling 2TB daily",
+        "Architected migration from monolith to microservices architecture",
+        "Mentored junior engineers and conducted technical interviews",
+        "Implemented monitoring and alerting systems reducing incident response time by 60%"
+      ],
+      "technologies": [
+        "AWS"
+      ]
+    },
+    {
+      "title": "Software Engineer",
+      "company": "TechSolutions LLC",
+      "duration": "Jun 2011 - Feb 2015",
+      "responsibilities": [
+        "Developed web applications using JavaScript frameworks and RESTful APIs",
+        "Built reporting systems integrating data from multiple enterprise sources",
+        "Optimized SQL queries and database schemas improving application performance",
+        "Implemented automated testing frameworks to ensure code quality"
+      ],
+      "technologies": []
+    }
+  ],
+  "soft_skills": [
+    "Exceptional leadership and team management",
+    "Strong communication with technical and non-technical stakeholders",
+    "Strategic planning and roadmap development",
+    "Excellent conflict resolution and problem-solving",
+    "Mentoring and career development"
+  ],
+  "education_level": "Bachelor of Science in Computer Science, University of Washington (2011)"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think okay' ¡ú Best match: 'confluence' (similarity: 0.217)Required: 'so i need to extract all the technical skills required for this senior full-stack engineer position let me go through each section carefully first' ¡ú Best match: 'confluence' (similarity: 0.132)Required: 'looking at the responsibilities section it mentions python' ¡ú Best match: 'python' (similarity: 0.533)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'cloud technologies' ¡ú Best match: 'confluence' (similarity: 0.370)Required: 'apis with ml models' ¡ú Best match: 'confluence' (similarity: 0.266)Required: 'database designs sql and nosql' ¡ú Best match: 'sql server' (similarity: 0.359)Required: 'working with ml teams' ¡ú Best match: 'confluence' (similarity: 0.329)Required: 'leading initiatives' ¡ú Best match: 'confluence' (similarity: 0.274)Required: 'code reviews' ¡ú Best match: 'confluence' (similarity: 0.425)Required: 'troubleshooting production issues' ¡ú Best match: 'confluence' (similarity: 0.285)Required: 'and staying updated with tech trends so from here' ¡ú Best match: 'confluence' (similarity: 0.103)Required: 'i can note python' ¡ú Best match: 'python' (similarity: 0.668)Required: 'cloud platforms aws' ¡ú Best match: 'aws' (similarity: 0.515)Required: 'google cloud' ¡ú Best match: 'azure' (similarity: 0.468)Required: 'azure' ¡ú Best match: 'azure' (similarity: 1.000)Required: 'restful apis' ¡ú Best match: 'spring boot' (similarity: 0.446)Required: 'databases' ¡ú Best match: 'jenkins' (similarity: 0.347)Required: 'ml integration' ¡ú Best match: 'confluence' (similarity: 0.479)Required: 'devops' ¡ú Best match: 'jenkins' (similarity: 0.566)Required: 'cicd pipelines' ¡ú Best match: 'jenkins' (similarity: 0.464)Required: 'docker' ¡ú Best match: 'python' (similarity: 0.540)Required: 'kubernetes' ¡ú Best match: 'mongodb' (similarity: 0.578)Required: 'etc next' ¡ú Best match: 'confluence' (similarity: 0.308)Required: 'the required skills experience section is more detailed it lists 5 years in web dev with a focus on web apps' ¡ú Best match: 'django' (similarity: 0.182)Required: 'strong python and jsts' ¡ú Best match: 'jenkins' (similarity: 0.234)Required: 'modern frameworks like react' ¡ú Best match: 'react' (similarity: 0.629)Required: 'angular' ¡ú Best match: 'angular' (similarity: 1.000)Required: 'vuejs though only react is mentioned in responsibilities' ¡ú Best match: 'confluence' (similarity: 0.179)Required: 'building restful apis and databases sql and nosql again' ¡ú Best match: 'mongodb' (similarity: 0.251)Required: 'cloud platforms as before' ¡ú Best match: 'confluence' (similarity: 0.155)Required: 'cicd' ¡ú Best match: 'jenkins' (similarity: 0.545)Required: 'containerization docker and kubernetes' ¡ú Best match: 'spring boot' (similarity: 0.409)Required: 'basic ml concepts and nlp' ¡ú Best match: 'python' (similarity: 0.293)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'collaborative dev so i should include all these the nice to have section adds real-time data processing with kafka' ¡ú Best match: 'spring boot' (similarity: 0.316)Required: 'spark' ¡ú Best match: 'jenkins' (similarity: 0.416)Required: 'ml applications' ¡ú Best match: 'confluence' (similarity: 0.402)Required: 'graphql' ¡ú Best match: 'django' (similarity: 0.585)Required: 'serverless arch' ¡ú Best match: 'azure' (similarity: 0.185)Required: 'open-source contributions' ¡ú Best match: 'confluence' (similarity: 0.347)Required: 'security practices but since its nice to have' ¡ú Best match: 'confluence' (similarity: 0.175)Required: 'maybe not required but still worth noting if the user wants everything i need to make sure i include all these as comma-separated skills without any extra text think python' ¡ú Best match: 'python' (similarity: 0.518)Required: 'javascripttypescript' ¡ú Best match: 'javascript' (similarity: 0.540)Required: 'aws' ¡ú Best match: 'aws' (similarity: 1.000)Required: 'sql' ¡ú Best match: 'mysql' (similarity: 0.651)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.568)Required: 'machine learning' ¡ú Best match: 'python' (similarity: 0.427)Required: 'nlp' ¡ú Best match: 'python' (similarity: 0.492)Required: 'containerization' ¡ú Best match: 'jenkins' (similarity: 0.520)Required: 'web frameworks' ¡ú Best match: 'confluence' (similarity: 0.409)Required: 'api patterns' ¡ú Best match: 'confluence' (similarity: 0.473)Required: 'cloud platforms' ¡ú Best match: 'confluence' (similarity: 0.405)
+Technical Skill Match Score (S1): 0.45
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: The candidate's experience in leading teams and managing delivery of major product releases aligns with the responsibilities listed in the job description. Their expertise in AWS, Python, and agile methodologies also matches the required skills for the role. However, the lack of direct experience with cloud platforms like Google Cloud or Azure slightly reduces the overall score.
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.80
+Justification: 
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.45
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.80
+Final Score: 2.05/3.00
+
+==================================================
+CANDIDATE 5: RACHEL GARCIA
+AGENT COMBINATION: A2 + B2 + C + D
+==================================================
+
+RESUME EXCERPT:
+
+RACHEL GARCIA
+Product-Focused Developer
+rachel.garcia@email.com | (555) 567-8901 | Chicago, IL | linkedin.com/in/rachelgarcia
+U.S. Citizen
+
+SUMMARY
+Empathetic and collaborative developer with 5 years...
+
+Running Agent A2: Resume Parser...
+
+Parsed Resume Data:
+{
+  "technical_skills": [
+    "JavaScript",
+    "Python",
+    "HTML/CSS",
+    "SQL",
+    "React",
+    "Express.js",
+    "Bootstrap",
+    "Tailwind CSS",
+    "AWS (basic)",
+    "Netlify",
+    "Vercel",
+    "Git",
+    "Figma",
+    "Trello",
+    "Notion",
+    "PostgreSQL",
+    "MongoDB",
+    "Jest",
+    "Cypress",
+    "User testing methods"
+  ],
+  "job_experience": [
+    {
+      "title": "Frontend Engineer",
+      "company": "UserFirst Technologies",
+      "duration": "Apr 2020 - Present",
+      "responsibilities": [
+        "Collaborated closely with UX designers to implement pixel-perfect, accessible interfaces",
+        "Facilitated 20+ user research sessions to gather feedback and inform development priorities",
+        "Reduced customer support tickets by 35% through intuitive UI improvements",
+        "Presented technical concepts to non-technical stakeholders in clear, understandable terms",
+        "Mentored junior developers on user-centered development practices"
+      ],
+      "technologies": [
+        "JavaScript",
+        "React",
+        "HTML/CSS",
+        "AWS (basic)",
+        "Netlify",
+        "Vercel",
+        "Git",
+        "Figma"
+      ]
+    },
+    {
+      "title": "Full-Stack Developer",
+      "company": "WebSolutions Agency",
+      "duration": "Jul 2018 - Mar 2020",
+      "responsibilities": [
+        "Served as primary client liaison for 10+ projects, translating business needs into technical requirements",
+        "Built custom web applications with focus on exceptional user experience",
+        "Collaborated with cross-functional teams to ensure alignment between design and implementation",
+        "Implemented analytics tracking to measure user engagement and conversion metrics"
+      ],
+      "technologies": [
+        "JavaScript",
+        "React",
+        "HTML/CSS",
+        "PostgreSQL",
+        "MongoDB",
+        "Jest",
+        "Cypress"
+      ]
+    },
+    {
+      "title": "Customer Success Specialist",
+      "company": "TechStart Inc.",
+      "duration": "Jan 2017 - Jun 2018",
+      "responsibilities": [
+        "Onboarded and supported enterprise customers using technical products",
+        "Documented user pain points and collaborated with engineering to implement solutions",
+        "Created training materials and conducted webinars for product users"
+      ],
+      "technologies": []
+    }
+  ],
+  "soft_skills": [
+    "Outstanding verbal and written communication",
+    "Excellent client and stakeholder management",
+    "Strong empathy and active listening",
+    "Exceptional presentation and documentation skills",
+    "Highly collaborative team player with ability to work across departments",
+    "Creative problem-solving with focus on user needs"
+  ],
+  "education_level": "Bachelor of Arts in Communications | Northwestern University (2016) Full-Stack Web Development Bootcamp | Tech Academy Chicago (2017)"
+}
+
+Running Agent B2: Technical Skill Scorer...
+technical match details: Required: 'think alright' ¡ú Best match: 'user testing methods' (similarity: 0.378)Required: 'so im trying to figure out how to extract all the technical skills required for this senior full-stack engineer position lets break it down step by step first' ¡ú Best match: 'user testing methods' (similarity: 0.383)Required: 'ill start by looking at the job description itself the title is senior full-stack engineer' ¡ú Best match: 'user testing methods' (similarity: 0.284)Required: 'which tells me its a web development role with experience needed the company is innovateai inc' ¡ú Best match: 'user testing methods' (similarity: 0.362)Required: 'working on ai products' ¡ú Best match: 'user testing methods' (similarity: 0.578)Required: 'so that gives a hint about the technologies involved looking at the responsibilities section' ¡ú Best match: 'user testing methods' (similarity: 0.483)Required: 'the key tasks include designing and building scalable web applications using python' ¡ú Best match: 'user testing methods' (similarity: 0.346)Required: 'react' ¡ú Best match: 'react' (similarity: 1.000)Required: 'and cloud technologies so right off the bat' ¡ú Best match: 'user testing methods' (similarity: 0.384)Required: 'i can note down python' ¡ú Best match: 'python' (similarity: 0.565)Required: 'and cloud platforms like aws' ¡ú Best match: 'aws basic' (similarity: 0.433)Required: 'google cloud' ¡ú Best match: 'aws basic' (similarity: 0.452)Required: 'or azure as technical skills next' ¡ú Best match: 'user testing methods' (similarity: 0.352)Required: 'they mention developing efficient apis to support ml models and front-end apps that means api development is important' ¡ú Best match: 'user testing methods' (similarity: 0.425)Required: 'so i should include that also' ¡ú Best match: 'user testing methods' (similarity: 0.356)Required: 'integrating machine learning models implies a need for understanding ml concepts' ¡ú Best match: 'user testing methods' (similarity: 0.535)Required: 'but since the required skills section mentions python and javascripttypescript' ¡ú Best match: 'expressjs' (similarity: 0.359)Required: 'maybe the ml part is more about application rather than coding moving on' ¡ú Best match: 'user testing methods' (similarity: 0.487)Required: 'implementing and optimizing database designsso both sql and nosql databases are involved here thats another skill to add they also talk about working closely with ml teams' ¡ú Best match: 'user testing methods' (similarity: 0.267)Required: 'leading technical initiatives' ¡ú Best match: 'user testing methods' (similarity: 0.577)Required: 'mentoring juniors' ¡ú Best match: 'user testing methods' (similarity: 0.533)Required: 'code reviews' ¡ú Best match: 'user testing methods' (similarity: 0.577)Required: 'troubleshooting' ¡ú Best match: 'bootstrap' (similarity: 0.394)Required: 'and staying updated with tech trends these dont directly list specific skills but more about experience and processes looking at required skills experience' ¡ú Best match: 'user testing methods' (similarity: 0.292)Required: 'lets list them out - 5 years in software dev with web focus - strong python and jsts - modern frameworks react' ¡ú Best match: 'react' (similarity: 0.369)Required: 'angular' ¡ú Best match: 'bootstrap' (similarity: 0.468)Required: 'vuejs - restful apis and databases sqlnosql - cloud platforms like aws' ¡ú Best match: 'aws basic' (similarity: 0.397)Required: 'azure - cicd pipelines and devops practices - docker and kubernetes for containerization - basic ml concepts and nlp - git for version control nice to have includes real-time data processing kafka' ¡ú Best match: 'postgresql' (similarity: 0.278)Required: 'spark' ¡ú Best match: 'bootstrap' (similarity: 0.439)Required: 'ml applications' ¡ú Best match: 'user testing methods' (similarity: 0.614)Required: 'graphql' ¡ú Best match: 'expressjs' (similarity: 0.590)Required: 'serverless' ¡ú Best match: 'expressjs' (similarity: 0.459)Required: 'open-source contributions' ¡ú Best match: 'user testing methods' (similarity: 0.572)Required: 'and security these are optional but good to note if the company values them the education section is a bachelors in cs or related with practical experience as an equivalent soft skills like communication' ¡ú Best match: 'user testing methods' (similarity: 0.187)Required: 'problem-solving' ¡ú Best match: 'user testing methods' (similarity: 0.415)Required: 'leadership' ¡ú Best match: 'expressjs' (similarity: 0.359)Required: 'etc' ¡ú Best match: 'expressjs' (similarity: 0.250)Required: 'arent technical so i wont include those benefits dont add technical skills' ¡ú Best match: 'user testing methods' (similarity: 0.409)Required: 'so i can ignore that putting it all together' ¡ú Best match: 'user testing methods' (similarity: 0.447)Required: 'the required technical skills are python' ¡ú Best match: 'python' (similarity: 0.474)Required: 'javascripttypescript' ¡ú Best match: 'expressjs' (similarity: 0.648)Required: 'restful apis' ¡ú Best match: 'expressjs' (similarity: 0.533)Required: 'sql and nosql databases' ¡ú Best match: 'user testing methods' (similarity: 0.569)Required: 'cloud platforms aws' ¡ú Best match: 'aws basic' (similarity: 0.492)Required: 'azure' ¡ú Best match: 'bootstrap' (similarity: 0.436)Required: 'cicd' ¡ú Best match: 'expressjs' (similarity: 0.512)Required: 'docker' ¡ú Best match: 'python' (similarity: 0.540)Required: 'kubernetes' ¡ú Best match: 'postgresql' (similarity: 0.595)Required: 'git' ¡ú Best match: 'git' (similarity: 1.000)Required: 'machine learning conceptsnlp the nice-to-have ones arent mandatory but could be included if specified wait' ¡ú Best match: 'user testing methods' (similarity: 0.330)Required: 'in the responsibilities' ¡ú Best match: 'user testing methods' (similarity: 0.443)Required: 'they mention integrating ml models into the applications' ¡ú Best match: 'user testing methods' (similarity: 0.505)Required: 'so maybe thats part of their workflow also' ¡ú Best match: 'user testing methods' (similarity: 0.418)Required: 'the required skills include basic understanding of ml and nlp' ¡ú Best match: 'user testing methods' (similarity: 0.470)Required: 'so i should include those as well i think ive covered all the points now' ¡ú Best match: 'user testing methods' (similarity: 0.398)Required: 'just list them without any additional text think python' ¡ú Best match: 'python' (similarity: 0.582)Required: 'sql' ¡ú Best match: 'sql' (similarity: 1.000)Required: 'nosql' ¡ú Best match: 'mongodb' (similarity: 0.568)Required: 'aws' ¡ú Best match: 'expressjs' (similarity: 0.426)Required: 'machine learning concepts' ¡ú Best match: 'user testing methods' (similarity: 0.626)Required: 'nlp' ¡ú Best match: 'expressjs' (similarity: 0.544)
+Technical Skill Match Score (S1): 0.48
+
+Running Agent C: Experience Relevance Scorer...
+Experience Relevance Score (S2): 0.80
+Justification: 
+
+Running Agent D: Soft Skills Scorer...
+Soft Skills Score (S3): 0.87
+Justification: The candidate has excellent communication and collaboration skills, as evident from their experience in facilitating user research sessions, mentoring junior developers, and serving as primary client liaison for multiple projects. Their ability to work effectively in a fast-paced environment is also reflected in their experience with agile development methodologies and their leadership roles in team projects. While the job description highlights technical expertise, the candidate's strong problem-solving skills and adaptability are evident through their open-source contributions and continuous learning demonstrated by attending conferences and webinars.
+
+FINAL RESULTS:
+Technical Skill Match (S1): 0.48
+Experience Relevance (S2): 0.80
+Soft Skills (S3): 0.87
+Final Score: 2.15/3.00
+
+System Ranking: [5, 4, 2, 3, 1]
+Human Ranking:  [2, 3, 5, 4, 1]
+
+Exact Position Accuracy: 0.20
+Spearman Rank Correlation: 0.20
+
+==================================================
+FINAL COMPARISON OF AGENT COMBINATIONS
+==================================================
+
+   Rank   |    Combination     |   Exact Accuracy   |      Spearman      
+----------------------------------------------------------------------
+    1     |     A1+B1+C+D      |        0.40        |        0.70        
+    2     |     A1+B2+C+D      |        0.40        |        0.70        
+    3     |     A2+B1+C+D      |        0.20        |        0.20        
+    4     |     A2+B2+C+D      |        0.20        |        0.20        
+
+Best agent combination: A1+B1+C+D
+Exact position accuracy: 0.40
+Spearman correlation: 0.70
