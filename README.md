@@ -1,28 +1,3 @@
-# Multi-Agent Resume Scoring System
-
-A system that uses multiple specialized agents to evaluate resumes against job descriptions. This implementation uses LLaMA 3.2 via the Ollama API.
-
-## System Overview
-
-The system consists of four independent agents:
-
-1. **Agent A (Resume Parser)**: Extracts structured information from a plain text resume.
-2. **Agent B (Technical Skill Scorer)**: Evaluates how well the resume's technical skills match the job requirements.
-3. **Agent C (Experience Relevance Scorer)**: Assesses the relevance of the candidate's work experience.
-4. **Agent D (Soft Skills Scorer)**: Evaluates the candidate's soft skills.
-
-Each agent operates independently with its own LLM interface. The system aggregates scores from all agents to produce a final score.
-
-This system is designed with a fully decoupled, modular architecture where:
-
-- Each agent operates independently with its own LLM handler
-- No shared base classes or inheritance is used
-- LLM interfaces can be easily replaced per agent
-- Agents have clear, well-defined inputs and outputs
-- Each agent encapsulates its own LLM logic
-
-This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
-
 ## Architecture
 
 ![64a8eee158e3d15ab80b02f189ece38](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
@@ -83,6 +58,22 @@ The evaluation pipeline produces detailed output including:
  - System-generated ranking
  - Human expert ranking
  - Accuracy metrics
+
+### Dataset
+
+Define Agent Combinations
+Evaluate the following 4 combinations:
+
+combinations = [
+    ['A1', 'B1', 'C', 'D'],  # baseline
+    ['A2', 'B1', 'C', 'D'],  # change in prompt style
+    ['A1', 'B2', 'C', 'D'],  # change in LLM model
+    ['A2', 'B2', 'C', 'D'],  # change in both
+]
+
+Rank the agent combinations based on the accuracy and output the best combination. 
+
+
 
 
 ## Prerequisites
