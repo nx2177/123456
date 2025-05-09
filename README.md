@@ -26,12 +26,12 @@ This mimics real-world asynchronous collaboration between different intelligent 
 ### Performance Evaluation:
 
 1. Simulate 5 Diverse Candidate Resumes
-I've generated 5 candidate resumes with the specified distribution:
-Resume 1 (ALEX ZHANG): Clear mismatch - lacks US work authorization (requires sponsorship as noted in the job description) and is missing required technical skills (Python, JavaScript, React).
-Resume 2 (SARAH JOHNSON): Strong match - exceptional candidate with all required skills, appropriate experience, strong soft skills, and US citizenship.
-Resume 3 (DAVID KIM): Moderate match with strength in technical skills - has excellent technical skills but less leadership experience.
-Resume 4 (MICHAEL WILSON): Moderate match with strength in experience - has extensive management experience but fewer modern technical skills.
-Resume 5 (RACHEL GARCIA): Moderate match with strength in soft skills - excellent at communication and user-focused development but more limited technical depth.
+
+ - Resume 1 (ALEX ZHANG): Clear mismatch - lacks US work authorization (requires sponsorship as noted in the job description) and is missing required technical skills (Python, JavaScript, React).
+ - Resume 2 (SARAH JOHNSON): Strong match - exceptional candidate with all required skills, appropriate experience, strong soft skills, and US citizenship.
+ - Resume 3 (DAVID KIM): Moderate match with strength in technical skills - has excellent technical skills but less leadership experience.
+ - Resume 4 (MICHAEL WILSON): Moderate match with strength in experience - has extensive management experience but fewer modern technical skills.
+ - Resume 5 (RACHEL GARCIA): Moderate match with strength in soft skills - excellent at communication and user-focused development but more limited technical depth.
 
 
 3. Implemented Performance Evaluation Pipeline
@@ -65,10 +65,10 @@ Define Agent Combinations
 Evaluate the following 4 combinations:
 
 combinations = [
-    ['A1', 'B1', 'C', 'D'],  # baseline
-    ['A2', 'B1', 'C', 'D'],  # change in prompt style
-    ['A1', 'B2', 'C', 'D'],  # change in LLM model
-    ['A2', 'B2', 'C', 'D'],  # change in both
+   - ['A1', 'B1', 'C', 'D'],  # baseline
+   - ['A2', 'B1', 'C', 'D'],  # change in prompt style
+   - ['A1', 'B2', 'C', 'D'],  # change in LLM model
+   - ['A2', 'B2', 'C', 'D'],  # change in both
 ]
 
 Rank the agent combinations based on the accuracy and output the best combination. 
