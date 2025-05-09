@@ -15,6 +15,9 @@ Each agent operates independently with its own LLM interface. The system aggrega
 
 ## Architecture
 
+![64a8eee158e3d15ab80b02f189ece38](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
+
+
 This system is designed with a fully decoupled, modular architecture where:
 
 - Each agent operates independently with its own LLM handler
