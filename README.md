@@ -1,8 +1,8 @@
-# Multi-Agent Resume Scoring System
+## Architecture
 
-A system that uses multiple specialized agents to evaluate resumes against job descriptions. This implementation uses LLaMA 3.2 via the Ollama API.
+![64a8eee158e3d15ab80b02f189ece38](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
 
-## System Overview
+### Multi-agent Scoring System:
 
 The system consists of four independent agents:
 
@@ -12,8 +12,6 @@ The system consists of four independent agents:
 4. **Agent D (Soft Skills Scorer)**: Evaluates the candidate's soft skills.
 
 Each agent operates independently with its own LLM interface. The system aggregates scores from all agents to produce a final score.
-
-## Architecture
 
 This system is designed with a fully decoupled, modular architecture where:
 
@@ -25,11 +23,64 @@ This system is designed with a fully decoupled, modular architecture where:
 
 This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
 
+### Performance Evaluation:
+
+1. Simulate 5 Diverse Candidate Resumes
+
+ - Resume 1 (ALEX ZHANG): Clear mismatch - lacks US work authorization (requires sponsorship as noted in the job description) and is missing required technical skills (Python, JavaScript, React).
+ - Resume 2 (SARAH JOHNSON): Strong match - exceptional candidate with all required skills, appropriate experience, strong soft skills, and US citizenship.
+ - Resume 3 (DAVID KIM): Moderate match with strength in technical skills - has excellent technical skills but less leadership experience.
+ - Resume 4 (MICHAEL WILSON): Moderate match with strength in experience - has extensive management experience but fewer modern technical skills.
+ - Resume 5 (RACHEL GARCIA): Moderate match with strength in soft skills - excellent at communication and user-focused development but more limited technical depth.
+
+
+3. Implemented Performance Evaluation Pipeline
+
+- Single Resume Scorer Function: Refactored the original scoring logic into a reusable function that processes a single resume.
+
+- Ranking Accuracy Evaluator: Added a function to compare system rankings with human rankings using:
+  Exact position match accuracy
+  Spearman rank correlation coefficient (which considers relative positions)
+
+- Performance Evaluation Runner: Created a function that:
+  Processes all 5 candidate resumes
+  Scores each one using the multi-agent system
+
+ - Ranks candidates based on scores
+  Compares to predefined human expert rankings
+  Calculates and displays accuracy metrics
+
+
+
+4. Enhanced Output
+The evaluation pipeline produces detailed output including:
+ - Individual scores for each candidate
+ - System-generated ranking
+ - Human expert ranking
+ - Accuracy metrics
+
+### Dataset
+
+Define Agent Combinations
+Evaluate the following 4 combinations:
+
+combinations = [
+   - ['A1', 'B1', 'C', 'D'],  # baseline
+   - ['A2', 'B1', 'C', 'D'],  # change in prompt style (A1's prompt style is concise, A2's prompt style is detailed)
+   - ['A1', 'B2', 'C', 'D'],  # change in LLM model (B1 use llama3.2, B2 use deepseek-r1:8b)
+   - ['A2', 'B2', 'C', 'D'],  # change in both
+]
+
+Rank the agent combinations based on the accuracy and output the best combination. 
+
+
+
+
 ## Prerequisites
 
 - Python 3.8+
 - [Ollama](https://ollama.ai/) installed and running locally
-- LLaMA 3.2 model pulled in Ollama
+- LLaMA 3.2 and deepseek-r1:8b pulled in Ollama
 
 ## Setup
 
