@@ -1,110 +1,206 @@
 import json
 import re
-import requests
-
-class OllamaLLM:
-    """
-    LLM handler for Ollama API
-    """
-    def __init__(self, model="llama3.2:latest"):
-        self.model = model
-        self.api_url = "http://localhost:11434/api/generate"
-        
-    def query(self, prompt, system_prompt="", format_json=False):
-        """
-        Query the Ollama LLM API
-        
-        Args:
-            prompt (str): The prompt to send to the LLM
-            system_prompt (str): Optional system prompt
-            format_json (bool): Whether to request the output in JSON format
-            
-        Returns:
-            str: The response from the LLM
-        """
-        headers = {"Content-Type": "application/json"}
-        
-        if format_json:
-            if system_prompt:
-                system_prompt += " Your response MUST be valid JSON format only, with no additional text, no code block markers, and no explanation."
-            else:
-                system_prompt = "Your response MUST be valid JSON format only, with no additional text, no code block markers, and no explanation."
-            
-            # Add JSON format instructions to the prompt as well
-            prompt = f"{prompt}\n\nIMPORTANT: Respond with ONLY the JSON object. No introductions, explanations, or code block markers."
-        
-        data = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False
-        }
-        
-        if system_prompt:
-            data["system"] = system_prompt
-            
-        try:
-            response = requests.post(self.api_url, headers=headers, json=data)
-            response.raise_for_status()
-            response_text = response.json()["response"]
-            
-            # Clean the response if JSON is expected
-            if format_json:
-                # Remove code block markers if present
-                response_text = response_text.replace("```json", "").replace("```", "").strip()
-                
-                # Remove any text before the first { and after the last }
-                first_brace = response_text.find('{')
-                last_brace = response_text.rfind('}')
-                if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-                    response_text = response_text[first_brace:last_brace+1]
-            
-            return response_text
-            
-        except requests.exceptions.RequestException as e:
-            print(f"Error querying LLM: {e}")
-            return ""
-
+import numpy as np
+from typing import List, Dict, Tuple
+from gensim.models import Word2Vec
+from scipy.stats import norm
 
 class SoftSkillsScorer:
     """
-    Agent D: Score the candidate's soft skills
+    Agent D: Score the candidate's soft skills using Word2Vec embeddings
     """
-    def __init__(self, llm_model="llama3.2:latest"):
+    def __init__(self, llm_model=None, weights=None, word2vec_model=None, jd_embedding=None, structured_weights=None):
         """
         Initialize the soft skills scorer agent
         
         Args:
-            llm_model (str): The LLM model to use
+            llm_model (str): Unused parameter kept for backward compatibility
+            weights (List[float]): Optional pre-defined weights for scoring
+            word2vec_model (Word2Vec): Pre-computed Word2Vec model
+            jd_embedding (List[float]): Pre-computed job description embedding
+            structured_weights (Dict[str, float]): Dictionary mapping features to weights
         """
-        self.llm = OllamaLLM(model=llm_model)
+        self.word2vec_model = word2vec_model
+        self.weights = weights
+        self.jd_embedding = jd_embedding
+        self.structured_weights = structured_weights
+        
+        # Common soft skills we'll look for
+        self.common_soft_skills = [
+            "communication", "teamwork", "leadership", "problem-solving", "adaptability",
+            "time management", "conflict resolution", "creativity", "emotional intelligence",
+            "critical thinking", "decision making", "negotiation", "presentation", "interpersonal",
+            "organization", "flexibility", "collaboration", "customer service", "mentoring",
+            "initiative", "analytical"
+        ]
     
-    def _extract_json_from_text(self, text):
+    def initialize_word2vec_model(self, job_description, resume):
         """
-        Extract JSON from text that might contain extra content
+        Initialize Word2Vec model based on job description and resume if not already provided
         
         Args:
-            text (str): Text that might contain JSON
+            job_description (str): The job description text
+            resume (str): The resume text
             
         Returns:
-            dict: Extracted JSON as dict or empty dict if not found
+            None
         """
-        # Try to find JSON-like content enclosed in braces
-        json_pattern = r'\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\}))*\}))*\}'
-        json_matches = re.findall(json_pattern, text)
+        # Skip initialization if model was provided in constructor
+        if self.word2vec_model is not None:
+            return
+            
+        # Combine both texts
+        combined_text = job_description + " " + resume
         
-        if json_matches:
-            # Try each match until we find valid JSON
-            for potential_json in json_matches:
-                try:
-                    return json.loads(potential_json)
-                except json.JSONDecodeError:
-                    continue
+        # Tokenize combined text
+        sentences = [re.findall(r'\w+', combined_text.lower())]
         
-        return {}
+        # Train Word2Vec model
+        self.word2vec_model = Word2Vec(sentences, vector_size=100, window=5, min_count=1, workers=4)
+    
+    def extract_soft_skills(self, text):
+        """
+        Extract soft skills from text using keyword matching
+        
+        Args:
+            text (str): Text to extract skills from
+            
+        Returns:
+            list: List of identified soft skills
+        """
+        text = text.lower()
+        found_skills = []
+        
+        for skill in self.common_soft_skills:
+            if skill in text or skill.replace('-', ' ') in text:
+                found_skills.append(skill)
+                
+        return found_skills
+    
+    def get_word2vec_embedding(self, text: str) -> List[float]:
+        """
+        Get Word2Vec embedding for text
+        
+        Args:
+            text (str): The text to get embedding for
+            
+        Returns:
+            List[float]: Embedding vector
+        """
+        # Split the text into individual words
+        words = text.lower().split()
+        
+        # Get embeddings for words that are in the model's vocabulary
+        word_vectors = []
+        for word in words:
+            if word in self.word2vec_model.wv:
+                word_vectors.append(self.word2vec_model.wv[word])
+        
+        # If no word vectors were found, return a zero vector
+        if not word_vectors:
+            return np.zeros(self.word2vec_model.vector_size)
+        
+        # Average the word vectors to get a text vector
+        text_vector = np.mean(word_vectors, axis=0)
+        return text_vector.tolist()
+    
+    def compute_cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """
+        Compute cosine similarity between two vectors
+        
+        Args:
+            vec1 (List[float]): First vector
+            vec2 (List[float]): Second vector
+            
+        Returns:
+            float: Cosine similarity between 0 and 1
+        """
+        if not vec1 or not vec2:
+            return 0.0
+            
+        # Convert to numpy arrays
+        vec1 = np.array(vec1)
+        vec2 = np.array(vec2)
+        
+        # Compute cosine similarity
+        dot_product = np.dot(vec1, vec2)
+        norm_product = np.linalg.norm(vec1) * np.linalg.norm(vec2)
+        
+        if norm_product == 0:
+            return 0.0
+            
+        similarity = dot_product / norm_product
+        
+        # Cap between 0 and 1
+        return max(0.0, min(1.0, similarity))
+    
+    def generate_gaussian_weights(self, n: int) -> List[float]:
+        """
+        Generate Gaussian distributed weights with mean=1 and variance=0.05
+        
+        Args:
+            n (int): Number of weights to generate
+            
+        Returns:
+            List[float]: List of weights
+        """
+        # Use pre-defined weights if available
+        if self.weights is not None:
+            return self.weights[:n] if len(self.weights) >= n else self.weights + [1.0] * (n - len(self.weights))
+            
+        # If structured weights are available, use them
+        if self.structured_weights is not None:
+            # Create a list that has consistent ordering with match_scores
+            return list(self.structured_weights.values())[:n]
+            
+        mean = 1.0
+        variance = 0.05
+        std_dev = np.sqrt(variance)
+        
+        # Generate weights from Gaussian distribution
+        weights = np.random.normal(mean, std_dev, n)
+        
+        # Ensure all weights are positive
+        weights = np.maximum(weights, 0.1)
+        
+        return weights.tolist()
+    
+    def get_feature_weight(self, feature_name, default_weight=1.0):
+        """
+        Get weight for a specific feature from structured weights
+        
+        Args:
+            feature_name (str): The feature to get weight for
+            default_weight (float): Default weight if not found
+            
+        Returns:
+            float: Weight value
+        """
+        if self.structured_weights and feature_name in self.structured_weights:
+            return self.structured_weights[feature_name]
+        return default_weight
+    
+    def get_embeddings_for_sections(self, sections):
+        """
+        Get embeddings for a list of text sections
+        
+        Args:
+            sections (List[str]): List of text sections
+            
+        Returns:
+            List[List[float]]: List of embedding vectors
+        """
+        embeddings = []
+        for section in sections:
+            embedding = self.get_word2vec_embedding(section)
+            # Check if embedding exists and is not all zeros
+            if isinstance(embedding, list) or (isinstance(embedding, np.ndarray) and np.any(embedding)):
+                embeddings.append(embedding)
+        return embeddings
     
     def process(self, resume_text, job_description):
         """
-        Evaluate soft skills evidence in the resume compared to job requirements
+        Evaluate soft skills evidence in the resume compared to job requirements using Word2Vec
         
         Args:
             resume_text (str): The full resume text
@@ -113,79 +209,100 @@ class SoftSkillsScorer:
         Returns:
             tuple: (score, justification) where score is between 0 and 1
         """
-        system_prompt = """
-        You are a specialized HR analyst who evaluates soft skills in resumes.
-        Soft skills include communication, teamwork, leadership, problem-solving, adaptability,
-        time management, conflict resolution, creativity, emotional intelligence, etc.
+        # Initialize Word2Vec model if not already provided
+        if self.word2vec_model is None:
+            self.initialize_word2vec_model(job_description, resume_text)
         
-        Your task is to:
-        1. Identify soft skills required in the job description
-        2. Find evidence of these skills in the resume
-        3. Evaluate how well the candidate's soft skills match the job requirements
-        4. Provide a score between 0.0 (no match) and 1.0 (perfect match)
-        5. Justify your score with specific examples from the resume
-        """
+        # Extract soft skills from job description and resume
+        job_soft_skills = self.extract_soft_skills(job_description)
+        resume_soft_skills = self.extract_soft_skills(resume_text)
         
-        prompt = f"""
-        Please analyze the following resume and job description to evaluate the candidate's soft skills.
-        
-        RESUME:
-        {resume_text}
-        
-        JOB DESCRIPTION:
-        {job_description}
-        
-        Provide your assessment as a JSON with two fields:
-        1. "score": a number between 0.0 and 1.0
-        2. "justification": 2-3 sentences explaining your reasoning with specific examples from the resume
-        """
-        
-        try:
-            # First attempt with format_json flag
-            response = self.llm.query(prompt, system_prompt, format_json=True)
+        if not job_soft_skills:
+            return 0.5, "No specific soft skills identified in job description."
             
-            # Try to parse the response as JSON
-            try:
-                result = json.loads(response)
-            except json.JSONDecodeError:
-                # If direct parsing fails, try to extract JSON from the response
-                result = self._extract_json_from_text(response)
+        # Get embeddings for job description sections
+        job_sections = job_description.split('\n\n')
+        job_section_embeddings = self.get_embeddings_for_sections(job_sections)
+        
+        # Get embeddings for resume sections
+        resume_sections = resume_text.split('\n\n')
+        resume_section_embeddings = self.get_embeddings_for_sections(resume_sections)
+                  
+        # Calculate similarities between each job section and resume sections
+        similarities = []
+        matched_sections = []
+        
+        for i, job_emb in enumerate(job_section_embeddings):
+            best_sim = 0.0
+            best_idx = -1
+            
+            for j, resume_emb in enumerate(resume_section_embeddings):
+                sim = self.compute_cosine_similarity(job_emb, resume_emb)
+                if sim > best_sim:
+                    best_sim = sim
+                    best_idx = j
+            
+            if best_idx >= 0:
+                similarities.append(best_sim)
+                matched_sections.append((job_sections[i][:50] + "...", resume_sections[best_idx][:50] + "..."))
+        
+        if not similarities:
+            return 0.5, "Unable to compute similarity between job and resume sections."
+        
+        # Calculate weighted average similarity
+        weighted_sum = 0.0
+        total_weight = 0.0
+        
+        justification = "Soft skills assessment: "
+        matched_skills = []
+        
+        # Handle potential size mismatch between job_soft_skills and similarities
+        # Since similarities are based on job sections, not directly on soft skills
+        if len(similarities) > 0:
+            # Generate weights for each similarity score
+            weights = self.generate_gaussian_weights(len(similarities))
+            
+            for i, similarity in enumerate(similarities):
+                # Use a default weight if not enough weights
+                weight_idx = min(i, len(weights)-1) if weights else 0
+                weight = weights[weight_idx]
                 
-                # If still no valid JSON, make a second attempt with stronger instructions
-                if not result:
-                    stronger_prompt = f"""
-                    Evaluate the candidate's soft skills against the job description requirements.
+                # If structured weights are available, try to apply them
+                if self.structured_weights:
+                    # Apply weights to similarity scores based on sections
+                    section_content = matched_sections[i][0] if i < len(matched_sections) else ""
                     
-                    RESUME:
-                    {resume_text}
-                    
-                    JOB DESCRIPTION:
-                    {job_description}
-                    
-                    Return ONLY a valid JSON object with exactly these two fields:
-                    {{
-                        "score": 0.0 to 1.0,
-                        "justification": "Your 2-3 sentence explanation here with examples"
-                    }}
-                    """
-                    response = self.llm.query(stronger_prompt, system_prompt, format_json=True)
-                    try:
-                        result = json.loads(response)
-                    except json.JSONDecodeError:
-                        result = self._extract_json_from_text(response)
-            
-            # Ensure we have valid score and justification
-            if not result or "score" not in result:
-                return 0.5, "Unable to generate proper justification due to technical issues."
+                    # Check if any soft skill appears in this section
+                    for skill in job_soft_skills:
+                        if skill.lower() in section_content.lower():
+                            weight = self.get_feature_weight(skill, weight)
+                            break
                 
-            score = float(result.get("score", 0.5))
-            # Cap score between 0 and 1
-            score = max(0.0, min(score, 1.0))
-            justification = result.get("justification", "No justification provided.")
+                weighted_sum += weight * similarity
+                total_weight += weight
+                
+                # Track matched skills for justification
+                if similarity >= 0.6:
+                    # Find soft skills in this section
+                    for skill in job_soft_skills:
+                        if skill not in matched_skills and skill.lower() in matched_sections[i][0].lower():
+                            matched_skills.append(skill)
+        
+        # Directly identified soft skills (exact matches)
+        direct_matches = [skill for skill in resume_soft_skills if skill in job_soft_skills]
+        for skill in direct_matches:
+            if skill not in matched_skills:
+                matched_skills.append(skill)
+        
+        # Calculate final score
+        score = weighted_sum / total_weight if total_weight > 0 else 0.5
+        
+        # Complete justification
+        if matched_skills:
+            justification += f"Found evidence of {len(matched_skills)} soft skills: {', '.join(matched_skills)}. "
+        else:
+            justification += "Limited evidence of required soft skills. "
             
-            return score, justification
-            
-        except Exception as e:
-            print(f"Error in soft skills scoring: {str(e)}")
-            # Return default values if there's an issue
-            return 0.5, "Unable to generate proper justification due to technical issues." 
+        justification += f"Overall soft skills score: {score:.2f}/1.00"
+        
+        return score, justification 
