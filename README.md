@@ -67,7 +67,6 @@ This system is designed with a fully decoupled, modular architecture where:
 - Each agent encapsulates its own LLM logic
 
 This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
-Each resume passes through a **multi-agent scoring pipeline**, with each agent evaluating a specific dimension:
 
 ---
 
