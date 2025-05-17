@@ -1,9 +1,3 @@
-## Architecture
-
-![64a8eee158e3d15ab80b02f189ece38](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
-
-### Multi-agent Scoring System:
-
 # Resume Scoring System
 
 A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
