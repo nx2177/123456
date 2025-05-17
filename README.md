@@ -91,8 +91,7 @@ Each weight dictionary is stored like:
   "id": "B2",
   "weights": {
     "Python": 0.92,
-    "JavaScript": 0.76,
-    ...
+    "JavaScript": 0.76,...
   }
 }
 ```
