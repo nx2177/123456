@@ -1,15 +1,17 @@
-# Resume Scoring System
+# Overview
+Stochastic Multi-Agent Combination Evaluation System which is LLM-Augmented and Embedding-Based.
 
-A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
 
 ## Architecture
 
-The Resume Scoring System implements a decoupled multi-agent architecture with four specialized agents:
+Here is a top-to-bottom break down of the whole architecture:
+![652039592b15a490e9542dd569b32b3](https://github.com/user-attachments/assets/a8d13a24-f344-4c68-8b98-964b3cce0522)
+![0863491170193dbc870f356610cc0ca](https://github.com/user-attachments/assets/daebc9dc-4f20-423a-bd10-b4762e1476e1)
 
-![Resume Scoring System Architecture](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
 
 ### Multi-agent Scoring System:
 
+A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
 The system consists of four independent agents that analyze different aspects of resume-job matching:
 
 1. **Agent A (Resume Parser)**: Extracts structured information from a plain text resume.
