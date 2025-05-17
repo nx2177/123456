@@ -102,23 +102,26 @@ Each weight dictionary is stored like:
 
 * Each agent processes the resume and outputs a score.
 * The scores are aggregated into a final ranking of all candidates.
-* This ranking is compared to a **predefined human-evaluated ground truth ranking** (e.g., `[1, 3, 2, 4, 5]`).
+* This ranking is compared to a **predefined human-evaluated ground truth ranking** (e.g., `[2,4,3,5,1]`).
+Note: the human-evaluated groud truth is also simulated by Claude.
 
 ---
 
 ### 🎯 **5. Evaluation Metric**
 
-* The system uses **Top-3 Set Accuracy**:
+* The system uses **Accuracy**:
 
-  * It compares the top-3 system-ranked resumes with the top-3 from the human ranking.
-  * Accuracy = proportion of overlap between the two sets (ignoring order).
+  * It compares the system ranking with the human ranking.
+  * Accuracy: 
+    - Exact position match accuracy
+    - Spearman rank correlation coefficient (which considers relative positions)
 
 ---
 
 ### 🧪 **6. Combination Evaluation**
 
 * Each agent category (B, C, D) has multiple variants (e.g., B1–B5, C1–C5…).
-* The system evaluates **all possible combinations** (e.g., \[B1, C2, D3]) by running them through the pipeline and recording the resulting accuracy.
+* The system evaluates **all possible combinations** (e.g.[B1, C2, D3]) by running them through the pipeline and recording the resulting accuracy.
 * Results are sorted and ranked by performance.
 
 ---
@@ -384,107 +387,9 @@ If you use this system in your research, please cite:
 
 ```
 @software{resume_scoring_system,
-  author = {Your Name},
+  author = {Nan Xiao (nx2177)},
   title = {Resume Scoring System},
-  year = {2023},
-  url = {https://github.com/yourusername/resume_scoring_system}
+  year = {2025},
+  url = {https://github.com/nx2177/123456}
 }
 ```
-
-
-
-
-------------
-Original:
-
-
-
-
-### Performance Evaluation:
-
-1. Simulate 5 Diverse Candidate Resumes
-
- - Resume 1 (ALEX ZHANG): Clear mismatch - lacks US work authorization (requires sponsorship as noted in the job description) and is missing required technical skills (Python, JavaScript, React).
- - Resume 2 (SARAH JOHNSON): Strong match - exceptional candidate with all required skills, appropriate experience, strong soft skills, and US citizenship.
- - Resume 3 (DAVID KIM): Moderate match with strength in technical skills - has excellent technical skills but less leadership experience.
- - Resume 4 (MICHAEL WILSON): Moderate match with strength in experience - has extensive management experience but fewer modern technical skills.
- - Resume 5 (RACHEL GARCIA): Moderate match with strength in soft skills - excellent at communication and user-focused development but more limited technical depth.
-
-
-3. Implemented Performance Evaluation Pipeline
-
-- Single Resume Scorer Function: Refactored the original scoring logic into a reusable function that processes a single resume.
-
-- Ranking Accuracy Evaluator: Added a function to compare system rankings with human rankings using:
-  Exact position match accuracy
-  Spearman rank correlation coefficient (which considers relative positions)
-
-- Performance Evaluation Runner: Created a function that:
-  Processes all 5 candidate resumes
-  Scores each one using the multi-agent system
-
- - Ranks candidates based on scores
-  Compares to predefined human expert rankings
-  Calculates and displays accuracy metrics
-
-
-
-4. Enhanced Output
-The evaluation pipeline produces detailed output including:
- - Individual scores for each candidate
- - System-generated ranking
- - Human expert ranking
- - Accuracy metrics
-
-### Dataset
-
-Define Agent Combinations
-Evaluate the following 4 combinations:
-
-combinations = [
-   - ['A1', 'B1', 'C', 'D'],  # baseline
-   - ['A2', 'B1', 'C', 'D'],  # change in prompt style (A1's prompt style is concise, A2's prompt style is detailed)
-   - ['A1', 'B2', 'C', 'D'],  # change in LLM model (B1 use llama3.2, B2 use deepseek-r1:8b)
-   - ['A2', 'B2', 'C', 'D'],  # change in both
-]
-
-Rank the agent combinations based on the accuracy and output the best combination. 
-
-
-
-
-
-   ```
-
-The system will:
-1. Generate a sample resume and job description
-2. Parse the resume using Agent A
-3. Evaluate technical skills match using Agent B
-4. Assess experience relevance using Agent C
-5. Evaluate soft skills using Agent D
-6. Calculate and display the final score
-
-## Customization
-
-To use your own resume and job description, modify the `main.py` file to read from files instead of using the sample generator.
-
-To replace an LLM implementation for a specific agent, simply modify the LLM handler class within that agent's file.
-
-## Implementation Details
-
-- `agents/parser.py`: Agent A implementation with its own LLM handler
-- `agents/technical_scorer.py`: Agent B implementation with its own LLM handler
-- `agents/experience_scorer.py`: Agent C implementation with its own LLM handler
-- `agents/soft_skills_scorer.py`: Agent D implementation with its own LLM handler
-- `utils/data_generator.py`: Generates sample data for testing
-- `main.py`: Orchestrates the system by calling each agent sequentially
-
-## Note
-
-This system demonstrates a fully decoupled multi-agent architecture. In a production environment, you might want to:
-1. Implement error handling and logging
-2. Add validation for input/output
-3. Optimize prompts for better extraction and evaluation
-4. Implement caching to reduce API calls
-5. Add additional agents for more specialized evaluations
-
