@@ -11,6 +11,8 @@ Here is a top-to-bottom break down of the whole architecture:
   
 ### 🗂️ **1. Input: Resume & Job Description Simulation**
 
+Simulate 5 candidate resumes and 1 job description using Claude.
+
 * **5 candidate resumes** are simulated for each evaluation run:
 
   * 1 strong match
