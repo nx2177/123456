@@ -8,8 +8,19 @@ Here is a top-to-bottom break down of the whole architecture:
 ![652039592b15a490e9542dd569b32b3](https://github.com/user-attachments/assets/a8d13a24-f344-4c68-8b98-964b3cce0522)
 ![0863491170193dbc870f356610cc0ca](https://github.com/user-attachments/assets/daebc9dc-4f20-423a-bd10-b4762e1476e1)
 
+  
+### 🗂️ **1. Input: Resume & Job Description Simulation**
 
-### Multi-agent Scoring System:
+* **5 candidate resumes** are simulated for each evaluation run:
+
+  * 1 strong match
+  * 3 moderate matches with varied strengths
+  * 1 clear mismatch (fails a hard requirement)
+* A **job description (JD)** is also simulated, containing structured expectations like required skills, experience, and soft qualities.
+
+---
+
+### 🧑‍🤝‍🧑 **2. Multi-agent Scoring System**
 
 A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
 The system consists of four independent agents that analyze different aspects of resume-job matching:
@@ -34,6 +45,13 @@ The system consists of four independent agents that analyze different aspects of
    - Identifies communication, teamwork, and other soft skills
    - Structured weights for different soft skill categories
 
+| Agent | Role                           | Input       | Output                                               |
+| ----- | ------------------------------ | ----------- | ---------------------------------------------------- |
+| **A** | Parsing agent                  | Resume + JD | Parsed data (e.g., extracted skills, experience)     |
+| **B** | Technical skill evaluator      | Parsed data | Technical skill score                                |
+| **C** | Job experience evaluator       | Parsed data | Experience score                                     |
+| **D** | Soft skills evaluator / Ranker | Parsed data | Soft skill score                                     |
+
 Note: Each agent operates independently with its own interface. The system aggregates scores from all agents to produce a final score.
 
 This system is designed with a fully decoupled, modular architecture where:
@@ -45,28 +63,9 @@ This system is designed with a fully decoupled, modular architecture where:
 - Each agent encapsulates its own LLM logic
 
 This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
-  
-### 🗂️ **1. Input: Resume & Job Description Simulation**
-
-* **5 candidate resumes** are simulated for each evaluation run:
-
-  * 1 strong match
-  * 3 moderate matches with varied strengths
-  * 1 clear mismatch (fails a hard requirement)
-* A **job description (JD)** is also simulated, containing structured expectations like required skills, experience, and soft qualities.
-
----
-
-### 🧑‍🤝‍🧑 **2. Agent Pipeline (A → B → C → D)**
-
 Each resume passes through a **multi-agent scoring pipeline**, with each agent evaluating a specific dimension:
 
-| Agent | Role                           | Input       | Output                                               |
-| ----- | ------------------------------ | ----------- | ---------------------------------------------------- |
-| **A** | Parsing agent                  | Resume + JD | Structured info (e.g., extracted skills, experience) |
-| **B** | Technical skill evaluator      | Parsed data | Technical skill score                                |
-| **C** | Job experience evaluator       | Parsed data | Experience score                                     |
-| **D** | Soft skills evaluator / Ranker | Parsed data | Final soft skill score or ranked decision            |
+
 
 > 🔹 Agent **A** is a pure parser — it **does not** use or store any weights.
 
