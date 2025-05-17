@@ -70,9 +70,9 @@ This mimics real-world asynchronous collaboration between different intelligent 
 
 ---
 
-### ⚖️ **3. Agent Weights**
+### ⚖️ **3. Stochastic Agent Weights**
 
-Agents B, C, and D each use a **custom weight vector** to evaluate their respective domain:
+Agents B, C, and D each use a **stochastic weight vector** to evaluate their respective domain:
 
 * Agent **B**’s weights: importance of technical skills (e.g., Python: 0.9, Java: 0.7)
 * Agent **C**’s weights: importance of job experience features (e.g., YearsExperience: 0.8)
@@ -80,9 +80,9 @@ Agents B, C, and D each use a **custom weight vector** to evaluate their respect
 
 Weights are:
 
-* Sampled once (e.g., from Gaussian distributions)
+* Sampled at the beginning, from i.i.d. Gaussian distributions.
 * Saved in a structured `weights.json` file
-* Reused across all evaluations to ensure **deterministic and reproducible results**
+* Can be reused across all evaluations to ensure **deterministic and reproducible results**
 
 Each weight dictionary is stored like:
 
