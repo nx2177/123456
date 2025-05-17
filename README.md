@@ -54,6 +54,8 @@ The system consists of four independent agents that analyze different aspects of
 | **C** | Job experience evaluator       | Parsed data | Experience score                                     |
 | **D** | Soft skills evaluator / Ranker | Parsed data | Soft skill score                                     |
 
+> 🔹 Agent **A** is a pure parser — it **does not** use or store any weights.
+
 Note: Each agent operates independently with its own interface. The system aggregates scores from all agents to produce a final score.
 
 This system is designed with a fully decoupled, modular architecture where:
@@ -66,10 +68,6 @@ This system is designed with a fully decoupled, modular architecture where:
 
 This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
 Each resume passes through a **multi-agent scoring pipeline**, with each agent evaluating a specific dimension:
-
-
-
-> 🔹 Agent **A** is a pure parser — it **does not** use or store any weights.
 
 ---
 
