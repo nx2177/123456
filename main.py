@@ -12,21 +12,22 @@ from agents.technical_scorer import TechnicalSkillScorer as AgentB
 from agents.experience_scorer import ExperienceRelevanceScorer as AgentC
 from agents.soft_skills_scorer import SoftSkillsScorer as AgentD
 from utils.data_generator import generate_sample_job_description, generate_candidate_resumes
-import umap
-import hdbscan
 from collections import defaultdict
+from matplotlib.colors import LinearSegmentedColormap
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 # Configuration for number of agents in each category
 n_A = 1  # Number of Agent A instances
-n_B = 20  # Number of Agent B instances
-n_C = 20  # Number of Agent C instances
-n_D = 20  # Number of Agent D instances
+n_B = 10  # Number of Agent B instances
+n_C = 10 # Number of Agent C instances
+n_D = 10  # Number of Agent D instances
 
 # Weights and embedding configuration
 WEIGHTS_FILE = "weights.json"
 EMBEDDING_DIM = 100  # Dimension for Word2Vec embeddings
 WEIGHT_MEAN = 1.0    # Mean of Gaussian distribution
-WEIGHT_VARIANCE = 1.0  # Variance of Gaussian distribution
+WEIGHT_VARIANCE = 10000.0  # Variance of Gaussian distribution
 WORD2VEC_WINDOW = 5  # Window size for Word2Vec model
 WORD2VEC_MIN_COUNT = 1  # Minimum count for Word2Vec model
 
@@ -356,39 +357,39 @@ def score_single_resume_with_agents(
     
     return final_score, parsed_resume
 
-def evaluate_ranking_accuracy(system_ranking, human_ranking):
+def evaluate_ranking_accuracy(system_ranking, human_ranking, scores):
     """
-    Calculate the accuracy of the system ranking compared to human ranking
+    Calculate the accuracy of the system ranking compared to human ranking using linear regression
     
     Args:
         system_ranking (list): System's ranking of candidates
         human_ranking (list): Human's ranking of candidates
+        scores (list): System-generated scores for each resume
         
     Returns:
         dict: Accuracy metrics
     """
-    # Calculate the number of correct positions
-    correct_positions = sum(1 for s, h in zip(system_ranking, human_ranking) if s == h)
-    
-    # Calculate accuracy
-    accuracy = correct_positions / len(human_ranking)
-    
-    # Calculate Spearman rank correlation
-    system_ranks = {candidate: rank for rank, candidate in enumerate(system_ranking)}
-    human_ranks = {candidate: rank for rank, candidate in enumerate(human_ranking)}
-    
+    # Get the number of resumes
     n = len(human_ranking)
     
-    # Calculate sum of squared differences in ranks
-    sum_squared_diff = sum((system_ranks[candidate] - human_ranks[candidate])**2 
-                          for candidate in range(1, n+1))
+    # Create x values as position numbers (1 to n)
+    x = [0.01, 0.02, 0.03, 0.04, 0.05]
     
-    # Calculate Spearman's rank correlation coefficient
-    spearman_corr = 1 - (6 * sum_squared_diff) / (n * (n**2 - 1))
+    # Create y values as scores corresponding to human ranking
+    # For each position in human ranking, get the corresponding resume's score
+    y = []
+    score_map = {candidate: score for candidate, score in enumerate(scores, 1)}
+    for candidate in human_ranking:
+        y.append(score_map[candidate])
+    
+    # Fit linear regression
+    slope, intercept = np.polyfit(x, y, 1)
+    
+    # Calculate accuracy as negative slope
+    accuracy = -slope
     
     return {
-        "exact_match_accuracy": accuracy,
-        "spearman_correlation": spearman_corr
+        "accuracy": accuracy
     }
 
 def run_evaluation_for_combination(agents_combination, resumes, job_description, human_ranking):
@@ -444,197 +445,26 @@ def run_evaluation_for_combination(agents_combination, resumes, job_description,
     system_ranking = [i+1 for i in ranked_indices]
     
     # Calculate accuracy
-    accuracy_metrics = evaluate_ranking_accuracy(system_ranking, human_ranking)
+    accuracy_metrics = evaluate_ranking_accuracy(system_ranking, human_ranking, scores)
     
     # Log the rankings and accuracy to the log file
     logger.log(f"\nSystem Ranking: {system_ranking}")
     logger.log(f"Human Ranking:  {human_ranking}")
-    logger.log(f"\nExact Position Accuracy: {accuracy_metrics['exact_match_accuracy']:.2f}")
-    logger.log(f"Spearman Rank Correlation: {accuracy_metrics['spearman_correlation']:.2f}")
+    logger.log(f"\nAccuracy (negative slope): {accuracy_metrics['accuracy']:.4f}")
     
     return {
         "combination": combination_name,
         "scores": scores,
         "system_ranking": system_ranking,
         "human_ranking": human_ranking,
-        "accuracy": accuracy_metrics,
+        "accuracy": accuracy_metrics['accuracy'],
         "agents": {
             "A": agent_A_id,
             "B": agent_B_id,
             "C": agent_C_id,
             "D": agent_D_id
-        },
-        "spearman": accuracy_metrics["spearman_correlation"],
-        "exact_accuracy": accuracy_metrics["exact_match_accuracy"]
-    }
-
-def visualize_agent_weights(agent_type, weights_data, agent_performance):
-    """
-    Visualize agent weights using UMAP + HDBSCAN
-    
-    Args:
-        agent_type (str): Agent type (B, C or D)
-        weights_data (dict): Dictionary containing agent weights
-        agent_performance (dict): Dictionary mapping agent ID to performance metrics
-        
-    Returns:
-        tuple: (umap_embedding, clusters, performance_data)
-    """
-    # Create directory for visualizations if it doesn't exist
-    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-    
-    # Extract features and weights for this agent type
-    data = []
-    agent_ids = []
-    
-    for agent_data in weights_data[agent_type]:
-        agent_id = f"{agent_type}{agent_data['id']}"
-        agent_ids.append(agent_id)
-        # Extract weights values as a flat vector
-        weights_flat = list(agent_data["weights"].values())
-        data.append(weights_flat)
-    
-    # Convert to numpy array
-    X = np.array(data)
-    
-    # Skip if we don't have enough data points
-    if len(X) < 2:
-        logger.log(f"Not enough {agent_type} agents for clustering (need at least 2)")
-        return None, None, None
-    
-    # Apply UMAP dimension reduction
-    reducer = umap.UMAP(n_components=2, random_state=42)
-    embedding = reducer.fit_transform(X)
-    
-    # Apply HDBSCAN clustering
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=2, gen_min_span_tree=True)
-    try:
-        cluster_labels = clusterer.fit_predict(embedding)
-    except Exception as e:
-        logger.log(f"Clustering failed for {agent_type} agents: {str(e)}")
-        cluster_labels = np.zeros(len(embedding))  # Default to all zero labels
-    
-    # Create dataframe with results
-    performance_data = []
-    
-    for i, agent_id in enumerate(agent_ids):
-        avg_accuracy = agent_performance.get(agent_id, {}).get("avg_accuracy", 0)
-        avg_spearman = agent_performance.get(agent_id, {}).get("avg_spearman", 0)
-        
-        performance_data.append({
-            "agent_id": agent_id,
-            "umap_x": embedding[i, 0],
-            "umap_y": embedding[i, 1],
-            "cluster": int(cluster_labels[i]),
-            "avg_accuracy": avg_accuracy,
-            "avg_spearman": avg_spearman,
-            "weights": X[i].tolist()
-        })
-    
-    # Create dataframe
-    df = pd.DataFrame(performance_data)
-    
-    # Create visualization
-    plt.figure(figsize=(12, 8))
-    
-    # Get unique clusters
-    unique_clusters = np.unique(cluster_labels)
-    
-    # Plot points
-    for cluster in unique_clusters:
-        cluster_points = df[df["cluster"] == cluster]
-        if cluster == -1:  # Noise points in HDBSCAN
-            plt.scatter(
-                cluster_points["umap_x"], 
-                cluster_points["umap_y"], 
-                c="black", 
-                marker="x", 
-                label=f"Noise", 
-                s=100
-            )
-        else:
-            plt.scatter(
-                cluster_points["umap_x"], 
-                cluster_points["umap_y"], 
-                marker="o", 
-                label=f"Cluster {cluster}", 
-                s=100
-            )
-    
-    # Add labels for each point
-    for _, row in df.iterrows():
-        plt.annotate(
-            row["agent_id"], 
-            (row["umap_x"], row["umap_y"]),
-            textcoords="offset points",
-            xytext=(0, 10),
-            ha='center'
-        )
-        plt.annotate(
-            f"Acc: {row['avg_accuracy']:.2f}",
-            (row["umap_x"], row["umap_y"]),
-            textcoords="offset points",
-            xytext=(0, -10),
-            ha='center',
-            fontsize=8
-        )
-    
-    plt.title(f"Agent {agent_type} Weight Space Visualization (UMAP + HDBSCAN)")
-    plt.xlabel("UMAP Dimension 1")
-    plt.ylabel("UMAP Dimension 2")
-    plt.legend()
-    plt.tight_layout()
-    
-    # Save plot
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_weights.png"))
-    plt.close()
-    
-    # Save CSV file
-    os.makedirs(CSV_DIR, exist_ok=True)
-    df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_analysis.csv"), index=False)
-    
-    # Print summary
-    cluster_counts = df["cluster"].value_counts().to_dict()
-    logger.log(f"\nAgent {agent_type} Cluster Summary:")
-    for cluster, count in cluster_counts.items():
-        cluster_avg_acc = df[df["cluster"] == cluster]["avg_accuracy"].mean()
-        logger.log(f"  Cluster {cluster}: {count} agents, Avg Accuracy: {cluster_avg_acc:.2f}")
-    
-    return embedding, cluster_labels, df
-
-def calculate_agent_performance(results):
-    """
-    Calculate performance metrics for each agent
-    
-    Args:
-        results (list): List of evaluation results
-    
-    Returns:
-        dict: Dictionary mapping agent ID to performance metrics
-    """
-    agent_results = defaultdict(list)
-    
-    # Group results by agent
-    for result in results:
-        for agent_type, agent_id in result["agents"].items():
-            agent_results[agent_id].append({
-                "exact_accuracy": result["exact_accuracy"],
-                "spearman": result["spearman"]
-            })
-    
-    # Calculate average performance for each agent
-    agent_performance = {}
-    for agent_id, performances in agent_results.items():
-        avg_accuracy = np.mean([p["exact_accuracy"] for p in performances])
-        avg_spearman = np.mean([p["spearman"] for p in performances])
-        
-        agent_performance[agent_id] = {
-            "avg_accuracy": avg_accuracy,
-            "avg_spearman": avg_spearman,
-            "num_combinations": len(performances)
         }
-    
-    return agent_performance
+    }
 
 def run_performance_evaluation():
     """
@@ -690,8 +520,8 @@ def run_performance_evaluation():
         result = run_evaluation_for_combination(combo, resumes, job_description, human_ranking)
         results.append(result)
     
-    # Sort results by Spearman correlation (higher is better)
-    sorted_results = sorted(results, key=lambda x: x["spearman"], reverse=True)
+    # Sort results by accuracy (higher value is better)
+    sorted_results = sorted(results, key=lambda x: x["accuracy"], reverse=True)
     
     # Display final comparison
     print("\n" + "="*50)
@@ -702,40 +532,155 @@ def run_performance_evaluation():
     logger.log("FINAL COMPARISON OF AGENT COMBINATIONS")
     logger.log("="*50)
     
-    print(f"\n{'Rank':^10}|{'Combination':^20}|{'Exact Accuracy':^20}|{'Spearman':^20}")
-    print("-" * 70)
+    print(f"\n{'Rank':^10}|{'Combination':^20}|{'Accuracy':^20}")
+    print("-" * 50)
     
     for rank, result in enumerate(sorted_results):
-        print(f"{rank+1:^10}|{result['combination']:^20}|{result['accuracy']['exact_match_accuracy']:^20.2f}|{result['spearman']:^20.2f}")
+        print(f"{rank+1:^10}|{result['combination']:^20}|{result['accuracy']:^20.4f}")
     
-    logger.log(f"\n{'Rank':^10}|{'Combination':^20}|{'Exact Accuracy':^20}|{'Spearman':^20}")
-    logger.log("-" * 70)
+    logger.log(f"\n{'Rank':^10}|{'Combination':^20}|{'Accuracy':^20}")
+    logger.log("-" * 50)
     
     for rank, result in enumerate(sorted_results):
-        logger.log(f"{rank+1:^10}|{result['combination']:^20}|{result['accuracy']['exact_match_accuracy']:^20.2f}|{result['spearman']:^20.2f}")
+        logger.log(f"{rank+1:^10}|{result['combination']:^20}|{result['accuracy']:^20.4f}")
     
     # Print the best combination
     best_combo = sorted_results[0]['combination']
-    best_accuracy = sorted_results[0]['accuracy']['exact_match_accuracy']
-    best_spearman = sorted_results[0]['spearman']
+    best_accuracy = sorted_results[0]['accuracy']
     
     print(f"\nBest agent combination: {best_combo}")
-    print(f"Exact position accuracy: {best_accuracy:.2f}")
-    print(f"Spearman correlation: {best_spearman:.2f}")
+    print(f"Accuracy (negative slope): {best_accuracy:.4f}")
     
     logger.log(f"\nBest agent combination: {best_combo}")
-    logger.log(f"Exact position accuracy: {best_accuracy:.2f}")
-    logger.log(f"Spearman correlation: {best_spearman:.2f}")
+    logger.log(f"Accuracy (negative slope): {best_accuracy:.4f}")
     
-    # Calculate agent performance
-    agent_performance = calculate_agent_performance(results)
-    
-    # Visualize agent weights
-    logger.log("\nVisualizing agent weights...")
-    for agent_type in ["B", "C", "D"]:
-        visualize_agent_weights(agent_type, weights, agent_performance)
+    # Visualize agent combinations using PCA
+    logger.log("\nVisualizing agent combinations using PCA...")
+    visualize_agent_combinations(results, weights)
     
     return sorted_results
+
+def visualize_agent_combinations(results, weights_data):
+    """
+    Visualize agent combinations using PCA with color gradient based on accuracy
+    
+    Args:
+        results (list): List of evaluation results for each agent combination
+        weights_data (dict): Dictionary containing agent weights
+        
+    Returns:
+        None
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LinearSegmentedColormap
+    from sklearn.decomposition import PCA
+    import numpy as np
+    
+    # Create directory for visualizations if it doesn't exist
+    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+    
+    # Extract weights and performance metrics for each agent combination
+    combination_weights = []
+    combination_names = []
+    combination_accuracies = []
+    
+    for result in results:
+        # Get agent IDs
+        agent_a_id = result["agents"]["A"]
+        agent_b_id = result["agents"]["B"]
+        agent_c_id = result["agents"]["C"]
+        agent_d_id = result["agents"]["D"]
+        
+        # Get agent indices (remove the letter prefix and convert to integer)
+        b_idx = int(agent_b_id[1:]) - 1
+        c_idx = int(agent_c_id[1:]) - 1
+        d_idx = int(agent_d_id[1:]) - 1
+        
+        # Get the weights for each agent
+        b_weights = list(weights_data["B"][b_idx]["weights"].values())
+        c_weights = list(weights_data["C"][c_idx]["weights"].values())
+        d_weights = list(weights_data["D"][d_idx]["weights"].values())
+        
+        # Concatenate all weights
+        combined_weights = b_weights + c_weights + d_weights
+        
+        # Store data
+        combination_weights.append(combined_weights)
+        combination_names.append(f"{agent_a_id}+{agent_b_id}+{agent_c_id}+{agent_d_id}")
+        combination_accuracies.append(result["accuracy"])
+    
+    # Convert to numpy arrays
+    X = np.array(combination_weights)
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(X)  # This scales your data to have mean=0 and std=1
+    accuracies = np.array(combination_accuracies)
+    
+    # Skip if we don't have enough data points
+    if len(X) < 2:
+        logger.log("Not enough agent combinations for PCA (need at least 2)")
+        return
+    
+    # Apply PCA for dimensionality reduction
+    pca = PCA(n_components=2)
+    embedding = pca.fit_transform(X)
+    print(pca.explained_variance_ratio_)
+    
+    # Create figure
+    plt.figure(figsize=(12, 10))
+    
+    # Create a custom colormap (red-white-blue)
+    colors = ["blue", "white", "red"]  # Reverse colors since lower accuracy (more negative) is better
+    cmap = LinearSegmentedColormap.from_list("BWR", colors)
+    
+    # Determine the color normalization range
+    max_abs_accuracy = max(abs(accuracies))
+    norm = plt.Normalize(-max_abs_accuracy, max_abs_accuracy)
+    
+    # Create scatter plot
+    scatter = plt.scatter(
+        embedding[:, 0],
+        embedding[:, 1],
+        c=accuracies,
+        cmap=cmap,
+        norm=norm,
+        s=100,
+    )
+
+    
+    # Add colorbar
+    cbar = plt.colorbar(scatter)
+    cbar.set_label('Accuracy (Negative Slope)')
+    
+    # Add plot labels
+    plt.title("Agent Combination Weight Space (PCA)")
+    plt.xlabel(f"PCA Dimension 1 (Explained Variance: {pca.explained_variance_ratio_[0]:.2f})")
+    plt.ylabel(f"PCA Dimension 2 (Explained Variance: {pca.explained_variance_ratio_[1]:.2f})")
+    plt.tight_layout()
+    
+    # Save the plot
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "agent_combinations_pca.png"))
+    plt.close()
+    
+    # Log information
+    logger.log("\nAgent Combination PCA Visualization:")
+    logger.log(f"  Total combinations: {len(X)}")
+    logger.log(f"  PCA Dimension 1 explained variance: {pca.explained_variance_ratio_[0]:.2f}")
+    logger.log(f"  PCA Dimension 2 explained variance: {pca.explained_variance_ratio_[1]:.2f}")
+    logger.log(f"  Min accuracy: {min(accuracies):.4f}")
+    logger.log(f"  Max accuracy: {max(accuracies):.4f}")
+    
+    # Create a CSV file with the results
+    df = pd.DataFrame({
+        "combination": combination_names,
+        "pca_x": embedding[:, 0],
+        "pca_y": embedding[:, 1],
+        "accuracy": accuracies,
+        "weights": combination_weights
+    })
+    
+    # Save CSV file
+    os.makedirs(CSV_DIR, exist_ok=True)
+    df.to_csv(os.path.join(CSV_DIR, "agent_combinations_pca.csv"), index=False)
 
 def main():
     """

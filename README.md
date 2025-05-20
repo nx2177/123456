@@ -1,139 +1,267 @@
+# Resume Scoring System
+
+A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
+
 ## Architecture
 
-![64a8eee158e3d15ab80b02f189ece38](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
+The Resume Scoring System implements a decoupled multi-agent architecture with four specialized agents:
+
+![Resume Scoring System Architecture](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
 
 ### Multi-agent Scoring System:
 
-The system consists of four independent agents:
+The system consists of four independent agents that analyze different aspects of resume-job matching:
 
 1. **Agent A (Resume Parser)**: Extracts structured information from a plain text resume.
+   - Implemented in `agents/parser.py`
+   - Parses technical skills, work experience, and soft skills
+   - No scoring/weights applied at this level
+
 2. **Agent B (Technical Skill Scorer)**: Evaluates how well the resume's technical skills match the job requirements.
+   - Implemented in `agents/technical_scorer.py`
+   - Uses Word2Vec embeddings for semantic matching
+   - Structured weights for different technical domains (e.g., programming languages, frameworks)
+
 3. **Agent C (Experience Relevance Scorer)**: Assesses the relevance of the candidate's work experience.
+   - Implemented in `agents/experience_scorer.py`
+   - Analyzes experience duration, responsibilities, and role relevance
+   - Structured weights for experience features (years, leadership, etc.)
+
 4. **Agent D (Soft Skills Scorer)**: Evaluates the candidate's soft skills.
+   - Implemented in `agents/soft_skills_scorer.py`
+   - Identifies communication, teamwork, and other soft skills
+   - Structured weights for different soft skill categories
 
-Each agent operates independently with its own LLM interface. The system aggregates scores from all agents to produce a final score.
+### Implementation Details:
 
-This system is designed with a fully decoupled, modular architecture where:
+- **Persistent Weights Management**: Weights are stored in `weights.json` and loaded/generated as needed
+- **Word2Vec Embeddings**: Used for semantic similarity calculation between job descriptions and resumes
+- **Structured Weight System**: Feature-specific weights rather than flat arrays
+- **UMAP & HDBSCAN Visualization**: For agent weight space analysis
+- **Performance Evaluation**: Compares system rankings against human expert rankings
 
-- Each agent operates independently with its own LLM handler
-- No shared base classes or inheritance is used
-- LLM interfaces can be easily replaced per agent
-- Agents have clear, well-defined inputs and outputs
-- Each agent encapsulates its own LLM logic
+### Data Flow:
 
-This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
+1. Job description and candidate resumes are processed
+2. Agent A parses resume into structured data
+3. Agents B, C, and D score different aspects using structured weights
+4. Scores are aggregated for final candidate ranking
+5. Results are analyzed with visualizations in `analysis_output/`
 
-### Performance Evaluation:
+## Performance Evaluation:
 
-1. Simulate 5 Diverse Candidate Resumes
+The system evaluates performance across multiple agent combinations:
 
- - Resume 1 (ALEX ZHANG): Clear mismatch - lacks US work authorization (requires sponsorship as noted in the job description) and is missing required technical skills (Python, JavaScript, React).
- - Resume 2 (SARAH JOHNSON): Strong match - exceptional candidate with all required skills, appropriate experience, strong soft skills, and US citizenship.
- - Resume 3 (DAVID KIM): Moderate match with strength in technical skills - has excellent technical skills but less leadership experience.
- - Resume 4 (MICHAEL WILSON): Moderate match with strength in experience - has extensive management experience but fewer modern technical skills.
- - Resume 5 (RACHEL GARCIA): Moderate match with strength in soft skills - excellent at communication and user-focused development but more limited technical depth.
+- 5 diverse candidate resumes with varying strengths
+- Comparison against predefined human expert rankings
+- Evaluation metrics: exact position accuracy and Spearman correlation
+- Visualization of agent weight spaces and cluster analysis
 
+## Installation
 
-3. Implemented Performance Evaluation Pipeline
-
-- Single Resume Scorer Function: Refactored the original scoring logic into a reusable function that processes a single resume.
-
-- Ranking Accuracy Evaluator: Added a function to compare system rankings with human rankings using:
-  Exact position match accuracy
-  Spearman rank correlation coefficient (which considers relative positions)
-
-- Performance Evaluation Runner: Created a function that:
-  Processes all 5 candidate resumes
-  Scores each one using the multi-agent system
-
- - Ranks candidates based on scores
-  Compares to predefined human expert rankings
-  Calculates and displays accuracy metrics
-
-
-
-4. Enhanced Output
-The evaluation pipeline produces detailed output including:
- - Individual scores for each candidate
- - System-generated ranking
- - Human expert ranking
- - Accuracy metrics
-
-### Dataset
-
-Define Agent Combinations
-Evaluate the following 4 combinations:
-
-combinations = [
-   - ['A1', 'B1', 'C', 'D'],  # baseline
-   - ['A2', 'B1', 'C', 'D'],  # change in prompt style (A1's prompt style is concise, A2's prompt style is detailed)
-   - ['A1', 'B2', 'C', 'D'],  # change in LLM model (B1 use llama3.2, B2 use deepseek-r1:8b)
-   - ['A2', 'B2', 'C', 'D'],  # change in both
-]
-
-Rank the agent combinations based on the accuracy and output the best combination. 
-
-
-
-
-## Prerequisites
+### Prerequisites
 
 - Python 3.8+
-- [Ollama](https://ollama.ai/) installed and running locally
-- LLaMA 3.2 and deepseek-r1:8b pulled in Ollama
+- The following Python packages:
+  - numpy
+  - matplotlib
+  - pandas
+  - gensim
+  - umap-learn
+  - hdbscan
+  - scikit-learn
+  - spacy (optional, for enhanced parsing)
 
-## Setup
+### Setup
 
-1. Install Ollama by following the instructions at [https://ollama.ai/](https://ollama.ai/)
-2. Pull the LLaMA 3.2 model:
+1. Clone the repository:
    ```
-   ollama pull llama3.2
-   ```
-3. Install required Python packages:
-   ```
-   pip install requests
-   ```
-
-## Usage
-
-1. Ensure the Ollama server is running locally:
-   ```
-   ollama serve
+   git clone https://github.com/yourusername/resume_scoring_system.git
+   cd resume_scoring_system
    ```
 
-2. Run the main application:
+2. Install required packages:
+   ```
+   pip install -r requirements.txt
+   ```
+
+3. (Optional) Install SpaCy model for enhanced parsing:
+   ```
+   python -m spacy download en_core_web_sm
+   ```
+
+## Step-by-Step Tutorial
+
+### Installation and Environment Setup
+
+1. **Verify Python Installation**:
+   ```
+   python --version
+   ```
+   Ensure you have Python 3.8 or higher installed.
+
+2. **Create a Virtual Environment** (recommended):
+   ```
+   python -m venv venv
+   ```
+
+3. **Activate the Virtual Environment**:
+   - Windows:
+     ```
+     venv\Scripts\activate
+     ```
+   - macOS/Linux:
+     ```
+     source venv/bin/activate
+     ```
+
+4. **Install Dependencies**:
+   ```
+   pip install -r requirements.txt
+   ```
+
+### Running the System
+
+1. **Basic Usage**:
    ```
    python main.py
    ```
+   This will:
+   - Generate sample resumes and job descriptions
+   - Create or load agent weights
+   - Evaluate resume rankings
+   - Generate visualizations and CSV files
 
-The system will:
-1. Generate a sample resume and job description
-2. Parse the resume using Agent A
-3. Evaluate technical skills match using Agent B
-4. Assess experience relevance using Agent C
-5. Evaluate soft skills using Agent D
-6. Calculate and display the final score
+2. **View Results**:
+   - Check console output for ranking summary
+   - Visualizations are saved to `analysis_output/visualizations/`
+   - CSV analysis files are saved to `analysis_output/csv/`
+   - Logs are saved to `logs/processing_details.log`
 
-## Customization
+### Configuration
 
-To use your own resume and job description, modify the `main.py` file to read from files instead of using the sample generator.
+The main configuration parameters can be found at the top of `main.py`:
 
-To replace an LLM implementation for a specific agent, simply modify the LLM handler class within that agent's file.
+```python
+# Configuration for number of agents in each category
+n_A = 5  # Number of Agent A instances
+n_B = 5  # Number of Agent B instances
+n_C = 5  # Number of Agent C instances
+n_D = 5  # Number of Agent D instances
 
-## Implementation Details
+# Weights and embedding configuration
+WEIGHTS_FILE = "weights.json"
+EMBEDDING_DIM = 100  # Dimension for Word2Vec embeddings
+WEIGHT_MEAN = 1.0    # Mean of Gaussian distribution
+WEIGHT_VARIANCE = 1.0  # Variance of Gaussian distribution
+```
 
-- `agents/parser.py`: Agent A implementation with its own LLM handler
-- `agents/technical_scorer.py`: Agent B implementation with its own LLM handler
-- `agents/experience_scorer.py`: Agent C implementation with its own LLM handler
-- `agents/soft_skills_scorer.py`: Agent D implementation with its own LLM handler
-- `utils/data_generator.py`: Generates sample data for testing
-- `main.py`: Orchestrates the system by calling each agent sequentially
+### Customization Examples
 
-## Note
+1. **Using Your Own Resumes and Job Descriptions**:
+   
+   Modify the `main.py` file to read your own files:
 
-This system demonstrates a fully decoupled multi-agent architecture. In a production environment, you might want to:
-1. Implement error handling and logging
-2. Add validation for input/output
-3. Optimize prompts for better extraction and evaluation
-4. Implement caching to reduce API calls
-5. Add additional agents for more specialized evaluations 
+   ```python
+   def main():
+       # Read your job description
+       with open("your_job_description.txt", "r") as f:
+           job_description = f.read()
+           
+       # Read your resumes
+       resumes = []
+       for file in ["resume1.txt", "resume2.txt", "resume3.txt"]:
+           with open(file, "r") as f:
+               resumes.append(f.read())
+               
+       # Continue with the evaluation
+       # ...
+   ```
+
+2. **Changing Agent Counts or Weights**:
+
+   When modifying agent counts or weight parameters (n_A, n_B, etc.), you must delete the existing weights.json file to regenerate weights:
+
+   ```
+   # Delete the existing weights file
+   rm weights.json  # Linux/macOS
+   del weights.json  # Windows
+   
+   # Run the system with new parameters
+   python main.py
+   ```
+
+3. **Advanced Analysis**:
+
+   To run specific analysis on the output CSV files:
+
+   ```python
+   import pandas as pd
+   
+   # Load CSV data
+   df = pd.read_csv("analysis_output/csv/agent_B_analysis.csv")
+   
+   # Perform additional analysis
+   print(df.groupby("cluster")["avg_accuracy"].mean())
+   ```
+
+### Troubleshooting Guide
+
+1. **"KeyError" in weights.json**:
+   - This usually happens when you've changed agent counts without deleting weights.json
+   - Solution: Delete weights.json and run again
+
+2. **Missing Visualizations**:
+   - Ensure matplotlib is properly installed
+   - Check if the analysis_output directory has proper write permissions
+   - Make sure you have at least 2 agents of each type for visualization
+
+3. **SpaCy Model Missing**:
+   - If you see "SpaCy model not available" warning, install the model:
+   ```
+   python -m spacy download en_core_web_sm
+   ```
+
+4. **Memory Issues with Large Datasets**:
+   - Reduce embedding dimensions in main.py
+   - Process resumes in smaller batches
+   - Use a machine with more RAM
+
+5. **UMAP/HDBSCAN Errors**:
+   - These may occur with too few data points
+   - Ensure you have enough agent variants (at least 5 of each type)
+   - Check UMAP and HDBSCAN installation
+
+## Advanced Usage
+
+### Extending the System
+
+1. **Adding New Agent Types**:
+   - Create a new agent class in the agents directory
+   - Update main.py to integrate the new agent
+   - Modify score_single_resume_with_agents to include the new agent
+
+2. **Custom Evaluation Metrics**:
+   - Add new metrics in the evaluate_ranking_accuracy function
+   - Implement calculation logic for your specific needs
+
+3. **Integrating with External Systems**:
+   - Use the score_single_resume_with_agents function as an API
+   - Return structured results for integration with other systems
+
+## Citation
+
+If you use this system in your research, please cite:
+
+```
+@software{resume_scoring_system,
+  author = {Your Name},
+  title = {Resume Scoring System},
+  year = {2023},
+  url = {https://github.com/yourusername/resume_scoring_system}
+}
+```
+
+## License
+
+[Your chosen license]
