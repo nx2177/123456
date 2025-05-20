@@ -1,15 +1,29 @@
-# Resume Scoring System
-
-A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
+# Overview
+Stochastic Multi-Agent Combination Evaluation System which is LLM-Augmented and Embedding-Based.
 
 ## Architecture
 
-The Resume Scoring System implements a decoupled multi-agent architecture with four specialized agents:
+Here is a top-to-bottom break down of the whole architecture:
+![652039592b15a490e9542dd569b32b3](https://github.com/user-attachments/assets/a8d13a24-f344-4c68-8b98-964b3cce0522)
+![0863491170193dbc870f356610cc0ca](https://github.com/user-attachments/assets/daebc9dc-4f20-423a-bd10-b4762e1476e1)
 
-![Resume Scoring System Architecture](https://github.com/user-attachments/assets/f4ab136b-2faf-45e2-a8f8-50ebb1acc716)
+  
+### 🗂️ **1. Input: Resume & Job Description Simulation**
 
-### Multi-agent Scoring System:
+Simulate 5 candidate resumes and 1 job description using Claude.
 
+* **5 candidate resumes** are simulated for each evaluation run:
+
+  * 1 strong match
+  * 3 moderate matches with varied strengths
+  * 1 clear mismatch (fails a hard requirement)
+* A **job description (JD)** is also simulated, containing structured expectations like required skills, experience, and soft qualities.
+
+---
+
+### 🧑‍🤝‍🧑 **2. Multi-agent Scoring System**
+
+A multi-agent system for evaluating candidate resumes against job descriptions using Word2Vec embeddings and structured weights.
 The system consists of four independent agents that analyze different aspects of resume-job matching:
 
 1. **Agent A (Resume Parser)**: Extracts structured information from a plain text resume.
@@ -31,6 +45,123 @@ The system consists of four independent agents that analyze different aspects of
    - Implemented in `agents/soft_skills_scorer.py`
    - Identifies communication, teamwork, and other soft skills
    - Structured weights for different soft skill categories
+
+| Agent | Role                           | Input       | Output                                               |
+| ----- | ------------------------------ | ----------- | ---------------------------------------------------- |
+| **A** | Parsing agent                  | Resume + JD | Parsed data (e.g., extracted skills, experience)     |
+| **B** | Technical skill evaluator      | Parsed data | Technical skill score                                |
+| **C** | Job experience evaluator       | Parsed data | Experience score                                     |
+| **D** | Soft skills evaluator / Ranker | Parsed data | Soft skill score                                     |
+
+> 🔹 Agent **A** is a pure parser — it **does not** use or store any weights.
+
+Note: Each agent operates independently with its own interface. The system aggregates scores from all agents to produce a final score.
+
+This system is designed with a fully decoupled, modular architecture where:
+
+- Each agent operates independently with its own handler
+- No shared base classes or inheritance is used
+- Interfaces can be easily replaced per agent
+- Agents have clear, well-defined inputs and outputs
+- Each agent encapsulates its own LLM logic
+
+This mimics real-world asynchronous collaboration between different intelligent components, as if each agent is a separate entity with its own brain.
+
+---
+
+### ⚖️ **3. Stochastic Agent Weights**
+
+Agents B, C, and D each use a **stochastic weight vector** to evaluate their respective domain:
+
+* Agent **B**’s weights: importance of technical skills (e.g., Python: 0.9, Java: 0.7)
+* Agent **C**’s weights: importance of job experience features (e.g., YearsExperience: 0.8)
+* Agent **D**’s weights: importance of soft skills (e.g., Communication: 0.85)
+
+Weights are:
+
+* Sampled at the beginning, from i.i.d. Gaussian distributions.
+* Saved in a structured `weights.json` file
+* Can be reused across all evaluations to ensure **deterministic and reproducible results**
+
+Each weight dictionary is stored like:
+
+```json
+{
+  "id": "B2",
+  "weights": {
+    "Python": 0.92,
+    "JavaScript": 0.76,...
+  }
+}
+```
+
+---
+
+### 🧮 **4. Scoring and Ranking**
+
+* Each agent processes the resume and outputs a score.
+* The scores are aggregated into a final ranking of all candidates.
+* This ranking is compared to a **predefined human-evaluated ground truth ranking** (e.g., `[2,4,3,5,1]`).
+Note: the human-evaluated groud truth is also simulated by Claude.
+
+---
+
+### 🎯 **5. Evaluation Metric**
+
+* The system uses **Accuracy**:
+
+  * It compares the system ranking with the human ranking.
+  * Accuracy: 
+    - Exact position match accuracy
+    - Spearman rank correlation coefficient (which considers relative positions)
+
+---
+
+### 🧪 **6. Combination Evaluation**
+
+* Each agent category (B, C, D) has multiple variants (e.g., B1–B5, C1–C5…).
+* The system evaluates **all possible combinations** (e.g.[B1, C2, D3]) by running them through the pipeline and recording the resulting accuracy.
+* Results are sorted and ranked by performance.
+
+---
+
+### 📉 **7. Visualization & Interpretability**
+
+For each agent category (B, C, D):
+
+* The structured weight vectors are **flattened** into numerical feature vectors.
+* **UMAP** is applied to reduce the vectors to 2D.
+* **HDBSCAN** is applied to cluster similar agents in this weight space.
+* Each point is:
+
+  * Colored by its average accuracy (from all combinations it appeared in)
+  * Labeled with its ID
+  * Marked by cluster (or labeled “Noise” if unclustered)
+
+This helps identify:
+
+* Which **types of weight configurations** tend to perform better
+* Whether there are **semantic clusters** of strong or weak agents
+* How agents differ or group based on their evaluation style (as encoded in their weights)
+
+---
+
+### 📁 **8. Output Artifacts**
+
+* `weights.json`: structured weight data for all agent variants
+* `.csv` files per agent category: containing ID, flattened weights, accuracy, and cluster ID
+* UMAP+HDBSCAN plots per agent category: for visual insight into evaluation space
+
+---
+
+### 🧭 **Why this design matters**
+
+This architecture allows you to:
+
+* Analyze **how different evaluation preferences (via weights) impact performance**
+* Identify **robust evaluation strategies** via clustering
+* Achieve **transparent, reproducible, and interpretable evaluation behavior**
+
 
 ### Implementation Details:
 
@@ -255,13 +386,8 @@ If you use this system in your research, please cite:
 
 ```
 @software{resume_scoring_system,
-  author = {Your Name},
+  author = {Nan Xiao (nx2177)},
   title = {Resume Scoring System},
-  year = {2023},
-  url = {https://github.com/yourusername/resume_scoring_system}
+  year = {2025},
+  url = {https://github.com/nx2177/123456}
 }
-```
-
-## License
-
-[Your chosen license]
