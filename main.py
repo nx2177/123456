@@ -19,9 +19,9 @@ from sklearn.preprocessing import StandardScaler
 
 # Configuration for number of agents in each category
 n_A = 1  # Number of Agent A instances
-n_B = 10  # Number of Agent B instances
-n_C = 10 # Number of Agent C instances
-n_D = 10  # Number of Agent D instances
+n_B = 7  # Number of Agent B instances
+n_C = 8 # Number of Agent C instances
+n_D = 9  # Number of Agent D instances
 
 # Weights and embedding configuration
 WEIGHTS_FILE = "weights.json"
@@ -373,7 +373,7 @@ def evaluate_ranking_accuracy(system_ranking, human_ranking, scores):
     n = len(human_ranking)
     
     # Create x values as position numbers (1 to n)
-    x = [0.01, 0.02, 0.03, 0.04, 0.05]
+    x = [1, 2, 3, 4, 5]
     
     # Create y values as scores corresponding to human ranking
     # For each position in human ranking, get the corresponding resume's score
@@ -571,11 +571,6 @@ def visualize_agent_combinations(results, weights_data):
     Returns:
         None
     """
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import LinearSegmentedColormap
-    from sklearn.decomposition import PCA
-    import numpy as np
-    
     # Create directory for visualizations if it doesn't exist
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
     
@@ -583,6 +578,16 @@ def visualize_agent_combinations(results, weights_data):
     combination_weights = []
     combination_names = []
     combination_accuracies = []
+    
+    # Initialize standard scalers for each agent type
+    scaler_b = StandardScaler()
+    scaler_c = StandardScaler()
+    scaler_d = StandardScaler()
+    
+    # First, collect all raw weights to fit the scalers
+    all_b_weights = []
+    all_c_weights = []
+    all_d_weights = []
     
     for result in results:
         # Get agent IDs
@@ -601,18 +606,63 @@ def visualize_agent_combinations(results, weights_data):
         c_weights = list(weights_data["C"][c_idx]["weights"].values())
         d_weights = list(weights_data["D"][d_idx]["weights"].values())
         
-        # Concatenate all weights
-        combined_weights = b_weights + c_weights + d_weights
+        # Store raw weights for later normalization
+        all_b_weights.append(b_weights)
+        all_c_weights.append(c_weights)
+        all_d_weights.append(d_weights)
         
-        # Store data
-        combination_weights.append(combined_weights)
+        # Store names and accuracies
         combination_names.append(f"{agent_a_id}+{agent_b_id}+{agent_c_id}+{agent_d_id}")
         combination_accuracies.append(result["accuracy"])
     
+    # Convert to numpy arrays for normalization
+    all_b_weights = np.array(all_b_weights)
+    all_c_weights = np.array(all_c_weights)
+    all_d_weights = np.array(all_d_weights)
+    
+    # Step 1: Fit scalers to each agent type's weights
+    scaler_b.fit(all_b_weights)
+    scaler_c.fit(all_c_weights)
+    scaler_d.fit(all_d_weights)
+    
+    # Step 2: Normalize each agent type's weights
+    normalized_b_weights = scaler_b.transform(all_b_weights)
+    normalized_c_weights = scaler_c.transform(all_c_weights)
+    normalized_d_weights = scaler_d.transform(all_d_weights)
+    
+    # Step 3: Apply L2 normalization to each agent block to equalize influence
+    for i in range(len(normalized_b_weights)):
+        # Calculate L2 norms
+        b_norm = np.linalg.norm(normalized_b_weights[i])
+        c_norm = np.linalg.norm(normalized_c_weights[i])
+        d_norm = np.linalg.norm(normalized_d_weights[i])
+        
+        # Scale each block to have unit norm (if norm is not zero)
+        if b_norm > 0:
+            normalized_b_weights[i] = normalized_b_weights[i] / b_norm
+        if c_norm > 0:
+            normalized_c_weights[i] = normalized_c_weights[i] / c_norm
+        if d_norm > 0:
+            normalized_d_weights[i] = normalized_d_weights[i] / d_norm
+    
+    # Log feature dimensions
+    logger.log(f"\nFeature dimensions before PCA:")
+    logger.log(f"  Agent B features: {normalized_b_weights.shape[1]}")
+    logger.log(f"  Agent C features: {normalized_c_weights.shape[1]}")
+    logger.log(f"  Agent D features: {normalized_d_weights.shape[1]}")
+    
+    # Step 4: Now concatenate the normalized and scaled weights for each combination
+    for i in range(len(results)):
+        # Concatenate normalized and scaled weights for this combination
+        combined_weights = np.concatenate([
+            normalized_b_weights[i], 
+            normalized_c_weights[i], 
+            normalized_d_weights[i]
+        ])
+        combination_weights.append(combined_weights)
+    
     # Convert to numpy arrays
     X = np.array(combination_weights)
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(X)  # This scales your data to have mean=0 and std=1
     accuracies = np.array(combination_accuracies)
     
     # Skip if we don't have enough data points
@@ -620,9 +670,17 @@ def visualize_agent_combinations(results, weights_data):
         logger.log("Not enough agent combinations for PCA (need at least 2)")
         return
     
+    # Step 5: Normalize the entire dataset before PCA (optional but recommended)
+    scaler_combined = StandardScaler()
+    X_normalized = scaler_combined.fit_transform(X)
+    
+    # Normalize accuracy values for coloring
+    scaler_accuracy = StandardScaler()
+    accuracies_normalized = scaler_accuracy.fit_transform(accuracies.reshape(-1, 1)).flatten()
+    
     # Apply PCA for dimensionality reduction
     pca = PCA(n_components=2)
-    embedding = pca.fit_transform(X)
+    embedding = pca.fit_transform(X_normalized)
     print(pca.explained_variance_ratio_)
     
     # Create figure
@@ -632,24 +690,23 @@ def visualize_agent_combinations(results, weights_data):
     colors = ["blue", "white", "red"]  # Reverse colors since lower accuracy (more negative) is better
     cmap = LinearSegmentedColormap.from_list("BWR", colors)
     
-    # Determine the color normalization range
-    max_abs_accuracy = max(abs(accuracies))
+    # Determine the color normalization range for normalized accuracies
+    max_abs_accuracy = max(abs(accuracies_normalized))
     norm = plt.Normalize(-max_abs_accuracy, max_abs_accuracy)
     
     # Create scatter plot
     scatter = plt.scatter(
         embedding[:, 0],
         embedding[:, 1],
-        c=accuracies,
+        c=accuracies_normalized,
         cmap=cmap,
         norm=norm,
-        s=100,
+        s=30,
     )
-
     
     # Add colorbar
     cbar = plt.colorbar(scatter)
-    cbar.set_label('Accuracy (Negative Slope)')
+    cbar.set_label('Normalized Accuracy (Negative Slope)')
     
     # Add plot labels
     plt.title("Agent Combination Weight Space (PCA)")
@@ -666,8 +723,8 @@ def visualize_agent_combinations(results, weights_data):
     logger.log(f"  Total combinations: {len(X)}")
     logger.log(f"  PCA Dimension 1 explained variance: {pca.explained_variance_ratio_[0]:.2f}")
     logger.log(f"  PCA Dimension 2 explained variance: {pca.explained_variance_ratio_[1]:.2f}")
-    logger.log(f"  Min accuracy: {min(accuracies):.4f}")
-    logger.log(f"  Max accuracy: {max(accuracies):.4f}")
+    logger.log(f"  Min accuracy (original): {min(accuracies):.4f}")
+    logger.log(f"  Max accuracy (original): {max(accuracies):.4f}")
     
     # Create a CSV file with the results
     df = pd.DataFrame({
@@ -675,7 +732,8 @@ def visualize_agent_combinations(results, weights_data):
         "pca_x": embedding[:, 0],
         "pca_y": embedding[:, 1],
         "accuracy": accuracies,
-        "weights": combination_weights
+        "accuracy_normalized": accuracies_normalized,
+        "weights": [w.tolist() for w in combination_weights]
     })
     
     # Save CSV file
