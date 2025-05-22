@@ -114,9 +114,8 @@ Note: the human-evaluated groud truth is also simulated by Claude.
 * The system uses **Accuracy**:
 
   * It compares the system ranking with the human ranking.
-  * Accuracy: 
-    - Exact position match accuracy
-    - Spearman rank correlation coefficient (which considers relative positions)
+  * Accuracy Evaluation:
+    
 
 ---
 
@@ -125,6 +124,22 @@ Note: the human-evaluated groud truth is also simulated by Claude.
 * Each agent category (B, C, D) has multiple variants (e.g., B1–B5, C1–C5…).
 * The system evaluates **all possible combinations** (e.g.[B1, C2, D3]) by running them through the pipeline and recording the resulting accuracy.
 * Results are sorted and ranked by performance.
+* Accuracy Evaluation: 
+  - For each resume, obtain its system-generated score from the agent pipeline.
+
+  - Use the human ranking list as the x-axis values.
+
+  - Example: if the human ranking is [2, 3, 5, 4, 1], then:
+
+  - x = [1, 2, 3, 4, 5] (positions)
+
+  - y = [score_of_resume_2, score_of_resume_3, score_of_resume_5, score_of_resume_4, score_of_resume_1]
+
+  - Fit a simple linear regression model with x as input and y as target.
+
+  - Compute the slope of the fitted line and use it as the accuracy score for this agent combination.
+  - Accuracy = - slope since the human ranking is in decendent order.
+
 
 ---
 
