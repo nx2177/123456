@@ -19,9 +19,9 @@ from sklearn.preprocessing import StandardScaler
 
 # Configuration for number of agents in each category
 n_A = 1  # Number of Agent A instances
-n_B = 20 # Number of Agent B instances
-n_C = 20 # Number of Agent C instances
-n_D = 20 # Number of Agent D instances
+n_B = 40 # Number of Agent B instances
+n_C = 40 # Number of Agent C instances
+n_D = 40 # Number of Agent D instances
 
 # Weights and embedding configuration
 WEIGHTS_FILE = "weights.json"
@@ -466,6 +466,351 @@ def run_evaluation_for_combination(agents_combination, resumes, job_description,
         }
     }
 
+def visualize_agent_combinations(results, weights_data, is_3d=True):
+    """
+    Visualize agent combinations using a multi-stage PCA approach with color gradient based on accuracy
+    
+    Args:
+        results (list): List of evaluation results for each agent combination
+        weights_data (dict): Dictionary containing agent weights
+        is_3d (bool): Whether to create 3D visualizations (True) or 2D (False)
+        
+    Returns:
+        None
+    """
+    # Create directory for visualizations if it doesn't exist
+    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+    
+    # Extract performance metrics for each agent combination
+    combination_names = []
+    combination_accuracies = []
+    
+    # Collect agent IDs and accuracies
+    for result in results:
+        # Get agent IDs
+        agent_a_id = result["agents"]["A"]
+        agent_b_id = result["agents"]["B"]
+        agent_c_id = result["agents"]["C"]
+        agent_d_id = result["agents"]["D"]
+        
+        # Store names and accuracies
+        combination_names.append(f"{agent_a_id}+{agent_b_id}+{agent_c_id}+{agent_d_id}")
+        combination_accuracies.append(result["accuracy"])
+    
+    # Convert to numpy array
+    accuracies = np.array(combination_accuracies)
+    
+    # Step 0: Prepare data structures for per-agent PCA
+    # First, get the dimensionality of each agent type's weight vector
+    b_features = len(list(weights_data["B"][0]["weights"].values()))
+    c_features = len(list(weights_data["C"][0]["weights"].values()))
+    d_features = len(list(weights_data["D"][0]["weights"].values()))
+    
+    # Log the raw feature dimensions for each agent type
+    logger.log(f"\nRaw feature dimensions:")
+    logger.log(f"  Agent B features: {b_features}")
+    logger.log(f"  Agent C features: {c_features}")
+    logger.log(f"  Agent D features: {d_features}")
+    
+    # Define the target dimensionality for per-agent PCA
+    pca_dim = 5
+    
+    # Create a scaler and PCA model for each agent type
+    b_scaler = StandardScaler()
+    c_scaler = StandardScaler()
+    d_scaler = StandardScaler()
+    
+    # Create PCA models for each agent type
+    b_pca = PCA(n_components=min(pca_dim, b_features))
+    c_pca = PCA(n_components=min(pca_dim, c_features))
+    d_pca = PCA(n_components=min(pca_dim, d_features))
+    
+    # Step 1: Collect and process all weights for fitting the scalers and PCAs
+    all_b_weights = []
+    all_c_weights = []
+    all_d_weights = []
+    agent_b_ids = []
+    agent_c_ids = []
+    agent_d_ids = []
+    
+    for result in results:
+        # Get agent IDs
+        agent_b_id = result["agents"]["B"]
+        agent_c_id = result["agents"]["C"]
+        agent_d_id = result["agents"]["D"]
+        
+        # Store agent IDs
+        agent_b_ids.append(agent_b_id)
+        agent_c_ids.append(agent_c_id)
+        agent_d_ids.append(agent_d_id)
+        
+        # Get agent indices
+        b_idx = int(agent_b_id[1:]) - 1
+        c_idx = int(agent_c_id[1:]) - 1
+        d_idx = int(agent_d_id[1:]) - 1
+        
+        # Get raw weights for each agent
+        b_weights = list(weights_data["B"][b_idx]["weights"].values())
+        c_weights = list(weights_data["C"][c_idx]["weights"].values())
+        d_weights = list(weights_data["D"][d_idx]["weights"].values())
+        
+        # Add to collection
+        all_b_weights.append(b_weights)
+        all_c_weights.append(c_weights)
+        all_d_weights.append(d_weights)
+    
+    # Convert to numpy arrays
+    all_b_weights = np.array(all_b_weights)
+    all_c_weights = np.array(all_c_weights)
+    all_d_weights = np.array(all_d_weights)
+    
+    # Fit the scalers to each agent type's weights
+    b_scaler.fit(all_b_weights)
+    c_scaler.fit(all_c_weights)
+    d_scaler.fit(all_d_weights)
+    
+    # Scale the weights
+    scaled_b_weights = b_scaler.transform(all_b_weights)
+    scaled_c_weights = c_scaler.transform(all_c_weights)
+    scaled_d_weights = d_scaler.transform(all_d_weights)
+    
+    # Fit the PCA models to the scaled weights
+    b_pca.fit(scaled_b_weights)
+    c_pca.fit(scaled_c_weights)
+    d_pca.fit(scaled_d_weights)
+    
+    # Log the explained variance for each agent's PCA
+    logger.log(f"\nExplained variance ratios for per-agent PCA:")
+    logger.log(f"  Agent B: {b_pca.explained_variance_ratio_}")
+    logger.log(f"  Agent C: {c_pca.explained_variance_ratio_}")
+    logger.log(f"  Agent D: {d_pca.explained_variance_ratio_}")
+    
+    # Step 2: Apply PCA to each agent's weights and normalize
+    # Prepare arrays to store the PCA features for each agent type
+    b_pca_features_all = []
+    c_pca_features_all = []
+    d_pca_features_all = []
+    concatenated_features = []
+    
+    # Create a color normalizer for accuracy values
+    accuracy_scaler = StandardScaler()
+    accuracies_normalized = accuracy_scaler.fit_transform(accuracies.reshape(-1, 1)).flatten()
+    
+    # Determine color normalization range
+    max_abs_accuracy = max(abs(accuracies_normalized))
+    norm = plt.Normalize(-max_abs_accuracy, max_abs_accuracy)
+    
+    # Create colormap
+    colors = ["blue", "white", "red"]
+    cmap = LinearSegmentedColormap.from_list("BWR", colors)
+    
+    for i in range(len(results)):
+        # Apply PCA to each agent's scaled weights
+        b_pca_features = b_pca.transform(scaled_b_weights[i].reshape(1, -1))[0]
+        c_pca_features = c_pca.transform(scaled_c_weights[i].reshape(1, -1))[0]
+        d_pca_features = d_pca.transform(scaled_d_weights[i].reshape(1, -1))[0]
+        
+        # Store PCA features
+        b_pca_features_all.append(b_pca_features)
+        c_pca_features_all.append(c_pca_features)
+        d_pca_features_all.append(d_pca_features)
+        
+        # Step 3: Normalize each PCA vector using L2 norm
+        b_norm = np.linalg.norm(b_pca_features)
+        c_norm = np.linalg.norm(c_pca_features)
+        d_norm = np.linalg.norm(d_pca_features)
+        
+        # Avoid division by zero
+        if b_norm > 0:
+            b_pca_features = b_pca_features / b_norm
+        if c_norm > 0:
+            c_pca_features = c_pca_features / c_norm
+        if d_norm > 0:
+            d_pca_features = d_pca_features / d_norm
+        
+        # Step 4: Concatenate the normalized PCA vectors
+        combined_features = np.concatenate([b_pca_features, c_pca_features, d_pca_features])
+        concatenated_features.append(combined_features)
+    
+    # Convert to numpy arrays
+    b_pca_features_all = np.array(b_pca_features_all)
+    c_pca_features_all = np.array(c_pca_features_all)
+    d_pca_features_all = np.array(d_pca_features_all)
+    
+    # Part 2: Visualize PCA-Reduced Agent Vectors Separately
+    # Function to visualize agent-specific PCA
+    def visualize_agent_pca(agent_features, agent_type, agent_ids):
+        # Apply PCA to the agent features
+        n_components = 3 if is_3d else 2
+        agent_pca = PCA(n_components=n_components)
+        agent_embedding = agent_pca.fit_transform(agent_features)
+        
+        # Create figure
+        if is_3d:
+            fig = plt.figure(figsize=(12, 10))
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            fig, ax = plt.subplots(figsize=(12, 10))
+            
+        # Plot the points
+        if is_3d:
+            scatter = ax.scatter(
+                agent_embedding[:, 0],
+                agent_embedding[:, 1],
+                agent_embedding[:, 2],
+                c=accuracies_normalized,
+                cmap=cmap,
+                norm=norm,
+                s=30
+            )
+        else:
+            scatter = ax.scatter(
+                agent_embedding[:, 0],
+                agent_embedding[:, 1],
+                c=accuracies_normalized,
+                cmap=cmap,
+                norm=norm,
+                s=30
+            )
+            
+        # Add colorbar
+        cbar = plt.colorbar(scatter)
+        cbar.set_label('Normalized Accuracy (Negative Slope)')
+        
+        # Add labels
+        ax.set_title(f"Agent {agent_type} PCA Projection")
+        ax.set_xlabel(f"PCA Dimension 1 (Explained Variance: {agent_pca.explained_variance_ratio_[0]:.2f})")
+        ax.set_ylabel(f"PCA Dimension 2 (Explained Variance: {agent_pca.explained_variance_ratio_[1]:.2f})")
+        if is_3d:
+            ax.set_zlabel(f"PCA Dimension 3 (Explained Variance: {agent_pca.explained_variance_ratio_[2]:.2f})")
+        
+        plt.tight_layout()
+        
+        # Save the plot
+        dim_label = "3d" if is_3d else "2d"
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_pca_{dim_label}.png"))
+        plt.close()
+        
+        # Log information
+        logger.log(f"\nAgent {agent_type} PCA Visualization:")
+        logger.log(f"  Explained variance: {agent_pca.explained_variance_ratio_}")
+        
+        # Create a CSV file with the results
+        df = pd.DataFrame({
+            "agent_id": agent_ids,
+            "pca_x": agent_embedding[:, 0],
+            "pca_y": agent_embedding[:, 1],
+            "accuracy": accuracies,
+            "accuracy_normalized": accuracies_normalized
+        })
+        
+        if is_3d:
+            df["pca_z"] = agent_embedding[:, 2]
+            
+        # Save CSV file
+        os.makedirs(CSV_DIR, exist_ok=True)
+        df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_pca_{dim_label}.csv"), index=False)
+    
+    # Visualize each agent type separately
+    visualize_agent_pca(b_pca_features_all, "B", agent_b_ids)
+    visualize_agent_pca(c_pca_features_all, "C", agent_c_ids)
+    visualize_agent_pca(d_pca_features_all, "D", agent_d_ids)
+    
+    # Convert to numpy array for global PCA
+    X = np.array(concatenated_features)
+    
+    # Skip if we don't have enough data points
+    if len(X) < 2:
+        logger.log("Not enough agent combinations for global PCA (need at least 2)")
+        return
+    
+    # Step 5: Normalize the combined feature vectors
+    global_scaler = StandardScaler()
+    X_normalized = global_scaler.fit_transform(X)
+    
+    # Step 6: Apply global PCA to reduce to 2D or 3D
+    n_components = 3 if is_3d else 2
+    global_pca = PCA(n_components=n_components)
+    embedding = global_pca.fit_transform(X_normalized)
+    
+    # Print global PCA explained variance
+    logger.log(f"\nGlobal PCA explained variance: {global_pca.explained_variance_ratio_}")
+    print(f"Global PCA explained variance: {global_pca.explained_variance_ratio_}")
+    
+    # Step 7: Create the visualization
+    if is_3d:
+        fig = plt.figure(figsize=(12, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        # Create 3D scatter plot
+        scatter = ax.scatter(
+            embedding[:, 0],
+            embedding[:, 1],
+            embedding[:, 2],
+            c=accuracies_normalized,
+            cmap=cmap,
+            norm=norm,
+            s=30,
+        )
+        
+        # Add labels
+        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 3D)")
+        ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
+        ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
+        ax.set_zlabel(f"Global PCA Dimension 3 (Explained Variance: {global_pca.explained_variance_ratio_[2]:.2f})")
+    else:
+        fig, ax = plt.subplots(figsize=(12, 10))
+        
+        # Create 2D scatter plot
+        scatter = ax.scatter(
+            embedding[:, 0],
+            embedding[:, 1],
+            c=accuracies_normalized,
+            cmap=cmap,
+            norm=norm,
+            s=30,
+        )
+        
+        # Add labels
+        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 2D)")
+        ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
+        ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
+    
+    # Add colorbar
+    cbar = plt.colorbar(scatter)
+    cbar.set_label('Normalized Accuracy (Negative Slope)')
+    
+    plt.tight_layout()
+    
+    # Save the plot
+    dim_label = "3d" if is_3d else "2d"
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_combinations_pca_{dim_label}.png"))
+    plt.close()
+    
+    # Log information
+    logger.log("\nAgent Combination PCA Visualization:")
+    logger.log(f"  Total combinations: {len(X)}")
+    logger.log(f"  Dimensions: {dim_label}")
+    logger.log(f"  Min accuracy (original): {min(accuracies):.4f}")
+    logger.log(f"  Max accuracy (original): {max(accuracies):.4f}")
+    
+    # Create a CSV file with the results
+    df = pd.DataFrame({
+        "combination": combination_names,
+        "pca_x": embedding[:, 0],
+        "pca_y": embedding[:, 1],
+        "accuracy": accuracies,
+        "accuracy_normalized": accuracies_normalized
+    })
+    
+    # Add z dimension if 3D
+    if is_3d:
+        df["pca_z"] = embedding[:, 2]
+    
+    # Save CSV file
+    os.makedirs(CSV_DIR, exist_ok=True)
+    df.to_csv(os.path.join(CSV_DIR, f"agent_combinations_pca_{dim_label}.csv"), index=False)
+
 def run_performance_evaluation():
     """
     Run the performance evaluation pipeline across all agent combinations
@@ -554,221 +899,9 @@ def run_performance_evaluation():
     logger.log(f"\nBest agent combination: {best_combo}")
     logger.log(f"Accuracy (negative slope): {best_accuracy:.4f}")
     
-    # Visualize agent combinations using a multi-stage PCA approach with color gradient based on accuracy
+    # Visualize agent combinations using a multi-stage PCA approach
     logger.log("\nVisualizing agent combinations using a multi-stage PCA approach...")
-    visualize_agent_combinations(results, weights)
-    
-    return sorted_results
-
-def visualize_agent_combinations(results, weights_data):
-    """
-    Visualize agent combinations using a multi-stage PCA approach with color gradient based on accuracy
-    
-    Args:
-        results (list): List of evaluation results for each agent combination
-        weights_data (dict): Dictionary containing agent weights
-        
-    Returns:
-        None
-    """
-    # Create directory for visualizations if it doesn't exist
-    os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-    
-    # Extract performance metrics for each agent combination
-    combination_names = []
-    combination_accuracies = []
-    
-    # Collect agent IDs and accuracies
-    for result in results:
-        # Get agent IDs
-        agent_a_id = result["agents"]["A"]
-        agent_b_id = result["agents"]["B"]
-        agent_c_id = result["agents"]["C"]
-        agent_d_id = result["agents"]["D"]
-        
-        # Store names and accuracies
-        combination_names.append(f"{agent_a_id}+{agent_b_id}+{agent_c_id}+{agent_d_id}")
-        combination_accuracies.append(result["accuracy"])
-    
-    # Convert to numpy array
-    accuracies = np.array(combination_accuracies)
-    
-    # Step 0: Prepare data structures for per-agent PCA
-    # First, get the dimensionality of each agent type's weight vector
-    b_features = len(list(weights_data["B"][0]["weights"].values()))
-    c_features = len(list(weights_data["C"][0]["weights"].values()))
-    d_features = len(list(weights_data["D"][0]["weights"].values()))
-    
-    # Log the raw feature dimensions for each agent type
-    logger.log(f"\nRaw feature dimensions:")
-    logger.log(f"  Agent B features: {b_features}")
-    logger.log(f"  Agent C features: {c_features}")
-    logger.log(f"  Agent D features: {d_features}")
-    
-    # Define the target dimensionality for per-agent PCA
-    pca_dim = 5
-    
-    # Create a scaler and PCA model for each agent type
-    b_scaler = StandardScaler()
-    c_scaler = StandardScaler()
-    d_scaler = StandardScaler()
-    
-    # Create PCA models for each agent type
-    b_pca = PCA(n_components=min(pca_dim, b_features))
-    c_pca = PCA(n_components=min(pca_dim, c_features))
-    d_pca = PCA(n_components=min(pca_dim, d_features))
-    
-    # Step 1: Collect and process all weights for fitting the scalers and PCAs
-    all_b_weights = []
-    all_c_weights = []
-    all_d_weights = []
-    
-    for result in results:
-        # Get agent indices
-        b_idx = int(result["agents"]["B"][1:]) - 1
-        c_idx = int(result["agents"]["C"][1:]) - 1
-        d_idx = int(result["agents"]["D"][1:]) - 1
-        
-        # Get raw weights for each agent
-        b_weights = list(weights_data["B"][b_idx]["weights"].values())
-        c_weights = list(weights_data["C"][c_idx]["weights"].values())
-        d_weights = list(weights_data["D"][d_idx]["weights"].values())
-        
-        # Add to collection
-        all_b_weights.append(b_weights)
-        all_c_weights.append(c_weights)
-        all_d_weights.append(d_weights)
-    
-    # Convert to numpy arrays
-    all_b_weights = np.array(all_b_weights)
-    all_c_weights = np.array(all_c_weights)
-    all_d_weights = np.array(all_d_weights)
-    
-    # Fit the scalers to each agent type's weights
-    b_scaler.fit(all_b_weights)
-    c_scaler.fit(all_c_weights)
-    d_scaler.fit(all_d_weights)
-    
-    # Scale the weights
-    scaled_b_weights = b_scaler.transform(all_b_weights)
-    scaled_c_weights = c_scaler.transform(all_c_weights)
-    scaled_d_weights = d_scaler.transform(all_d_weights)
-    
-    # Fit the PCA models to the scaled weights
-    b_pca.fit(scaled_b_weights)
-    c_pca.fit(scaled_c_weights)
-    d_pca.fit(scaled_d_weights)
-    
-    # Log the explained variance for each agent's PCA
-    logger.log(f"\nExplained variance ratios for per-agent PCA:")
-    logger.log(f"  Agent B: {b_pca.explained_variance_ratio_}")
-    logger.log(f"  Agent C: {c_pca.explained_variance_ratio_}")
-    logger.log(f"  Agent D: {d_pca.explained_variance_ratio_}")
-    
-    # Step 2: Apply PCA to each agent's weights and normalize
-    # Prepare an array to store the concatenated PCA features for each combination
-    concatenated_features = []
-    
-    for i in range(len(results)):
-        # Apply PCA to each agent's scaled weights
-        b_pca_features = b_pca.transform(scaled_b_weights[i].reshape(1, -1))[0]
-        c_pca_features = c_pca.transform(scaled_c_weights[i].reshape(1, -1))[0]
-        d_pca_features = d_pca.transform(scaled_d_weights[i].reshape(1, -1))[0]
-        
-        # Step 3: Normalize each PCA vector using L2 norm
-        b_norm = np.linalg.norm(b_pca_features)
-        c_norm = np.linalg.norm(c_pca_features)
-        d_norm = np.linalg.norm(d_pca_features)
-        
-        # Avoid division by zero
-        if b_norm > 0:
-            b_pca_features = b_pca_features / b_norm
-        if c_norm > 0:
-            c_pca_features = c_pca_features / c_norm
-        if d_norm > 0:
-            d_pca_features = d_pca_features / d_norm
-        
-        # Step 4: Concatenate the normalized PCA vectors
-        combined_features = np.concatenate([b_pca_features, c_pca_features, d_pca_features])
-        concatenated_features.append(combined_features)
-    
-    # Convert to numpy array
-    X = np.array(concatenated_features)
-    
-    # Skip if we don't have enough data points
-    if len(X) < 2:
-        logger.log("Not enough agent combinations for global PCA (need at least 2)")
-        return
-    
-    # Step 5: Normalize the combined feature vectors
-    global_scaler = StandardScaler()
-    X_normalized = global_scaler.fit_transform(X)
-    
-    # Step 6: Apply global PCA to reduce to 2D
-    global_pca = PCA(n_components=2)
-    embedding = global_pca.fit_transform(X_normalized)
-    
-    # Normalize accuracy values for coloring
-    accuracy_scaler = StandardScaler()
-    accuracies_normalized = accuracy_scaler.fit_transform(accuracies.reshape(-1, 1)).flatten()
-    
-    # Print global PCA explained variance
-    logger.log(f"\nGlobal PCA explained variance: {global_pca.explained_variance_ratio_}")
-    print(f"Global PCA explained variance: {global_pca.explained_variance_ratio_}")
-    
-    # Step 7: Create the visualization
-    plt.figure(figsize=(12, 10))
-    
-    # Create a custom colormap (red-white-blue)
-    colors = ["blue", "white", "red"]  # Reverse colors since lower accuracy (more negative) is better
-    cmap = LinearSegmentedColormap.from_list("BWR", colors)
-    
-    # Determine the color normalization range for normalized accuracies
-    max_abs_accuracy = max(abs(accuracies_normalized))
-    norm = plt.Normalize(-max_abs_accuracy, max_abs_accuracy)
-    
-    # Create scatter plot
-    scatter = plt.scatter(
-        embedding[:, 0],
-        embedding[:, 1],
-        c=accuracies_normalized,
-        cmap=cmap,
-        norm=norm,
-        s=30,
-    )
-    
-    # Add colorbar
-    cbar = plt.colorbar(scatter)
-    cbar.set_label('Normalized Accuracy (Negative Slope)')
-    
-    # Add plot labels
-    plt.title("Agent Combination Weight Space (Multi-Stage PCA)")
-    plt.xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
-    plt.ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
-    plt.tight_layout()
-    
-    # Save the plot
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, "agent_combinations_pca.png"))
-    plt.close()
-    
-    # Log information
-    logger.log("\nAgent Combination PCA Visualization:")
-    logger.log(f"  Total combinations: {len(X)}")
-    logger.log(f"  Min accuracy (original): {min(accuracies):.4f}")
-    logger.log(f"  Max accuracy (original): {max(accuracies):.4f}")
-    
-    # Create a CSV file with the results
-    df = pd.DataFrame({
-        "combination": combination_names,
-        "pca_x": embedding[:, 0],
-        "pca_y": embedding[:, 1],
-        "accuracy": accuracies,
-        "accuracy_normalized": accuracies_normalized
-    })
-    
-    # Save CSV file
-    os.makedirs(CSV_DIR, exist_ok=True)
-    df.to_csv(os.path.join(CSV_DIR, "agent_combinations_pca.csv"), index=False)
+    visualize_agent_combinations(results, weights, is_3d=True)
 
 def main():
     """
