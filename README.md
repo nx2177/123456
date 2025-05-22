@@ -3,11 +3,14 @@ Stochastic Multi-Agent Combination Evaluation System which is LLM-Augmented and 
 
 ## Architecture
 
-Here is a top-to-bottom break down of the whole architecture:
-![652039592b15a490e9542dd569b32b3](https://github.com/user-attachments/assets/a8d13a24-f344-4c68-8b98-964b3cce0522)
-![0863491170193dbc870f356610cc0ca](https://github.com/user-attachments/assets/daebc9dc-4f20-423a-bd10-b4762e1476e1)
+Here is a break down of the whole architecture:
+<img width="989" alt="ff85b028595bff6237d3da12a269369" src="https://github.com/user-attachments/assets/abd26adc-4d61-45d9-ab4b-da539ae32203" />
+<img width="990" alt="d920ec37bd4b19fd449e6ca15271b5e" src="https://github.com/user-attachments/assets/ad7dbe2a-682c-4229-9801-74baa623cf7b" />
+<img width="989" alt="031a6770ff3192af90fd80ea4dde9e8" src="https://github.com/user-attachments/assets/0946c0ae-9597-4748-9c66-4f4bb32767d3" />
+<img width="984" alt="7288a3fa9b8e2ec14d9fc6bef830a21" src="https://github.com/user-attachments/assets/47ceb39e-b4be-4dc4-8b64-65db7e651b02" />
+<img width="989" alt="cee7426a239bd052cfffa02db04e92e" src="https://github.com/user-attachments/assets/de51e3c2-a928-46d0-9bf0-b685486cea29" />
+<img width="974" alt="d506f2508a65df51cad9c453c826cdd" src="https://github.com/user-attachments/assets/34a6ef50-aead-4cc6-9f39-20ef7a95398d" />
 
-  
 ### 🗂️ **1. Input: Resume & Job Description Simulation**
 
 Simulate 5 candidate resumes and 1 job description using Claude.
