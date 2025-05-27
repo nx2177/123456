@@ -19,15 +19,13 @@ from sklearn.preprocessing import StandardScaler
 
 # Configuration for number of agents in each category
 n_A = 1  # Number of Agent A instances
-n_B = 40 # Number of Agent B instances
-n_C = 40 # Number of Agent C instances
-n_D = 40 # Number of Agent D instances
+n_combinations = 10000  # Number of agent combinations to generate
 
 # Weights and embedding configuration
 WEIGHTS_FILE = "weights.json"
 EMBEDDING_DIM = 100  # Dimension for Word2Vec embeddings
-WEIGHT_MEAN = 1.0    # Mean of Gaussian distribution
-WEIGHT_VARIANCE = 10000.0  # Variance of Gaussian distribution
+WEIGHT_MIN = -10.0  # Minimum value for uniform distribution
+WEIGHT_MAX = 10.0   # Maximum value for uniform distribution
 WORD2VEC_WINDOW = 5  # Window size for Word2Vec model
 WORD2VEC_MIN_COUNT = 1  # Minimum count for Word2Vec model
 
@@ -156,31 +154,28 @@ def create_word2vec_model(job_description: str) -> Tuple[Word2Vec, List[float]]:
     
     return model, jd_embedding
 
-def generate_structured_weights(features, count, mean=WEIGHT_MEAN, variance=WEIGHT_VARIANCE):
+def generate_combination_weights(n_combinations, b_features, c_features, d_features):
     """
-    Generate structured weights for agent types
+    Generate weights for agent combinations directly
     
     Args:
-        features (List[str]): List of feature names
-        count (int): Number of agent variants to generate
-        mean (float): Mean of weight distribution
-        variance (float): Variance of weight distribution
+        n_combinations (int): Number of combinations to generate
+        b_features (int): Number of Agent B features
+        c_features (int): Number of Agent C features
+        d_features (int): Number of Agent D features
         
     Returns:
-        List[Dict]: List of dictionaries with agent IDs and structured weights
+        List[List[float]]: List of combination weight vectors
     """
-    result = []
+    combination_weights = []
+    total_features = b_features + c_features + d_features
     
-    for i in range(1, count + 1):
-        weights_dict = {}
-        # Generate a weight for each feature
-        for feature in features:
-            weights_dict[feature] = float(np.random.normal(mean, np.sqrt(variance)))
-            weights_dict[feature] = max(0.1, weights_dict[feature])  # Ensure positive weights
-            
-        result.append({"id": i, "weights": weights_dict})
+    for i in range(n_combinations):
+        # Generate weights from uniform distribution in range [-10, 10]
+        weights = np.random.uniform(WEIGHT_MIN, WEIGHT_MAX, total_features)
+        combination_weights.append(weights.tolist())
     
-    return result
+    return combination_weights
 
 def load_or_generate_weights(job_description: str):
     """
@@ -190,7 +185,7 @@ def load_or_generate_weights(job_description: str):
         job_description (str): The job description text to generate embeddings for
         
     Returns:
-        dict: Dictionary containing weights for agent types and job description embedding
+        dict: Dictionary containing weights for agent combinations and job description embedding
     """
     if os.path.exists(WEIGHTS_FILE):
         # Load existing weights
@@ -207,18 +202,27 @@ def load_or_generate_weights(job_description: str):
         exp_features = extract_experience_features()
         soft_features = extract_soft_skills_features()
         
-        # Generate structured weights for each agent type
-        b_weights = generate_structured_weights(tech_features, n_B)
-        c_weights = generate_structured_weights(exp_features, n_C)
-        d_weights = generate_structured_weights(soft_features, n_D)
+        # Get feature counts
+        b_features = len(tech_features)
+        c_features = len(exp_features)
+        d_features = len(soft_features)
+        
+        # Generate combination-level weights
+        combination_weights = generate_combination_weights(n_combinations, b_features, c_features, d_features)
         
         # Create data structure
         data = {
             "jd_embedding": jd_embedding,
-            "weights": {
-                "B": b_weights,
-                "C": c_weights,
-                "D": d_weights
+            "combination_weights": combination_weights,
+            "feature_counts": {
+                "b_features": b_features,
+                "c_features": c_features,
+                "d_features": d_features
+            },
+            "feature_names": {
+                "b_features": tech_features,
+                "c_features": exp_features,
+                "d_features": soft_features
             }
         }
         
@@ -226,97 +230,109 @@ def load_or_generate_weights(job_description: str):
         with open(WEIGHTS_FILE, 'w') as f:
             json.dump(data, f, indent=2)
         
-        logger.log(f"Generated new structured weights and JD embedding, saved to {WEIGHTS_FILE}")
+        logger.log(f"Generated {n_combinations} combination weight vectors, saved to {WEIGHTS_FILE}")
+        logger.log(f"Feature counts: B={b_features}, C={c_features}, D={d_features}")
         return data
 
 def create_agents(weights_data, word2vec_model, jd_embedding):
     """
-    Create multiple instances of each agent category
+    Create agent instances for evaluation
     
     Args:
-        weights_data (dict): Dictionary of weights for all agents
+        weights_data (dict): Dictionary of weights and feature information
         word2vec_model (Word2Vec): Word2Vec model for embedding
         jd_embedding (List[float]): Job description embedding
     
     Returns:
-        tuple: (agent_A_list, agent_B_list, agent_C_list, agent_D_list)
+        tuple: (agent_A_list, feature_counts, feature_names)
     """
     agent_A_list = []
-    agent_B_list = []
-    agent_C_list = []
-    agent_D_list = []
     
     # Create Agent A instances (no weights needed)
     for i in range(n_A):
         agent_id = f"A{i+1}"
         agent_A_list.append((agent_id, AgentA(word2vec_model=word2vec_model)))
     
-    # Create Agent B instances with structured weights
-    for agent_data in weights_data["B"]:
-        agent_id = f"B{agent_data['id']}"
-        agent_B_list.append((agent_id, AgentB(
-            weights=list(agent_data["weights"].values()),  # Convert dict to list for backward compatibility
-            word2vec_model=word2vec_model,
-            jd_embedding=jd_embedding,
-            structured_weights=agent_data["weights"]  # Pass the structured weights
-        )))
+    # Get feature information
+    feature_counts = weights_data["feature_counts"]
+    feature_names = weights_data["feature_names"]
     
-    # Create Agent C instances with structured weights
-    for agent_data in weights_data["C"]:
-        agent_id = f"C{agent_data['id']}"
-        agent_C_list.append((agent_id, AgentC(
-            weights=list(agent_data["weights"].values()),  # Convert dict to list for backward compatibility
-            word2vec_model=word2vec_model,
-            jd_embedding=jd_embedding,
-            structured_weights=agent_data["weights"]  # Pass the structured weights
-        )))
-    
-    # Create Agent D instances with structured weights
-    for agent_data in weights_data["D"]:
-        agent_id = f"D{agent_data['id']}"
-        agent_D_list.append((agent_id, AgentD(
-            weights=list(agent_data["weights"].values()),  # Convert dict to list for backward compatibility
-            word2vec_model=word2vec_model,
-            jd_embedding=jd_embedding,
-            structured_weights=agent_data["weights"]  # Pass the structured weights
-        )))
-    
-    return agent_A_list, agent_B_list, agent_C_list, agent_D_list
+    return agent_A_list, feature_counts, feature_names
 
-def score_single_resume_with_agents(
+def score_single_resume_with_combination(
     resume_text: str, 
     job_description: str, 
+    combination_weights: List[float],
+    feature_counts: dict,
+    feature_names: dict,
     agent_A: Tuple[str, AgentA], 
-    agent_B: Tuple[str, AgentB],
-    agent_C: Tuple[str, AgentC],
-    agent_D: Tuple[str, AgentD],
-    candidate_index: int = None
+    word2vec_model,
+    jd_embedding: List[float],
+    candidate_index: int = None,
+    combination_index: int = None
 ) -> Tuple[float, Dict[str, Any]]:
     """
-    Score a single resume against a job description using the specified agents
+    Score a single resume against a job description using the specified combination weights
     
     Args:
         resume_text (str): The resume text
         job_description (str): The job description text
+        combination_weights (List[float]): Combined weight vector for B, C, D agents
+        feature_counts (dict): Dictionary with feature counts for each agent
+        feature_names (dict): Dictionary with feature names for each agent
         agent_A (tuple): (agent_id, agent_instance) for Agent A
-        agent_B (tuple): (agent_id, agent_instance) for Agent B
-        agent_C (tuple): (agent_id, agent_instance) for Agent C
-        agent_D (tuple): (agent_id, agent_instance) for Agent D
+        word2vec_model: Word2Vec model
+        jd_embedding (List[float]): Job description embedding
         candidate_index (int): Index of the candidate for logging purposes
+        combination_index (int): Index of the combination for logging purposes
         
     Returns:
         tuple: (final_score, parsed_resume)
     """
     agent_A_id, agent_A_instance = agent_A
-    agent_B_id, agent_B_instance = agent_B
-    agent_C_id, agent_C_instance = agent_C
-    agent_D_id, agent_D_instance = agent_D
+    
+    # Extract feature counts
+    b_features = feature_counts["b_features"]
+    c_features = feature_counts["c_features"]
+    d_features = feature_counts["d_features"]
+    
+    # Split the combination weights for each agent
+    b_weights = combination_weights[:b_features]
+    c_weights = combination_weights[b_features:b_features + c_features]
+    d_weights = combination_weights[b_features + c_features:]
+    
+    # Create structured weights dictionaries
+    b_structured_weights = dict(zip(feature_names["b_features"], b_weights))
+    c_structured_weights = dict(zip(feature_names["c_features"], c_weights))
+    d_structured_weights = dict(zip(feature_names["d_features"], d_weights))
+    
+    # Create agent instances with the split weights
+    agent_B_instance = AgentB(
+        weights=b_weights,
+        word2vec_model=word2vec_model,
+        jd_embedding=jd_embedding,
+        structured_weights=b_structured_weights
+    )
+    
+    agent_C_instance = AgentC(
+        weights=c_weights,
+        word2vec_model=word2vec_model,
+        jd_embedding=jd_embedding,
+        structured_weights=c_structured_weights
+    )
+    
+    agent_D_instance = AgentD(
+        weights=d_weights,
+        word2vec_model=word2vec_model,
+        jd_embedding=jd_embedding,
+        structured_weights=d_structured_weights
+    )
     
     # Log separator and candidate info
     candidate_name = resume_text.strip().split("\n")[0]
     logger.log(f"\n{'='*50}")
     logger.log(f"CANDIDATE {candidate_index}: {candidate_name}")
-    logger.log(f"AGENT COMBINATION: {agent_A_id} + {agent_B_id} + {agent_C_id} + {agent_D_id}")
+    logger.log(f"COMBINATION {combination_index}: {agent_A_id}")
     logger.log(f"{'='*50}\n")
     
     # Log resume excerpt
@@ -328,20 +344,20 @@ def score_single_resume_with_agents(
     parsed_resume = agent_A_instance.process(resume_text)
     logger.log_json(parsed_resume, "Parsed Resume Data")
     
-    # Agent B: Technical Skill Scorer - Using pre-computed JD embedding
-    logger.log(f"\nRunning Agent {agent_B_id}: Technical Skill Scorer...")
+    # Agent B: Technical Skill Scorer
+    logger.log(f"\nRunning Agent B: Technical Skill Scorer...")
     s1, s1_technical_match_details = agent_B_instance.process(parsed_resume["technical_skills"], job_description, resume_text)
     logger.log(f"technical match details: {s1_technical_match_details}")
     logger.log(f"Technical Skill Match Score (S1): {s1:.2f}")
     
-    # Agent C: Experience Relevance Scorer - Using pre-computed JD embedding
-    logger.log(f"\nRunning Agent {agent_C_id}: Experience Relevance Scorer...")
+    # Agent C: Experience Relevance Scorer
+    logger.log(f"\nRunning Agent C: Experience Relevance Scorer...")
     s2, s2_justification = agent_C_instance.process(parsed_resume["job_experience"], job_description)
     logger.log(f"Experience Relevance Score (S2): {s2:.2f}")
     logger.log(f"Justification: {s2_justification}")
     
-    # Agent D: Soft Skills Scorer - Using pre-computed JD embedding
-    logger.log(f"\nRunning Agent {agent_D_id}: Soft Skills Scorer...")
+    # Agent D: Soft Skills Scorer
+    logger.log(f"\nRunning Agent D: Soft Skills Scorer...")
     s3, s3_justification = agent_D_instance.process(resume_text, job_description)
     logger.log(f"Soft Skills Score (S3): {s3:.2f}")
     logger.log(f"Justification: {s3_justification}")
@@ -357,12 +373,11 @@ def score_single_resume_with_agents(
     
     return final_score, parsed_resume
 
-def evaluate_ranking_accuracy(system_ranking, human_ranking, scores):
+def evaluate_ranking_accuracy(human_ranking, scores):
     """
     Calculate the accuracy of the system ranking compared to human ranking using linear regression
     
     Args:
-        system_ranking (list): System's ranking of candidates
         human_ranking (list): Human's ranking of candidates
         scores (list): System-generated scores for each resume
         
@@ -392,26 +407,29 @@ def evaluate_ranking_accuracy(system_ranking, human_ranking, scores):
         "accuracy": accuracy
     }
 
-def run_evaluation_for_combination(agents_combination, resumes, job_description, human_ranking):
+def run_evaluation_for_combination(combination_weights, combination_index, resumes, job_description, human_ranking, feature_counts, feature_names, agent_A_list, word2vec_model, jd_embedding):
     """
     Run the performance evaluation pipeline for a specific agent combination
     
     Args:
-        agents_combination (tuple): Tuple of (agent_A, agent_B, agent_C, agent_D)
+        combination_weights (List[float]): Weight vector for the combination
+        combination_index (int): Index of the combination
         resumes (list): List of resume texts
         job_description (str): Job description
         human_ranking (list): Human expert ranking
+        feature_counts (dict): Feature counts for each agent type
+        feature_names (dict): Feature names for each agent type
+        agent_A_list: List of Agent A instances
+        word2vec_model: Word2Vec model
+        jd_embedding: Job description embedding
         
     Returns:
         dict: Evaluation results
     """
-    agent_A, agent_B, agent_C, agent_D = agents_combination
-    agent_A_id, _ = agent_A
-    agent_B_id, _ = agent_B
-    agent_C_id, _ = agent_C
-    agent_D_id, _ = agent_D
+    agent_A = agent_A_list[0]  # Use the first (and only) Agent A instance
+    agent_A_id = agent_A[0]
     
-    combination_name = f"{agent_A_id}+{agent_B_id}+{agent_C_id}+{agent_D_id}"
+    combination_name = f"Combination_{combination_index+1}"
 
     logger.log(f"\n\n{'='*30} EVALUATING COMBINATION: {combination_name} {'='*30}\n")
     
@@ -423,14 +441,17 @@ def run_evaluation_for_combination(agents_combination, resumes, job_description,
         candidate_name = resume.strip().split("\n")[0]
         candidate_names.append(candidate_name)
         
-        score, _ = score_single_resume_with_agents(
+        score, _ = score_single_resume_with_combination(
             resume, 
             job_description, 
-            agent_A, 
-            agent_B,
-            agent_C,
-            agent_D,
-            candidate_index=i+1
+            combination_weights,
+            feature_counts,
+            feature_names,
+            agent_A,
+            word2vec_model,
+            jd_embedding,
+            candidate_index=i+1,
+            combination_index=combination_index+1
         )
         
         # Print only the scores to terminal (no processing details)
@@ -445,7 +466,7 @@ def run_evaluation_for_combination(agents_combination, resumes, job_description,
     system_ranking = [i+1 for i in ranked_indices]
     
     # Calculate accuracy
-    accuracy_metrics = evaluate_ranking_accuracy(system_ranking, human_ranking, scores)
+    accuracy_metrics = evaluate_ranking_accuracy(human_ranking, scores)
     
     # Log the rankings and accuracy to the log file
     logger.log(f"\nSystem Ranking: {system_ranking}")
@@ -454,25 +475,22 @@ def run_evaluation_for_combination(agents_combination, resumes, job_description,
     
     return {
         "combination": combination_name,
+        "combination_index": combination_index,
+        "combination_weights": combination_weights,
         "scores": scores,
         "system_ranking": system_ranking,
         "human_ranking": human_ranking,
-        "accuracy": accuracy_metrics['accuracy'],
-        "agents": {
-            "A": agent_A_id,
-            "B": agent_B_id,
-            "C": agent_C_id,
-            "D": agent_D_id
-        }
+        "accuracy": accuracy_metrics['accuracy']
     }
 
-def visualize_agent_combinations(results, weights_data, is_3d=True):
+def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True):
     """
     Visualize agent combinations using a multi-stage PCA approach with color gradient based on accuracy
     
     Args:
         results (list): List of evaluation results for each agent combination
-        weights_data (dict): Dictionary containing agent weights
+        feature_counts (dict): Dictionary with feature counts for each agent
+        feature_names (dict): Dictionary with feature names for each agent
         is_3d (bool): Whether to create 3D visualizations (True) or 2D (False)
         
     Returns:
@@ -481,165 +499,78 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
     # Create directory for visualizations if it doesn't exist
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
     
-    # Extract performance metrics for each agent combination
+    # Extract performance metrics and weights for each agent combination
     combination_names = []
     combination_accuracies = []
+    all_combination_weights = []
     
-    # Collect agent IDs and accuracies
+    # Extract feature counts
+    b_features = feature_counts["b_features"]
+    c_features = feature_counts["c_features"]
+    d_features = feature_counts["d_features"]
+    
+    # Collect data from results
     for result in results:
-        # Get agent IDs
-        agent_a_id = result["agents"]["A"]
-        agent_b_id = result["agents"]["B"]
-        agent_c_id = result["agents"]["C"]
-        agent_d_id = result["agents"]["D"]
-        
-        # Store names and accuracies
-        combination_names.append(f"{agent_a_id}+{agent_b_id}+{agent_c_id}+{agent_d_id}")
+        combination_names.append(result["combination"])
         combination_accuracies.append(result["accuracy"])
+        all_combination_weights.append(result["combination_weights"])
     
-    # Convert to numpy array
+    # Convert to numpy arrays
     accuracies = np.array(combination_accuracies)
+    all_combination_weights = np.array(all_combination_weights)
     
-    # Step 0: Prepare data structures for per-agent PCA
-    # First, get the dimensionality of each agent type's weight vector
-    b_features = len(list(weights_data["B"][0]["weights"].values()))
-    c_features = len(list(weights_data["C"][0]["weights"].values()))
-    d_features = len(list(weights_data["D"][0]["weights"].values()))
-    
-    # Log the raw feature dimensions for each agent type
+    # Log the raw feature dimensions
     logger.log(f"\nRaw feature dimensions:")
     logger.log(f"  Agent B features: {b_features}")
     logger.log(f"  Agent C features: {c_features}")
     logger.log(f"  Agent D features: {d_features}")
+    logger.log(f"  Total features per combination: {b_features + c_features + d_features}")
+    
+    # Split combination weights into agent-specific weights
+    b_weights_all = all_combination_weights[:, :b_features]
+    c_weights_all = all_combination_weights[:, b_features:b_features + c_features]
+    d_weights_all = all_combination_weights[:, b_features + c_features:]
     
     # Define the target dimensionality for per-agent PCA
     pca_dim = 5
     
-    # Create a scaler and PCA model for each agent type
+    # Create scalers and PCA models for each agent type
     b_scaler = StandardScaler()
     c_scaler = StandardScaler()
     d_scaler = StandardScaler()
     
-    # Create PCA models for each agent type
     b_pca = PCA(n_components=min(pca_dim, b_features))
     c_pca = PCA(n_components=min(pca_dim, c_features))
     d_pca = PCA(n_components=min(pca_dim, d_features))
     
-    # Step 1: Collect and process all weights for fitting the scalers and PCAs
-    all_b_weights = []
-    all_c_weights = []
-    all_d_weights = []
-    agent_b_ids = []
-    agent_c_ids = []
-    agent_d_ids = []
+    # Fit scalers and PCA models
+    b_scaled = b_scaler.fit_transform(b_weights_all)
+    c_scaled = c_scaler.fit_transform(c_weights_all)
+    d_scaled = d_scaler.fit_transform(d_weights_all)
     
-    for result in results:
-        # Get agent IDs
-        agent_b_id = result["agents"]["B"]
-        agent_c_id = result["agents"]["C"]
-        agent_d_id = result["agents"]["D"]
-        
-        # Store agent IDs
-        agent_b_ids.append(agent_b_id)
-        agent_c_ids.append(agent_c_id)
-        agent_d_ids.append(agent_d_id)
-        
-        # Get agent indices
-        b_idx = int(agent_b_id[1:]) - 1
-        c_idx = int(agent_c_id[1:]) - 1
-        d_idx = int(agent_d_id[1:]) - 1
-        
-        # Get raw weights for each agent
-        b_weights = list(weights_data["B"][b_idx]["weights"].values())
-        c_weights = list(weights_data["C"][c_idx]["weights"].values())
-        d_weights = list(weights_data["D"][d_idx]["weights"].values())
-        
-        # Add to collection
-        all_b_weights.append(b_weights)
-        all_c_weights.append(c_weights)
-        all_d_weights.append(d_weights)
+    # Apply PCA to each agent type
+    b_pca_features = b_pca.fit_transform(b_scaled)
+    c_pca_features = c_pca.fit_transform(c_scaled)
+    d_pca_features = d_pca.fit_transform(d_scaled)
     
-    # Convert to numpy arrays
-    all_b_weights = np.array(all_b_weights)
-    all_c_weights = np.array(all_c_weights)
-    all_d_weights = np.array(all_d_weights)
-    
-    # Fit the scalers to each agent type's weights
-    b_scaler.fit(all_b_weights)
-    c_scaler.fit(all_c_weights)
-    d_scaler.fit(all_d_weights)
-    
-    # Scale the weights
-    scaled_b_weights = b_scaler.transform(all_b_weights)
-    scaled_c_weights = c_scaler.transform(all_c_weights)
-    scaled_d_weights = d_scaler.transform(all_d_weights)
-    
-    # Fit the PCA models to the scaled weights
-    b_pca.fit(scaled_b_weights)
-    c_pca.fit(scaled_c_weights)
-    d_pca.fit(scaled_d_weights)
-    
-    # Log the explained variance for each agent's PCA
+    # Log explained variance
     logger.log(f"\nExplained variance ratios for per-agent PCA:")
     logger.log(f"  Agent B: {b_pca.explained_variance_ratio_}")
     logger.log(f"  Agent C: {c_pca.explained_variance_ratio_}")
     logger.log(f"  Agent D: {d_pca.explained_variance_ratio_}")
     
-    # Step 2: Apply PCA to each agent's weights and normalize
-    # Prepare arrays to store the PCA features for each agent type
-    b_pca_features_all = []
-    c_pca_features_all = []
-    d_pca_features_all = []
-    concatenated_features = []
-    
-    # Create a color normalizer for accuracy values
+    # Normalize accuracy values for coloring
     accuracy_scaler = StandardScaler()
     accuracies_normalized = accuracy_scaler.fit_transform(accuracies.reshape(-1, 1)).flatten()
     
-    # Determine color normalization range
+    # Create color normalization and colormap
     max_abs_accuracy = max(abs(accuracies_normalized))
     norm = plt.Normalize(-max_abs_accuracy, max_abs_accuracy)
-    
-    # Create colormap
     colors = ["blue", "white", "red"]
     cmap = LinearSegmentedColormap.from_list("BWR", colors)
     
-    for i in range(len(results)):
-        # Apply PCA to each agent's scaled weights
-        b_pca_features = b_pca.transform(scaled_b_weights[i].reshape(1, -1))[0]
-        c_pca_features = c_pca.transform(scaled_c_weights[i].reshape(1, -1))[0]
-        d_pca_features = d_pca.transform(scaled_d_weights[i].reshape(1, -1))[0]
-        
-        # Store PCA features
-        b_pca_features_all.append(b_pca_features)
-        c_pca_features_all.append(c_pca_features)
-        d_pca_features_all.append(d_pca_features)
-        
-        # Step 3: Normalize each PCA vector using L2 norm
-        b_norm = np.linalg.norm(b_pca_features)
-        c_norm = np.linalg.norm(c_pca_features)
-        d_norm = np.linalg.norm(d_pca_features)
-        
-        # Avoid division by zero
-        if b_norm > 0:
-            b_pca_features = b_pca_features / b_norm
-        if c_norm > 0:
-            c_pca_features = c_pca_features / c_norm
-        if d_norm > 0:
-            d_pca_features = d_pca_features / d_norm
-        
-        # Step 4: Concatenate the normalized PCA vectors
-        combined_features = np.concatenate([b_pca_features, c_pca_features, d_pca_features])
-        concatenated_features.append(combined_features)
-    
-    # Convert to numpy arrays
-    b_pca_features_all = np.array(b_pca_features_all)
-    c_pca_features_all = np.array(c_pca_features_all)
-    d_pca_features_all = np.array(d_pca_features_all)
-    
-    # Part 2: Visualize PCA-Reduced Agent Vectors Separately
     # Function to visualize agent-specific PCA
-    def visualize_agent_pca(agent_features, agent_type, agent_ids):
+    def visualize_agent_pca(agent_features, agent_type):
         # Apply PCA to the agent features
         n_components = 3 if is_3d else 2
         agent_pca = PCA(n_components=n_components)
@@ -688,6 +619,7 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
         
         # Save the plot
         dim_label = "3d" if is_3d else "2d"
+        plt.show()
         plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_pca_{dim_label}.png"))
         plt.close()
         
@@ -697,7 +629,7 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
         
         # Create a CSV file with the results
         df = pd.DataFrame({
-            "agent_id": agent_ids,
+            "combination": combination_names,
             "pca_x": agent_embedding[:, 0],
             "pca_y": agent_embedding[:, 1],
             "accuracy": accuracies,
@@ -712,11 +644,35 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
         df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_pca_{dim_label}.csv"), index=False)
     
     # Visualize each agent type separately
-    visualize_agent_pca(b_pca_features_all, "B", agent_b_ids)
-    visualize_agent_pca(c_pca_features_all, "C", agent_c_ids)
-    visualize_agent_pca(d_pca_features_all, "D", agent_d_ids)
+    visualize_agent_pca(b_pca_features, "B")
+    visualize_agent_pca(c_pca_features, "C")
+    visualize_agent_pca(d_pca_features, "D")
     
-    # Convert to numpy array for global PCA
+    # Normalize each agent's PCA features using L2 norm
+    concatenated_features = []
+    for i in range(len(results)):
+        # Get PCA features for this combination
+        b_features_i = b_pca_features[i]
+        c_features_i = c_pca_features[i]
+        d_features_i = d_pca_features[i]
+        
+        # Normalize each using L2 norm
+        b_norm = np.linalg.norm(b_features_i)
+        c_norm = np.linalg.norm(c_features_i)
+        d_norm = np.linalg.norm(d_features_i)
+        
+        if b_norm > 0:
+            b_features_i = b_features_i / b_norm
+        if c_norm > 0:
+            c_features_i = c_features_i / c_norm
+        if d_norm > 0:
+            d_features_i = d_features_i / d_norm
+        
+        # Concatenate normalized features
+        combined_features = np.concatenate([b_features_i, c_features_i, d_features_i])
+        concatenated_features.append(combined_features)
+    
+    # Convert to numpy array
     X = np.array(concatenated_features)
     
     # Skip if we don't have enough data points
@@ -724,11 +680,11 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
         logger.log("Not enough agent combinations for global PCA (need at least 2)")
         return
     
-    # Step 5: Normalize the combined feature vectors
+    # Normalize the combined feature vectors
     global_scaler = StandardScaler()
     X_normalized = global_scaler.fit_transform(X)
     
-    # Step 6: Apply global PCA to reduce to 2D or 3D
+    # Apply global PCA
     n_components = 3 if is_3d else 2
     global_pca = PCA(n_components=n_components)
     embedding = global_pca.fit_transform(X_normalized)
@@ -737,12 +693,11 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
     logger.log(f"\nGlobal PCA explained variance: {global_pca.explained_variance_ratio_}")
     print(f"Global PCA explained variance: {global_pca.explained_variance_ratio_}")
     
-    # Step 7: Create the visualization
+    # Create the global visualization
     if is_3d:
         fig = plt.figure(figsize=(12, 10))
         ax = fig.add_subplot(111, projection='3d')
         
-        # Create 3D scatter plot
         scatter = ax.scatter(
             embedding[:, 0],
             embedding[:, 1],
@@ -753,7 +708,6 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
             s=30,
         )
         
-        # Add labels
         ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 3D)")
         ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
         ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
@@ -761,7 +715,6 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
     else:
         fig, ax = plt.subplots(figsize=(12, 10))
         
-        # Create 2D scatter plot
         scatter = ax.scatter(
             embedding[:, 0],
             embedding[:, 1],
@@ -771,7 +724,6 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
             s=30,
         )
         
-        # Add labels
         ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 2D)")
         ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
         ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
@@ -784,6 +736,7 @@ def visualize_agent_combinations(results, weights_data, is_3d=True):
     
     # Save the plot
     dim_label = "3d" if is_3d else "2d"
+    plt.show()
     plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_combinations_pca_{dim_label}.png"))
     plt.close()
     
@@ -827,7 +780,9 @@ def run_performance_evaluation():
     
     # Load or generate weights and embeddings
     data = load_or_generate_weights(job_description)
-    weights = data["weights"]
+    combination_weights = data["combination_weights"]
+    feature_counts = data["feature_counts"]
+    feature_names = data["feature_names"]
     jd_embedding = data["jd_embedding"]
     
     # Create Word2Vec model for the job description
@@ -843,29 +798,29 @@ def run_performance_evaluation():
     
     logger.log(f"Human Expert Ranking (Ground Truth): {human_ranking}")
     
-    # Create agent instances using fixed weights and shared JD embedding
-    agent_A_list, agent_B_list, agent_C_list, agent_D_list = create_agents(weights, word2vec_model, jd_embedding)
+    # Create agent instances
+    agent_A_list, feature_counts, feature_names = create_agents(data, word2vec_model, jd_embedding)
     
-    # Log the number of agents in each category
-    logger.log(f"\nNumber of agents per category:")
-    logger.log(f"Category A: {n_A} agents")
-    logger.log(f"Category B: {n_B} agents")
-    logger.log(f"Category C: {n_C} agents")
-    logger.log(f"Category D: {n_D} agents")
-    logger.log(f"Total combinations to evaluate: {n_A * n_B * n_C * n_D}")
+    # Log the number of combinations and features
+    logger.log(f"\nNumber of combinations to evaluate: {len(combination_weights)}")
+    logger.log(f"Feature counts per combination:")
+    logger.log(f"  Agent B features: {feature_counts['b_features']}")
+    logger.log(f"  Agent C features: {feature_counts['c_features']}")
+    logger.log(f"  Agent D features: {feature_counts['d_features']}")
+    logger.log(f"  Total features: {sum(feature_counts.values())}")
     
-    # Generate all combinations of agents
-    all_combinations = list(itertools.product(agent_A_list, agent_B_list, agent_C_list, agent_D_list))
-    print(f"\nEvaluating {len(all_combinations)} agent combinations...")
+    print(f"\nEvaluating {len(combination_weights)} agent combinations...")
     
     # Evaluate each combination
     results = []
-    for i, combo in enumerate(all_combinations):
-        
-        result = run_evaluation_for_combination(combo, resumes, job_description, human_ranking)
+    for i, weights in enumerate(combination_weights):
+        result = run_evaluation_for_combination(
+            weights, i, resumes, job_description, human_ranking,
+            feature_counts, feature_names, agent_A_list, word2vec_model, jd_embedding
+        )
         results.append(result)
     
-    # Sort results by accuracy (higher value is better)
+    # Sort results by accuracy 
     sorted_results = sorted(results, key=lambda x: x["accuracy"], reverse=True)
     
     # Display final comparison
@@ -901,7 +856,9 @@ def run_performance_evaluation():
     
     # Visualize agent combinations using a multi-stage PCA approach
     logger.log("\nVisualizing agent combinations using a multi-stage PCA approach...")
-    visualize_agent_combinations(results, weights, is_3d=True)
+    visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True)
+    
+    return sorted_results
 
 def main():
     """
