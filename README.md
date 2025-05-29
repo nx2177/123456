@@ -11,6 +11,9 @@ Here is a break down of the whole architecture:
 <img width="992" alt="47b931ee578503ae7832388ccfa3e44" src="https://github.com/user-attachments/assets/6bdac7a1-e858-47f8-b95e-5577f7f36fc6" />
 <img width="989" alt="cee7426a239bd052cfffa02db04e92e" src="https://github.com/user-attachments/assets/de51e3c2-a928-46d0-9bf0-b685486cea29" />
 <img width="974" alt="d506f2508a65df51cad9c453c826cdd" src="https://github.com/user-attachments/assets/34a6ef50-aead-4cc6-9f39-20ef7a95398d" />
+<img width="992" alt="ac787c95823b7a112aac0059ab0f7e7" src="https://github.com/user-attachments/assets/6861b1a9-2034-4bd7-b9ba-cd0eb90f9093" />
+<img width="993" alt="8d94a30214461b50809385cc969424e" src="https://github.com/user-attachments/assets/644d58db-7a0a-4e7d-8aa1-702f0c39d933" />
+
 
 ### 🗂️ **1. Input: Resume & Job Description Simulation**
 
