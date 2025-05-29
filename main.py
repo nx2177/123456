@@ -16,10 +16,15 @@ from collections import defaultdict
 from matplotlib.colors import LinearSegmentedColormap
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
 # Configuration for number of agents in each category
 n_A = 1  # Number of Agent A instances
-n_combinations = 10000  # Number of agent combinations to generate
+n_combinations = 5000  # Number of agent combinations to generate
 
 # Weights and embedding configuration
 WEIGHTS_FILE = "weights.json"
@@ -33,6 +38,23 @@ WORD2VEC_MIN_COUNT = 1  # Minimum count for Word2Vec model
 OUTPUT_DIR = "analysis_output"
 VISUALIZATIONS_DIR = os.path.join(OUTPUT_DIR, "visualizations")
 CSV_DIR = os.path.join(OUTPUT_DIR, "csv")
+
+# Sigmoid transformation and filtering parameters
+NORMALIZATION_CONSTANT_L = 0.1  # Normalization factor for accuracy scores
+FILTERING_INTERVAL_WIDTH_A = 0.01  # Width of exclusion interval around 0.5
+
+# Scatter plot visualization parameters
+SCATTER_ALPHA = 0.8  # Transparency for scatter plot points
+SCATTER_SIZE = 20   # Size of scatter plot points
+
+# Neural Network configuration parameters
+NN_OUTPUT_MODE = 1  # 1: Regression, 2: Binary Classification, 3: Three-Class Classification
+NN_HIDDEN_LAYERS = [27, 9, 3]  # Hidden layer sizes
+NN_EPOCHS = 100  # Number of training epochs
+NN_BATCH_SIZE = 32  # Batch size for training
+NN_VALIDATION_SPLIT = 0.2  # Fraction of data to use for validation
+NN_LEARNING_RATE = 0.001  # Learning rate for Adam optimizer
+NN_RANDOM_STATE = 42  # Random state for reproducibility
 
 # Create a logger for storing processing details
 class Logger:
@@ -56,6 +78,253 @@ class Logger:
 
 # Initialize logger
 logger = Logger(os.path.join("logs", "processing_details.log"))
+
+class AccuracyPredictor:
+    """
+    Neural Network model to predict agent combination accuracy with multiple output modes
+    """
+    
+    def __init__(self, input_dim, output_mode=1, hidden_layers=None):
+        """
+        Initialize the AccuracyPredictor
+        
+        Args:
+            input_dim (int): Dimension of input weight vectors
+            output_mode (int): 1=Regression, 2=Binary Classification, 3=Three-Class Classification
+            hidden_layers (list): List of hidden layer sizes
+        """
+        self.input_dim = input_dim
+        self.output_mode = output_mode
+        self.hidden_layers = hidden_layers or NN_HIDDEN_LAYERS
+        self.model = None
+        self.history = None
+        
+    def _prepare_targets(self, accuracies_raw):
+        """
+        Prepare target values based on output mode
+        
+        Args:
+            accuracies_raw (np.array): Raw accuracy values
+            
+        Returns:
+            np.array: Prepared target values
+        """
+        if self.output_mode == 1:  # Regression
+            return accuracies_raw
+            
+        elif self.output_mode == 2:  # Binary Classification
+            # Good = accuracy > 0, Bad = accuracy <= 0
+            binary_labels = (accuracies_raw > 0).astype(int)
+            return tf.keras.utils.to_categorical(binary_labels, num_classes=2)
+            
+        elif self.output_mode == 3:  # Three-Class Classification
+            # Bad if accuracy < -a, Mid if -a <= accuracy <= a, Good if accuracy > a
+            a = FILTERING_INTERVAL_WIDTH_A
+            labels = np.zeros(len(accuracies_raw), dtype=int)
+            labels[accuracies_raw < -a] = 0  # Bad
+            labels[(accuracies_raw >= -a) & (accuracies_raw <= a)] = 1  # Mid
+            labels[accuracies_raw > a] = 2  # Good
+            return tf.keras.utils.to_categorical(labels, num_classes=3)
+            
+        else:
+            raise ValueError(f"Invalid output_mode: {self.output_mode}")
+    
+    def _build_model(self):
+        """
+        Build the neural network model based on output mode
+        """
+        model = keras.Sequential()
+        
+        # Input layer
+        model.add(layers.Dense(self.hidden_layers[0], 
+                              activation='relu', 
+                              input_shape=(self.input_dim,),
+                              name='hidden_1'))
+        
+        # Hidden layers
+        for i, units in enumerate(self.hidden_layers[1:], 2):
+            model.add(layers.Dense(units, activation='relu', name=f'hidden_{i}'))
+        
+        # Output layer based on mode
+        if self.output_mode == 1:  # Regression
+            model.add(layers.Dense(1, activation='linear', name='output'))
+            model.compile(optimizer=keras.optimizers.Adam(learning_rate=NN_LEARNING_RATE),
+                         loss='mse',
+                         metrics=['mae'])
+            
+        elif self.output_mode == 2:  # Binary Classification
+            model.add(layers.Dense(2, activation='softmax', name='output'))
+            model.compile(optimizer=keras.optimizers.Adam(learning_rate=NN_LEARNING_RATE),
+                         loss='categorical_crossentropy',
+                         metrics=['accuracy'])
+            
+        elif self.output_mode == 3:  # Three-Class Classification
+            model.add(layers.Dense(3, activation='softmax', name='output'))
+            model.compile(optimizer=keras.optimizers.Adam(learning_rate=NN_LEARNING_RATE),
+                         loss='categorical_crossentropy',
+                         metrics=['accuracy'])
+        
+        return model
+    
+    def train(self, X_train, y_train_raw, X_val=None, y_val_raw=None, verbose=1):
+        """
+        Train the neural network model
+        
+        Args:
+            X_train (np.array): Training input data (weight vectors)
+            y_train_raw (np.array): Training target data (raw accuracies)
+            X_val (np.array): Validation input data
+            y_val_raw (np.array): Validation target data
+            verbose (int): Verbosity level
+            
+        Returns:
+            keras.callbacks.History: Training history
+        """
+        # Prepare targets based on output mode
+        y_train = self._prepare_targets(y_train_raw)
+        y_val = self._prepare_targets(y_val_raw) if y_val_raw is not None else None
+        
+        # Build model
+        self.model = self._build_model()
+        
+        # Print model summary
+        if verbose:
+            print(f"\nNeural Network Architecture (Mode {self.output_mode}):")
+            self.model.summary()
+        
+        # Prepare validation data
+        validation_data = (X_val, y_val) if X_val is not None and y_val is not None else None
+        
+        # Train the model
+        self.history = self.model.fit(
+            X_train, y_train,
+            epochs=NN_EPOCHS,
+            batch_size=NN_BATCH_SIZE,
+            validation_data=validation_data,
+            verbose=verbose
+        )
+        
+        return self.history
+    
+    def predict(self, X):
+        """
+        Make predictions using the trained model
+        
+        Args:
+            X (np.array): Input data
+            
+        Returns:
+            np.array: Predictions
+        """
+        if self.model is None:
+            raise ValueError("Model must be trained before making predictions")
+        
+        predictions = self.model.predict(X)
+        
+        # For classification, convert probabilities to class labels
+        if self.output_mode in [2, 3]:
+            predictions = np.argmax(predictions, axis=1)
+            
+        return predictions
+    
+    def evaluate(self, X_test, y_test_raw, verbose=1):
+        """
+        Evaluate the model on test data
+        
+        Args:
+            X_test (np.array): Test input data
+            y_test_raw (np.array): Test target data (raw accuracies)
+            verbose (int): Verbosity level
+            
+        Returns:
+            dict: Evaluation results
+        """
+        if self.model is None:
+            raise ValueError("Model must be trained before evaluation")
+        
+        # Prepare targets
+        y_test = self._prepare_targets(y_test_raw)
+        
+        # Evaluate model
+        results = {}
+        test_loss, test_metric = self.model.evaluate(X_test, y_test, verbose=0)
+        results['test_loss'] = test_loss
+        
+        if self.output_mode == 1:  # Regression
+            results['test_mae'] = test_metric
+            if verbose:
+                print(f"\nRegression Results:")
+                print(f"Test Loss (MSE): {test_loss:.4f}")
+                print(f"Test MAE: {test_metric:.4f}")
+                
+        else:  # Classification
+            results['test_accuracy'] = test_metric
+            
+            # Get predictions for confusion matrix and classification report
+            y_pred = self.predict(X_test)
+            y_true = np.argmax(y_test, axis=1)
+            
+            # Confusion matrix
+            cm = confusion_matrix(y_true, y_pred)
+            results['confusion_matrix'] = cm
+            
+            # Classification report
+            if self.output_mode == 2:
+                target_names = ['Bad', 'Good']
+            else:  # mode 3
+                target_names = ['Bad', 'Mid', 'Good']
+            
+            class_report = classification_report(y_true, y_pred, target_names=target_names, output_dict=True)
+            results['classification_report'] = class_report
+            
+            if verbose:
+                print(f"\nClassification Results:")
+                print(f"Test Loss: {test_loss:.4f}")
+                print(f"Test Accuracy: {test_metric:.4f}")
+                print(f"\nConfusion Matrix:")
+                print(cm)
+                print(f"\nClassification Report:")
+                print(classification_report(y_true, y_pred, target_names=target_names))
+        
+        return results
+    
+    def plot_training_history(self):
+        """
+        Plot training history
+        """
+        if self.history is None:
+            print("No training history available")
+            return
+        
+        fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+        
+        # Plot loss
+        axes[0].plot(self.history.history['loss'], label='Training Loss')
+        if 'val_loss' in self.history.history:
+            axes[0].plot(self.history.history['val_loss'], label='Validation Loss')
+        axes[0].set_title('Model Loss')
+        axes[0].set_xlabel('Epoch')
+        axes[0].set_ylabel('Loss')
+        axes[0].legend()
+        
+        # Plot metric
+        metric_name = 'mae' if self.output_mode == 1 else 'accuracy'
+        if metric_name in self.history.history:
+            axes[1].plot(self.history.history[metric_name], label=f'Training {metric_name.upper()}')
+            if f'val_{metric_name}' in self.history.history:
+                axes[1].plot(self.history.history[f'val_{metric_name}'], label=f'Validation {metric_name.upper()}')
+            axes[1].set_title(f'Model {metric_name.upper()}')
+            axes[1].set_xlabel('Epoch')
+            axes[1].set_ylabel(metric_name.upper())
+            axes[1].legend()
+        
+        plt.tight_layout()
+        
+        # Save the plot
+        os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f'nn_training_history_mode_{self.output_mode}.png'))
+        plt.show()
+        plt.close()
 
 def generate_random_weights(n_weights: int, mean: float = 1.0, variance: float = 0.05) -> List[float]:
     """
@@ -375,14 +644,15 @@ def score_single_resume_with_combination(
 
 def evaluate_ranking_accuracy(human_ranking, scores):
     """
-    Calculate the accuracy of the system ranking compared to human ranking using linear regression
+    Calculate the accuracy of the system ranking compared to human ranking using linear regression,
+    then apply normalization and sigmoid transformation
     
     Args:
         human_ranking (list): Human's ranking of candidates
         scores (list): System-generated scores for each resume
         
     Returns:
-        dict: Accuracy metrics
+        dict: Accuracy metrics with both raw and transformed values
     """
     # Get the number of resumes
     n = len(human_ranking)
@@ -400,11 +670,22 @@ def evaluate_ranking_accuracy(human_ranking, scores):
     # Fit linear regression
     slope, intercept = np.polyfit(x, y, 1)
     
-    # Calculate accuracy as negative slope
-    accuracy = -slope
+    # Calculate raw accuracy as negative slope
+    raw_accuracy = -slope
+    
+    # Apply normalization and sigmoid transformation
+    normalized_accuracy = raw_accuracy / NORMALIZATION_CONSTANT_L
+    
+    # Apply sigmoid transformation
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+    
+    transformed_accuracy = sigmoid(normalized_accuracy)
     
     return {
-        "accuracy": accuracy
+        "accuracy_raw": raw_accuracy,
+        "accuracy_normalized": normalized_accuracy,
+        "accuracy": transformed_accuracy  # This is the final transformed accuracy
     }
 
 def run_evaluation_for_combination(combination_weights, combination_index, resumes, job_description, human_ranking, feature_counts, feature_names, agent_A_list, word2vec_model, jd_embedding):
@@ -471,7 +752,9 @@ def run_evaluation_for_combination(combination_weights, combination_index, resum
     # Log the rankings and accuracy to the log file
     logger.log(f"\nSystem Ranking: {system_ranking}")
     logger.log(f"Human Ranking:  {human_ranking}")
-    logger.log(f"\nAccuracy (negative slope): {accuracy_metrics['accuracy']:.4f}")
+    logger.log(f"\nRaw Accuracy (negative slope): {accuracy_metrics['accuracy_raw']:.4f}")
+    logger.log(f"Normalized Accuracy: {accuracy_metrics['accuracy_normalized']:.4f}")
+    logger.log(f"Transformed Accuracy (sigmoid): {accuracy_metrics['accuracy']:.4f}")
     
     return {
         "combination": combination_name,
@@ -480,12 +763,14 @@ def run_evaluation_for_combination(combination_weights, combination_index, resum
         "scores": scores,
         "system_ranking": system_ranking,
         "human_ranking": human_ranking,
-        "accuracy": accuracy_metrics['accuracy']
+        "accuracy_raw": accuracy_metrics['accuracy_raw'],
+        "accuracy_normalized": accuracy_metrics['accuracy_normalized'],
+        "accuracy": accuracy_metrics['accuracy']  # This is the transformed accuracy
     }
 
 def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True):
     """
-    Visualize agent combinations using a multi-stage PCA approach with color gradient based on accuracy
+    Visualize agent combinations using a multi-stage PCA approach with sigmoid transformation and filtering
     
     Args:
         results (list): List of evaluation results for each agent combination
@@ -501,7 +786,8 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     
     # Extract performance metrics and weights for each agent combination
     combination_names = []
-    combination_accuracies = []
+    combination_accuracies_raw = []
+    combination_accuracies_transformed = []
     all_combination_weights = []
     
     # Extract feature counts
@@ -512,12 +798,42 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     # Collect data from results
     for result in results:
         combination_names.append(result["combination"])
-        combination_accuracies.append(result["accuracy"])
+        combination_accuracies_raw.append(result["accuracy_raw"])
+        combination_accuracies_transformed.append(result["accuracy"])  # Already sigmoid-transformed
         all_combination_weights.append(result["combination_weights"])
     
     # Convert to numpy arrays
-    accuracies = np.array(combination_accuracies)
+    accuracies_raw = np.array(combination_accuracies_raw)
+    accuracies_transformed = np.array(combination_accuracies_transformed)  # Already sigmoid values 0-1
     all_combination_weights = np.array(all_combination_weights)
+    
+    # Step 3: Filter out combinations with scores in the exclusion interval [0.5-a, 0.5+a]
+    # Use the already-transformed sigmoid scores
+    exclusion_lower = 0.5 - FILTERING_INTERVAL_WIDTH_A
+    exclusion_upper = 0.5 + FILTERING_INTERVAL_WIDTH_A
+    
+    # Create filter mask for combinations outside the exclusion interval
+    filter_mask = (accuracies_transformed < exclusion_lower) | (accuracies_transformed > exclusion_upper)
+    
+    # Apply filter to all data
+    filtered_combination_names = [name for i, name in enumerate(combination_names) if filter_mask[i]]
+    filtered_accuracies_raw = accuracies_raw[filter_mask]
+    filtered_accuracies_transformed = accuracies_transformed[filter_mask]
+    filtered_combination_weights = all_combination_weights[filter_mask]
+    
+    logger.log(f"\nSigmoid Transformation and Filtering:")
+    logger.log(f"  Normalization constant L: {NORMALIZATION_CONSTANT_L}")
+    logger.log(f"  Filtering interval width a: {FILTERING_INTERVAL_WIDTH_A}")
+    logger.log(f"  Exclusion interval: [{exclusion_lower:.2f}, {exclusion_upper:.2f}]")
+    logger.log(f"  Original combinations: {len(combination_names)}")
+    logger.log(f"  Filtered combinations: {len(filtered_combination_names)}")
+    logger.log(f"  Filtered out: {len(combination_names) - len(filtered_combination_names)}")
+    
+    # Check if we have enough filtered combinations for visualization
+    if len(filtered_combination_names) < 2:
+        logger.log("Not enough filtered combinations for PCA visualization (need at least 2)")
+        print("Warning: Not enough filtered combinations for PCA visualization")
+        return
     
     # Log the raw feature dimensions
     logger.log(f"\nRaw feature dimensions:")
@@ -526,10 +842,10 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     logger.log(f"  Agent D features: {d_features}")
     logger.log(f"  Total features per combination: {b_features + c_features + d_features}")
     
-    # Split combination weights into agent-specific weights
-    b_weights_all = all_combination_weights[:, :b_features]
-    c_weights_all = all_combination_weights[:, b_features:b_features + c_features]
-    d_weights_all = all_combination_weights[:, b_features + c_features:]
+    # Split combination weights into agent-specific weights (using filtered data)
+    b_weights_all = filtered_combination_weights[:, :b_features]
+    c_weights_all = filtered_combination_weights[:, b_features:b_features + c_features]
+    d_weights_all = filtered_combination_weights[:, b_features + c_features:]
     
     # Define the target dimensionality for per-agent PCA
     pca_dim = 5
@@ -559,13 +875,9 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     logger.log(f"  Agent C: {c_pca.explained_variance_ratio_}")
     logger.log(f"  Agent D: {d_pca.explained_variance_ratio_}")
     
-    # Normalize accuracy values for coloring
-    accuracy_scaler = StandardScaler()
-    accuracies_normalized = accuracy_scaler.fit_transform(accuracies.reshape(-1, 1)).flatten()
-    
-    # Create color normalization and colormap
-    max_abs_accuracy = max(abs(accuracies_normalized))
-    norm = plt.Normalize(-max_abs_accuracy, max_abs_accuracy)
+    # Create color normalization and colormap for sigmoid scores
+    # Sigmoid scores range from 0 to 1, with 0.5 as neutral (now filtered out)
+    norm = plt.Normalize(0, 1)
     colors = ["blue", "white", "red"]
     cmap = LinearSegmentedColormap.from_list("BWR", colors)
     
@@ -583,33 +895,35 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
         else:
             fig, ax = plt.subplots(figsize=(12, 10))
             
-        # Plot the points
+        # Plot the points using sigmoid scores for coloring
         if is_3d:
             scatter = ax.scatter(
                 agent_embedding[:, 0],
                 agent_embedding[:, 1],
                 agent_embedding[:, 2],
-                c=accuracies_normalized,
+                c=filtered_accuracies_transformed,
                 cmap=cmap,
                 norm=norm,
-                s=30
+                s=SCATTER_SIZE,
+                alpha=SCATTER_ALPHA
             )
         else:
             scatter = ax.scatter(
                 agent_embedding[:, 0],
                 agent_embedding[:, 1],
-                c=accuracies_normalized,
+                c=filtered_accuracies_transformed,
                 cmap=cmap,
                 norm=norm,
-                s=30
+                s=SCATTER_SIZE,
+                alpha=SCATTER_ALPHA
             )
             
         # Add colorbar
         cbar = plt.colorbar(scatter)
-        cbar.set_label('Normalized Accuracy (Negative Slope)')
+        cbar.set_label('Sigmoid-Transformed Accuracy (0=Poor, 1=Excellent)')
         
         # Add labels
-        ax.set_title(f"Agent {agent_type} PCA Projection")
+        ax.set_title(f"Agent {agent_type} PCA Projection (Filtered)")
         ax.set_xlabel(f"PCA Dimension 1 (Explained Variance: {agent_pca.explained_variance_ratio_[0]:.2f})")
         ax.set_ylabel(f"PCA Dimension 2 (Explained Variance: {agent_pca.explained_variance_ratio_[1]:.2f})")
         if is_3d:
@@ -619,21 +933,21 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
         
         # Save the plot
         dim_label = "3d" if is_3d else "2d"
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_pca_{dim_label}_filtered.png"))
         plt.show()
-        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_pca_{dim_label}.png"))
         plt.close()
         
         # Log information
-        logger.log(f"\nAgent {agent_type} PCA Visualization:")
+        logger.log(f"\nAgent {agent_type} PCA Visualization (Filtered):")
         logger.log(f"  Explained variance: {agent_pca.explained_variance_ratio_}")
         
         # Create a CSV file with the results
         df = pd.DataFrame({
-            "combination": combination_names,
+            "combination": filtered_combination_names,
             "pca_x": agent_embedding[:, 0],
             "pca_y": agent_embedding[:, 1],
-            "accuracy": accuracies,
-            "accuracy_normalized": accuracies_normalized
+            "accuracy_original": filtered_accuracies_raw,
+            "accuracy_sigmoid": filtered_accuracies_transformed
         })
         
         if is_3d:
@@ -641,7 +955,7 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
             
         # Save CSV file
         os.makedirs(CSV_DIR, exist_ok=True)
-        df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_pca_{dim_label}.csv"), index=False)
+        df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_pca_{dim_label}_filtered.csv"), index=False)
     
     # Visualize each agent type separately
     visualize_agent_pca(b_pca_features, "B")
@@ -650,7 +964,7 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     
     # Normalize each agent's PCA features using L2 norm
     concatenated_features = []
-    for i in range(len(results)):
+    for i in range(len(filtered_combination_names)):
         # Get PCA features for this combination
         b_features_i = b_pca_features[i]
         c_features_i = c_pca_features[i]
@@ -677,7 +991,7 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     
     # Skip if we don't have enough data points
     if len(X) < 2:
-        logger.log("Not enough agent combinations for global PCA (need at least 2)")
+        logger.log("Not enough filtered combinations for global PCA (need at least 2)")
         return
     
     # Normalize the combined feature vectors
@@ -702,13 +1016,14 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
             embedding[:, 0],
             embedding[:, 1],
             embedding[:, 2],
-            c=accuracies_normalized,
+            c=filtered_accuracies_transformed,
             cmap=cmap,
             norm=norm,
-            s=30,
+            s=SCATTER_SIZE,
+            alpha=SCATTER_ALPHA
         )
         
-        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 3D)")
+        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 3D, Filtered)")
         ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
         ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
         ax.set_zlabel(f"Global PCA Dimension 3 (Explained Variance: {global_pca.explained_variance_ratio_[2]:.2f})")
@@ -718,42 +1033,45 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
         scatter = ax.scatter(
             embedding[:, 0],
             embedding[:, 1],
-            c=accuracies_normalized,
+            c=filtered_accuracies_transformed,
             cmap=cmap,
             norm=norm,
-            s=30,
+            s=SCATTER_SIZE,
+            alpha=SCATTER_ALPHA
         )
         
-        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 2D)")
+        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 2D, Filtered)")
         ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
         ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
     
     # Add colorbar
     cbar = plt.colorbar(scatter)
-    cbar.set_label('Normalized Accuracy (Negative Slope)')
+    cbar.set_label('Sigmoid-Transformed Accuracy (0=Poor, 1=Excellent)')
     
     plt.tight_layout()
     
     # Save the plot
     dim_label = "3d" if is_3d else "2d"
+    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_combinations_pca_{dim_label}_filtered.png"))
     plt.show()
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_combinations_pca_{dim_label}.png"))
     plt.close()
     
     # Log information
-    logger.log("\nAgent Combination PCA Visualization:")
-    logger.log(f"  Total combinations: {len(X)}")
+    logger.log("\nAgent Combination PCA Visualization (Filtered):")
+    logger.log(f"  Total filtered combinations: {len(X)}")
     logger.log(f"  Dimensions: {dim_label}")
-    logger.log(f"  Min accuracy (original): {min(accuracies):.4f}")
-    logger.log(f"  Max accuracy (original): {max(accuracies):.4f}")
+    logger.log(f"  Min accuracy (original): {min(filtered_accuracies_raw):.4f}")
+    logger.log(f"  Max accuracy (original): {max(filtered_accuracies_raw):.4f}")
+    logger.log(f"  Min sigmoid score: {min(filtered_accuracies_transformed):.4f}")
+    logger.log(f"  Max sigmoid score: {max(filtered_accuracies_transformed):.4f}")
     
     # Create a CSV file with the results
     df = pd.DataFrame({
-        "combination": combination_names,
+        "combination": filtered_combination_names,
         "pca_x": embedding[:, 0],
         "pca_y": embedding[:, 1],
-        "accuracy": accuracies,
-        "accuracy_normalized": accuracies_normalized
+        "accuracy_original": filtered_accuracies_raw,
+        "accuracy_sigmoid": filtered_accuracies_transformed
     })
     
     # Add z dimension if 3D
@@ -762,7 +1080,171 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     
     # Save CSV file
     os.makedirs(CSV_DIR, exist_ok=True)
-    df.to_csv(os.path.join(CSV_DIR, f"agent_combinations_pca_{dim_label}.csv"), index=False)
+    df.to_csv(os.path.join(CSV_DIR, f"agent_combinations_pca_{dim_label}_filtered.csv"), index=False)
+
+def train_accuracy_predictor(results, feature_counts, output_mode=None):
+    """
+    Train and evaluate a neural network to predict agent combination accuracy
+    
+    Args:
+        results (list): List of evaluation results for each agent combination
+        feature_counts (dict): Dictionary with feature counts for each agent
+        output_mode (int): Neural network output mode (1, 2, or 3). If None, uses NN_OUTPUT_MODE
+        
+    Returns:
+        AccuracyPredictor: Trained neural network model
+    """
+    if output_mode is None:
+        output_mode = NN_OUTPUT_MODE
+    
+    logger.log(f"\n{'='*50}")
+    logger.log(f"TRAINING NEURAL NETWORK PREDICTOR (MODE {output_mode})")
+    logger.log(f"{'='*50}")
+    
+    # Extract data from results
+    X = []  # Weight vectors
+    y_raw = []  # Raw accuracy values
+    combination_names = []
+    
+    for result in results:
+        X.append(result["combination_weights"])
+        y_raw.append(result["accuracy_raw"])
+        combination_names.append(result["combination"])
+    
+    # Convert to numpy arrays
+    X = np.array(X)
+    y_raw = np.array(y_raw)
+    
+    # Log dataset information
+    input_dim = X.shape[1]
+    n_samples = X.shape[0]
+    
+    logger.log(f"\nDataset Information:")
+    logger.log(f"  Number of samples: {n_samples}")
+    logger.log(f"  Input dimension: {input_dim}")
+    logger.log(f"  Feature breakdown:")
+    logger.log(f"    Agent B features: {feature_counts['b_features']}")
+    logger.log(f"    Agent C features: {feature_counts['c_features']}")
+    logger.log(f"    Agent D features: {feature_counts['d_features']}")
+    logger.log(f"  Raw accuracy range: [{y_raw.min():.4f}, {y_raw.max():.4f}]")
+    
+    print(f"\nTraining Neural Network Predictor (Mode {output_mode}):")
+    print(f"Dataset: {n_samples} samples, {input_dim} features")
+    print(f"Raw accuracy range: [{y_raw.min():.4f}, {y_raw.max():.4f}]")
+    
+    # Check if we have enough data
+    if n_samples < 10:
+        logger.log("Warning: Very small dataset, neural network training may not be effective")
+        print("Warning: Very small dataset, neural network training may not be effective")
+        
+    # Split data into train/validation/test sets
+    # First split: 80% train+val, 20% test
+    X_temp, X_test, y_temp, y_test = train_test_split(
+        X, y_raw, test_size=0.2, random_state=NN_RANDOM_STATE, stratify=None
+    )
+    
+    # Second split: 75% train, 25% val (of the remaining 80%)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_temp, y_temp, test_size=0.25, random_state=NN_RANDOM_STATE, stratify=None
+    )
+    
+    logger.log(f"\nData Split:")
+    logger.log(f"  Training set: {len(X_train)} samples")
+    logger.log(f"  Validation set: {len(X_val)} samples")
+    logger.log(f"  Test set: {len(X_test)} samples")
+    
+    print(f"Data split: {len(X_train)} train, {len(X_val)} val, {len(X_test)} test")
+    
+    # For classification modes, show class distribution
+    if output_mode in [2, 3]:
+        logger.log(f"\nClass Distribution (based on raw accuracy):")
+        
+        if output_mode == 2:  # Binary
+            train_good = (y_train > 0).sum()
+            train_bad = (y_train <= 0).sum()
+            val_good = (y_val > 0).sum()
+            val_bad = (y_val <= 0).sum()
+            test_good = (y_test > 0).sum()
+            test_bad = (y_test <= 0).sum()
+            
+            logger.log(f"  Training: Good={train_good}, Bad={train_bad}")
+            logger.log(f"  Validation: Good={val_good}, Bad={val_bad}")
+            logger.log(f"  Test: Good={test_good}, Bad={test_bad}")
+            
+        elif output_mode == 3:  # Three-class
+            a = FILTERING_INTERVAL_WIDTH_A
+            for split_name, y_split in [("Training", y_train), ("Validation", y_val), ("Test", y_test)]:
+                bad = (y_split < -a).sum()
+                mid = ((y_split >= -a) & (y_split <= a)).sum()
+                good = (y_split > a).sum()
+                logger.log(f"  {split_name}: Bad={bad}, Mid={mid}, Good={good}")
+    
+    # Standardize input features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_val_scaled = scaler.transform(X_val)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # Create and train the model
+    predictor = AccuracyPredictor(input_dim=input_dim, output_mode=output_mode)
+    
+    print(f"\nTraining neural network...")
+    history = predictor.train(X_train_scaled, y_train, X_val_scaled, y_val, verbose=1)
+    
+    # Evaluate on test set
+    print(f"\nEvaluating on test set...")
+    test_results = predictor.evaluate(X_test_scaled, y_test, verbose=1)
+    
+    # Log test results
+    logger.log(f"\nTest Results:")
+    for key, value in test_results.items():
+        if key not in ['confusion_matrix', 'classification_report']:
+            logger.log(f"  {key}: {value}")
+    
+    if 'confusion_matrix' in test_results:
+        logger.log(f"  Confusion Matrix:")
+        logger.log(f"    {test_results['confusion_matrix']}")
+    
+    if 'classification_report' in test_results:
+        logger.log(f"  Classification Report:")
+        for class_name, metrics in test_results['classification_report'].items():
+            if isinstance(metrics, dict):
+                logger.log(f"    {class_name}: precision={metrics.get('precision', 'N/A'):.3f}, "
+                          f"recall={metrics.get('recall', 'N/A'):.3f}, "
+                          f"f1-score={metrics.get('f1-score', 'N/A'):.3f}")
+    
+    # Plot training history
+    predictor.plot_training_history()
+    
+    # Save model summary to CSV
+    model_info = {
+        'output_mode': output_mode,
+        'input_dim': input_dim,
+        'hidden_layers': predictor.hidden_layers,
+        'n_train_samples': len(X_train),
+        'n_val_samples': len(X_val),
+        'n_test_samples': len(X_test),
+        'epochs': NN_EPOCHS,
+        'batch_size': NN_BATCH_SIZE,
+        'learning_rate': NN_LEARNING_RATE,
+    }
+    
+    # Add test results to model info
+    model_info.update(test_results)
+    
+    # Convert arrays to lists for JSON serialization
+    if 'confusion_matrix' in model_info:
+        model_info['confusion_matrix'] = model_info['confusion_matrix'].tolist()
+    
+    # Save model information
+    os.makedirs(CSV_DIR, exist_ok=True)
+    model_df = pd.DataFrame([model_info])
+    model_df.to_csv(os.path.join(CSV_DIR, f'nn_model_info_mode_{output_mode}.csv'), index=False)
+    
+    logger.log(f"\nNeural network training completed for mode {output_mode}")
+    print(f"Neural network training completed for mode {output_mode}")
+    
+    return predictor
 
 def run_performance_evaluation():
     """
@@ -832,31 +1314,41 @@ def run_performance_evaluation():
     logger.log("FINAL COMPARISON OF AGENT COMBINATIONS")
     logger.log("="*50)
     
-    print(f"\n{'Rank':^10}|{'Combination':^20}|{'Accuracy':^20}")
-    print("-" * 50)
+    print(f"\n{'Rank':^6}|{'Combination':^15}|{'Raw Acc':^10}|{'Norm Acc':^10}|{'Trans Acc':^10}")
+    print("-" * 70)
     
     for rank, result in enumerate(sorted_results):
-        print(f"{rank+1:^10}|{result['combination']:^20}|{result['accuracy']:^20.4f}")
+        print(f"{rank+1:^6}|{result['combination']:^15}|{result['accuracy_raw']:^10.4f}|{result['accuracy_normalized']:^10.4f}|{result['accuracy']:^10.4f}")
     
-    logger.log(f"\n{'Rank':^10}|{'Combination':^20}|{'Accuracy':^20}")
-    logger.log("-" * 50)
+    logger.log(f"\n{'Rank':^6}|{'Combination':^15}|{'Raw Acc':^10}|{'Norm Acc':^10}|{'Trans Acc':^10}")
+    logger.log("-" * 70)
     
     for rank, result in enumerate(sorted_results):
-        logger.log(f"{rank+1:^10}|{result['combination']:^20}|{result['accuracy']:^20.4f}")
+        logger.log(f"{rank+1:^6}|{result['combination']:^15}|{result['accuracy_raw']:^10.4f}|{result['accuracy_normalized']:^10.4f}|{result['accuracy']:^10.4f}")
     
     # Print the best combination
     best_combo = sorted_results[0]['combination']
-    best_accuracy = sorted_results[0]['accuracy']
+    best_accuracy_raw = sorted_results[0]['accuracy_raw']
+    best_accuracy_normalized = sorted_results[0]['accuracy_normalized']
+    best_accuracy_transformed = sorted_results[0]['accuracy']
     
     print(f"\nBest agent combination: {best_combo}")
-    print(f"Accuracy (negative slope): {best_accuracy:.4f}")
+    print(f"Raw accuracy (negative slope): {best_accuracy_raw:.4f}")
+    print(f"Normalized accuracy: {best_accuracy_normalized:.4f}")
+    print(f"Transformed accuracy (sigmoid): {best_accuracy_transformed:.4f}")
     
     logger.log(f"\nBest agent combination: {best_combo}")
-    logger.log(f"Accuracy (negative slope): {best_accuracy:.4f}")
+    logger.log(f"Raw accuracy (negative slope): {best_accuracy_raw:.4f}")
+    logger.log(f"Normalized accuracy: {best_accuracy_normalized:.4f}")
+    logger.log(f"Transformed accuracy (sigmoid): {best_accuracy_transformed:.4f}")
     
     # Visualize agent combinations using a multi-stage PCA approach
     logger.log("\nVisualizing agent combinations using a multi-stage PCA approach...")
     visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True)
+    
+    # Train and evaluate neural network to predict agent combination accuracy
+    logger.log("\nTraining neural network to predict agent combination accuracy...")
+    predictor = train_accuracy_predictor(results, feature_counts, output_mode=NN_OUTPUT_MODE)
     
     return sorted_results
 
