@@ -8,6 +8,7 @@ Here is a break down of the whole architecture:
 <img width="990" alt="d920ec37bd4b19fd449e6ca15271b5e" src="https://github.com/user-attachments/assets/ad7dbe2a-682c-4229-9801-74baa623cf7b" />
 <img width="989" alt="031a6770ff3192af90fd80ea4dde9e8" src="https://github.com/user-attachments/assets/0946c0ae-9597-4748-9c66-4f4bb32767d3" />
 <img width="984" alt="7288a3fa9b8e2ec14d9fc6bef830a21" src="https://github.com/user-attachments/assets/47ceb39e-b4be-4dc4-8b64-65db7e651b02" />
+<img width="992" alt="47b931ee578503ae7832388ccfa3e44" src="https://github.com/user-attachments/assets/6bdac7a1-e858-47f8-b95e-5577f7f36fc6" />
 <img width="989" alt="cee7426a239bd052cfffa02db04e92e" src="https://github.com/user-attachments/assets/de51e3c2-a928-46d0-9bf0-b685486cea29" />
 <img width="974" alt="d506f2508a65df51cad9c453c826cdd" src="https://github.com/user-attachments/assets/34a6ef50-aead-4cc6-9f39-20ef7a95398d" />
 
