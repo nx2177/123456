@@ -16,20 +16,22 @@ from collections import defaultdict
 from matplotlib.colors import LinearSegmentedColormap
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+from sklearn.model_selection import train_test_split, cross_val_score, LeaveOneOut, KFold
+from sklearn.metrics import classification_report, confusion_matrix, mean_squared_error, r2_score
+from sklearn.cross_decomposition import PLSRegression
+import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
+from scipy.signal import find_peaks
+import seaborn as sns
 
 # Configuration for number of agents in each category
 n_A = 1  # Number of Agent A instances
-n_combinations = 5000  # Number of agent combinations to generate
+n_combinations = 1000  # Number of agent combinations to generate
 
 # Weights and embedding configuration
 WEIGHTS_FILE = "weights.json"
 EMBEDDING_DIM = 100  # Dimension for Word2Vec embeddings
-WEIGHT_MIN = -10.0  # Minimum value for uniform distribution
+WEIGHT_MIN = 1  # Minimum value for uniform distribution
 WEIGHT_MAX = 10.0   # Maximum value for uniform distribution
 WORD2VEC_WINDOW = 5  # Window size for Word2Vec model
 WORD2VEC_MIN_COUNT = 1  # Minimum count for Word2Vec model
@@ -40,15 +42,15 @@ VISUALIZATIONS_DIR = os.path.join(OUTPUT_DIR, "visualizations")
 CSV_DIR = os.path.join(OUTPUT_DIR, "csv")
 
 # Sigmoid transformation and filtering parameters
-NORMALIZATION_CONSTANT_L = 0.1  # Normalization factor for accuracy scores
-FILTERING_INTERVAL_WIDTH_A = 0.01  # Width of exclusion interval around 0.5
+NORMALIZATION_CONSTANT_L = 1  # Normalization factor for accuracy scores
+FILTERING_INTERVAL_WIDTH_A = 0.2  # Width of exclusion interval around 0.5
 
 # Scatter plot visualization parameters
 SCATTER_ALPHA = 0.8  # Transparency for scatter plot points
-SCATTER_SIZE = 20   # Size of scatter plot points
+SCATTER_SIZE = 10   # Size of scatter plot points
 
 # Neural Network configuration parameters
-NN_OUTPUT_MODE = 1  # 1: Regression, 2: Binary Classification, 3: Three-Class Classification
+NN_OUTPUT_MODE = 3  # 1: Regression, 2: Binary Classification, 3: Three-Class Classification
 NN_HIDDEN_LAYERS = [27, 9, 3]  # Hidden layer sizes
 NN_EPOCHS = 100  # Number of training epochs
 NN_BATCH_SIZE = 32  # Batch size for training
@@ -63,15 +65,15 @@ class Logger:
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
         # Initialize or clear the log file
-        with open(log_file_path, 'w') as f:
+        with open(log_file_path, 'w', encoding='utf-8') as f:
             f.write("===== RESUME SCORING SYSTEM PROCESSING DETAILS =====\n\n")
     
     def log(self, message):
-        with open(self.log_file_path, 'a') as f:
+        with open(self.log_file_path, 'a', encoding='utf-8') as f:
             f.write(f"{message}\n")
     
     def log_json(self, data, title=None):
-        with open(self.log_file_path, 'a') as f:
+        with open(self.log_file_path, 'a', encoding='utf-8') as f:
             if title:
                 f.write(f"\n{title}:\n")
             f.write(json.dumps(data, indent=2) + "\n")
@@ -79,252 +81,6 @@ class Logger:
 # Initialize logger
 logger = Logger(os.path.join("logs", "processing_details.log"))
 
-class AccuracyPredictor:
-    """
-    Neural Network model to predict agent combination accuracy with multiple output modes
-    """
-    
-    def __init__(self, input_dim, output_mode=1, hidden_layers=None):
-        """
-        Initialize the AccuracyPredictor
-        
-        Args:
-            input_dim (int): Dimension of input weight vectors
-            output_mode (int): 1=Regression, 2=Binary Classification, 3=Three-Class Classification
-            hidden_layers (list): List of hidden layer sizes
-        """
-        self.input_dim = input_dim
-        self.output_mode = output_mode
-        self.hidden_layers = hidden_layers or NN_HIDDEN_LAYERS
-        self.model = None
-        self.history = None
-        
-    def _prepare_targets(self, accuracies_raw):
-        """
-        Prepare target values based on output mode
-        
-        Args:
-            accuracies_raw (np.array): Raw accuracy values
-            
-        Returns:
-            np.array: Prepared target values
-        """
-        if self.output_mode == 1:  # Regression
-            return accuracies_raw
-            
-        elif self.output_mode == 2:  # Binary Classification
-            # Good = accuracy > 0, Bad = accuracy <= 0
-            binary_labels = (accuracies_raw > 0).astype(int)
-            return tf.keras.utils.to_categorical(binary_labels, num_classes=2)
-            
-        elif self.output_mode == 3:  # Three-Class Classification
-            # Bad if accuracy < -a, Mid if -a <= accuracy <= a, Good if accuracy > a
-            a = FILTERING_INTERVAL_WIDTH_A
-            labels = np.zeros(len(accuracies_raw), dtype=int)
-            labels[accuracies_raw < -a] = 0  # Bad
-            labels[(accuracies_raw >= -a) & (accuracies_raw <= a)] = 1  # Mid
-            labels[accuracies_raw > a] = 2  # Good
-            return tf.keras.utils.to_categorical(labels, num_classes=3)
-            
-        else:
-            raise ValueError(f"Invalid output_mode: {self.output_mode}")
-    
-    def _build_model(self):
-        """
-        Build the neural network model based on output mode
-        """
-        model = keras.Sequential()
-        
-        # Input layer
-        model.add(layers.Dense(self.hidden_layers[0], 
-                              activation='relu', 
-                              input_shape=(self.input_dim,),
-                              name='hidden_1'))
-        
-        # Hidden layers
-        for i, units in enumerate(self.hidden_layers[1:], 2):
-            model.add(layers.Dense(units, activation='relu', name=f'hidden_{i}'))
-        
-        # Output layer based on mode
-        if self.output_mode == 1:  # Regression
-            model.add(layers.Dense(1, activation='linear', name='output'))
-            model.compile(optimizer=keras.optimizers.Adam(learning_rate=NN_LEARNING_RATE),
-                         loss='mse',
-                         metrics=['mae'])
-            
-        elif self.output_mode == 2:  # Binary Classification
-            model.add(layers.Dense(2, activation='softmax', name='output'))
-            model.compile(optimizer=keras.optimizers.Adam(learning_rate=NN_LEARNING_RATE),
-                         loss='categorical_crossentropy',
-                         metrics=['accuracy'])
-            
-        elif self.output_mode == 3:  # Three-Class Classification
-            model.add(layers.Dense(3, activation='softmax', name='output'))
-            model.compile(optimizer=keras.optimizers.Adam(learning_rate=NN_LEARNING_RATE),
-                         loss='categorical_crossentropy',
-                         metrics=['accuracy'])
-        
-        return model
-    
-    def train(self, X_train, y_train_raw, X_val=None, y_val_raw=None, verbose=1):
-        """
-        Train the neural network model
-        
-        Args:
-            X_train (np.array): Training input data (weight vectors)
-            y_train_raw (np.array): Training target data (raw accuracies)
-            X_val (np.array): Validation input data
-            y_val_raw (np.array): Validation target data
-            verbose (int): Verbosity level
-            
-        Returns:
-            keras.callbacks.History: Training history
-        """
-        # Prepare targets based on output mode
-        y_train = self._prepare_targets(y_train_raw)
-        y_val = self._prepare_targets(y_val_raw) if y_val_raw is not None else None
-        
-        # Build model
-        self.model = self._build_model()
-        
-        # Print model summary
-        if verbose:
-            print(f"\nNeural Network Architecture (Mode {self.output_mode}):")
-            self.model.summary()
-        
-        # Prepare validation data
-        validation_data = (X_val, y_val) if X_val is not None and y_val is not None else None
-        
-        # Train the model
-        self.history = self.model.fit(
-            X_train, y_train,
-            epochs=NN_EPOCHS,
-            batch_size=NN_BATCH_SIZE,
-            validation_data=validation_data,
-            verbose=verbose
-        )
-        
-        return self.history
-    
-    def predict(self, X):
-        """
-        Make predictions using the trained model
-        
-        Args:
-            X (np.array): Input data
-            
-        Returns:
-            np.array: Predictions
-        """
-        if self.model is None:
-            raise ValueError("Model must be trained before making predictions")
-        
-        predictions = self.model.predict(X)
-        
-        # For classification, convert probabilities to class labels
-        if self.output_mode in [2, 3]:
-            predictions = np.argmax(predictions, axis=1)
-            
-        return predictions
-    
-    def evaluate(self, X_test, y_test_raw, verbose=1):
-        """
-        Evaluate the model on test data
-        
-        Args:
-            X_test (np.array): Test input data
-            y_test_raw (np.array): Test target data (raw accuracies)
-            verbose (int): Verbosity level
-            
-        Returns:
-            dict: Evaluation results
-        """
-        if self.model is None:
-            raise ValueError("Model must be trained before evaluation")
-        
-        # Prepare targets
-        y_test = self._prepare_targets(y_test_raw)
-        
-        # Evaluate model
-        results = {}
-        test_loss, test_metric = self.model.evaluate(X_test, y_test, verbose=0)
-        results['test_loss'] = test_loss
-        
-        if self.output_mode == 1:  # Regression
-            results['test_mae'] = test_metric
-            if verbose:
-                print(f"\nRegression Results:")
-                print(f"Test Loss (MSE): {test_loss:.4f}")
-                print(f"Test MAE: {test_metric:.4f}")
-                
-        else:  # Classification
-            results['test_accuracy'] = test_metric
-            
-            # Get predictions for confusion matrix and classification report
-            y_pred = self.predict(X_test)
-            y_true = np.argmax(y_test, axis=1)
-            
-            # Confusion matrix
-            cm = confusion_matrix(y_true, y_pred)
-            results['confusion_matrix'] = cm
-            
-            # Classification report
-            if self.output_mode == 2:
-                target_names = ['Bad', 'Good']
-            else:  # mode 3
-                target_names = ['Bad', 'Mid', 'Good']
-            
-            class_report = classification_report(y_true, y_pred, target_names=target_names, output_dict=True)
-            results['classification_report'] = class_report
-            
-            if verbose:
-                print(f"\nClassification Results:")
-                print(f"Test Loss: {test_loss:.4f}")
-                print(f"Test Accuracy: {test_metric:.4f}")
-                print(f"\nConfusion Matrix:")
-                print(cm)
-                print(f"\nClassification Report:")
-                print(classification_report(y_true, y_pred, target_names=target_names))
-        
-        return results
-    
-    def plot_training_history(self):
-        """
-        Plot training history
-        """
-        if self.history is None:
-            print("No training history available")
-            return
-        
-        fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-        
-        # Plot loss
-        axes[0].plot(self.history.history['loss'], label='Training Loss')
-        if 'val_loss' in self.history.history:
-            axes[0].plot(self.history.history['val_loss'], label='Validation Loss')
-        axes[0].set_title('Model Loss')
-        axes[0].set_xlabel('Epoch')
-        axes[0].set_ylabel('Loss')
-        axes[0].legend()
-        
-        # Plot metric
-        metric_name = 'mae' if self.output_mode == 1 else 'accuracy'
-        if metric_name in self.history.history:
-            axes[1].plot(self.history.history[metric_name], label=f'Training {metric_name.upper()}')
-            if f'val_{metric_name}' in self.history.history:
-                axes[1].plot(self.history.history[f'val_{metric_name}'], label=f'Validation {metric_name.upper()}')
-            axes[1].set_title(f'Model {metric_name.upper()}')
-            axes[1].set_xlabel('Epoch')
-            axes[1].set_ylabel(metric_name.upper())
-            axes[1].legend()
-        
-        plt.tight_layout()
-        
-        # Save the plot
-        os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
-        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f'nn_training_history_mode_{self.output_mode}.png'))
-        plt.show()
-        plt.close()
 
 def generate_random_weights(n_weights: int, mean: float = 1.0, variance: float = 0.05) -> List[float]:
     """
@@ -673,19 +429,19 @@ def evaluate_ranking_accuracy(human_ranking, scores):
     # Calculate raw accuracy as negative slope
     raw_accuracy = -slope
     
-    # Apply normalization and sigmoid transformation
-    normalized_accuracy = raw_accuracy / NORMALIZATION_CONSTANT_L
+    # # Apply normalization and sigmoid transformation
+    # normalized_accuracy = raw_accuracy / NORMALIZATION_CONSTANT_L
     
-    # Apply sigmoid transformation
-    def sigmoid(x):
-        return 1 / (1 + np.exp(-x))
+    # # Apply sigmoid transformation
+    # def sigmoid(x):
+    #     return 1 / (1 + np.exp(-x))
     
-    transformed_accuracy = sigmoid(normalized_accuracy)
+    # transformed_accuracy = sigmoid(normalized_accuracy)
     
     return {
         "accuracy_raw": raw_accuracy,
-        "accuracy_normalized": normalized_accuracy,
-        "accuracy": transformed_accuracy  # This is the final transformed accuracy
+        # "accuracy_normalized": normalized_accuracy,
+        # "accuracy": transformed_accuracy  # This is the final transformed accuracy
     }
 
 def run_evaluation_for_combination(combination_weights, combination_index, resumes, job_description, human_ranking, feature_counts, feature_names, agent_A_list, word2vec_model, jd_embedding):
@@ -753,8 +509,8 @@ def run_evaluation_for_combination(combination_weights, combination_index, resum
     logger.log(f"\nSystem Ranking: {system_ranking}")
     logger.log(f"Human Ranking:  {human_ranking}")
     logger.log(f"\nRaw Accuracy (negative slope): {accuracy_metrics['accuracy_raw']:.4f}")
-    logger.log(f"Normalized Accuracy: {accuracy_metrics['accuracy_normalized']:.4f}")
-    logger.log(f"Transformed Accuracy (sigmoid): {accuracy_metrics['accuracy']:.4f}")
+    # logger.log(f"Normalized Accuracy: {accuracy_metrics['accuracy_normalized']:.4f}")
+    # logger.log(f"Transformed Accuracy (sigmoid): {accuracy_metrics['accuracy']:.4f}")
     
     return {
         "combination": combination_name,
@@ -764,13 +520,377 @@ def run_evaluation_for_combination(combination_weights, combination_index, resum
         "system_ranking": system_ranking,
         "human_ranking": human_ranking,
         "accuracy_raw": accuracy_metrics['accuracy_raw'],
-        "accuracy_normalized": accuracy_metrics['accuracy_normalized'],
-        "accuracy": accuracy_metrics['accuracy']  # This is the transformed accuracy
+        # "accuracy_normalized": accuracy_metrics['accuracy_normalized'],
+        # "accuracy": accuracy_metrics['accuracy']  # This is the transformed accuracy
     }
+
+def compute_comprehensive_pls_metrics(X, y, agent_name, feature_names=None, max_components=None, cv_folds=5, n_permutations=1000):
+    """
+    Compute comprehensive PLS evaluation metrics for a given dataset
+    
+    Args:
+        X (np.array): Input features (n_samples x n_features)
+        y (np.array): Target variable (n_samples,)
+        agent_name (str): Name of the agent/model for logging
+        feature_names (list): Names of input features for VIP analysis
+        max_components (int): Maximum number of components to test
+        cv_folds (int): Number of cross-validation folds
+        n_permutations (int): Number of permutations for significance test
+        
+    Returns:
+        dict: Comprehensive metrics dictionary
+    """
+    logger.log(f"\n{'='*20} PLS EVALUATION: {agent_name} {'='*20}")
+    
+    n_samples, n_features = X.shape
+    if max_components is None:
+        max_components = min(n_samples - 1, n_features, 10)  # Reasonable upper bound
+    
+    # Standardize the data
+    scaler_X = StandardScaler()
+    scaler_y = StandardScaler()
+    X_scaled = scaler_X.fit_transform(X)
+    y_scaled = scaler_y.fit_transform(y.reshape(-1, 1)).ravel()
+    
+    # Initialize storage for component-wise metrics
+    r2x_cum = []
+    r2y_cum = []
+    q2_scores = []
+    press_scores = []
+    rmsecv_scores = []
+    
+    # Test different numbers of components
+    component_range = range(1, max_components + 1)
+    
+    # Split data for final test set evaluation
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_scaled, y_scaled, test_size=0.2, random_state=42
+    )
+    
+    best_q2 = -np.inf
+    optimal_components = 1
+    
+    for n_comp in component_range:
+        # Fit PLS model
+        pls = PLSRegression(n_components=n_comp)
+        pls.fit(X_train, y_train)
+        
+        # 1. Goodness of Fit Metrics
+        
+        # R²X (cumulative): Variance explained in X
+        X_scores = pls.transform(X_train)
+        X_reconstructed = X_scores @ pls.x_loadings_.T
+        ss_res_x = np.sum((X_train - X_reconstructed) ** 2)
+        ss_tot_x = np.sum((X_train - np.mean(X_train, axis=0)) ** 2)
+        r2x = 1 - (ss_res_x / ss_tot_x)
+        r2x_cum.append(r2x)
+        
+        # R²Y (cumulative): Variance explained in Y
+        y_pred_train = pls.predict(X_train).ravel()
+        r2y = r2_score(y_train, y_pred_train)
+        r2y_cum.append(r2y)
+        
+        # 2. Predictive Power Metrics
+        
+        # Cross-validation Q² and RMSECV
+        cv = KFold(n_splits=cv_folds, shuffle=True, random_state=42)
+        y_pred_cv = np.zeros_like(y_train)
+        
+        for train_idx, val_idx in cv.split(X_train):
+            pls_cv = PLSRegression(n_components=n_comp)
+            pls_cv.fit(X_train[train_idx], y_train[train_idx])
+            y_pred_cv[val_idx] = pls_cv.predict(X_train[val_idx]).ravel()
+        
+        # Q² calculation
+        press = np.sum((y_train - y_pred_cv) ** 2)
+        ss_tot_y = np.sum((y_train - np.mean(y_train)) ** 2)
+        q2 = 1 - (press / ss_tot_y)
+        
+        q2_scores.append(q2)
+        press_scores.append(press)
+        rmsecv_scores.append(np.sqrt(mean_squared_error(y_train, y_pred_cv)))
+        
+        # Track best Q² for optimal component selection
+        if q2 > best_q2:
+            best_q2 = q2
+            optimal_components = n_comp
+    
+    # Fit final model with optimal components
+    pls_final = PLSRegression(n_components=optimal_components)
+    pls_final.fit(X_train, y_train)
+    
+    # RMSEP on test set
+    y_pred_test = pls_final.predict(X_test).ravel()
+    rmsep = np.sqrt(mean_squared_error(y_test, y_pred_test))
+    
+    # 3. Diagnostic Correlation Check
+    X_scores_first = pls_final.transform(X_train)[:, 0]
+    correlation_coeff, correlation_p = pearsonr(X_scores_first, y_train)
+    
+    # 4. Component Selection and Elbow Identification
+    
+    # Find elbow point in PRESS curve
+    press_array = np.array(press_scores)
+    # Use negative PRESS for peak finding (to find minimum)
+    peaks, _ = find_peaks(-press_array)
+    if len(peaks) > 0:
+        elbow_component = peaks[0] + 1  # Convert to 1-indexed
+    else:
+        # Fallback: find point where PRESS stops decreasing significantly
+        press_diff = np.diff(press_array)
+        elbow_idx = np.where(press_diff > -0.01 * press_array[0])[0]
+        elbow_component = elbow_idx[0] + 1 if len(elbow_idx) > 0 else optimal_components
+    
+    # 5. Variable Relevance (VIP Scores)
+    
+    def compute_vip_scores(pls_model, X_data):
+        """Compute VIP scores for PLS model"""
+        T = pls_model.x_scores_  # X scores
+        W = pls_model.x_weights_  # X weights
+        Q = pls_model.y_loadings_  # Y loadings
+        
+        # Number of variables and components
+        p = X_data.shape[1]
+        h = pls_model.n_components
+        
+        # Calculate VIP scores
+        vip_scores = np.zeros(p)
+        
+        for j in range(p):
+            wj = W[j, :]  # Weights for variable j
+            qh = Q[:, :h].T  # Y loadings for h components
+            
+            # Sum of squares of Y loadings weighted by X weights
+            numerator = np.sum((wj ** 2) * np.sum(qh ** 2, axis=0))
+            denominator = np.sum(qh ** 2)
+            
+            vip_scores[j] = np.sqrt(p * numerator / denominator)
+        
+        return vip_scores
+    
+    vip_scores = compute_vip_scores(pls_final, X_train)
+    important_features = vip_scores > 1.0
+    
+    # 6. Whole-Model Significance (Permutation Test)
+    
+    logger.log(f"Running permutation test with {n_permutations} permutations...")
+    permuted_q2_scores = []
+    
+    for _ in range(n_permutations):
+        # Shuffle target variable
+        y_permuted = np.random.permutation(y_train)
+        
+        # Fit PLS with optimal components
+        pls_perm = PLSRegression(n_components=optimal_components)
+        pls_perm.fit(X_train, y_permuted)
+        
+        # Calculate Q² for permuted data
+        cv = KFold(n_splits=cv_folds, shuffle=True, random_state=None)
+        y_pred_cv_perm = np.zeros_like(y_permuted)
+        
+        for train_idx, val_idx in cv.split(X_train):
+            pls_cv_perm = PLSRegression(n_components=optimal_components)
+            pls_cv_perm.fit(X_train[train_idx], y_permuted[train_idx])
+            y_pred_cv_perm[val_idx] = pls_cv_perm.predict(X_train[val_idx]).ravel()
+        
+        press_perm = np.sum((y_permuted - y_pred_cv_perm) ** 2)
+        ss_tot_perm = np.sum((y_permuted - np.mean(y_permuted)) ** 2)
+        q2_perm = 1 - (press_perm / ss_tot_perm)
+        permuted_q2_scores.append(q2_perm)
+    
+    # Calculate p-value
+    original_q2 = q2_scores[optimal_components - 1]
+    p_value = np.sum(np.array(permuted_q2_scores) >= original_q2) / n_permutations
+    
+    # Compile results
+    results = {
+        'agent_name': agent_name,
+        'n_samples': n_samples,
+        'n_features': n_features,
+        'optimal_components': optimal_components,
+        'elbow_component': elbow_component,
+        
+        # Goodness of fit
+        'r2x_cum': r2x_cum,
+        'r2y_cum': r2y_cum,
+        'r2x_final': r2x_cum[optimal_components - 1],
+        'r2y_final': r2y_cum[optimal_components - 1],
+        
+        # Predictive power
+        'q2_scores': q2_scores,
+        'q2_final': original_q2,
+        'press_scores': press_scores,
+        'rmsecv_scores': rmsecv_scores,
+        'rmsecv_final': rmsecv_scores[optimal_components - 1],
+        'rmsep': rmsep,
+        
+        # Diagnostic correlation
+        'correlation_coeff': correlation_coeff,
+        'correlation_p': correlation_p,
+        
+        # Variable relevance
+        'vip_scores': vip_scores,
+        'important_features': important_features,
+        'n_important_features': np.sum(important_features),
+        
+        # Significance test
+        'permutation_p_value': p_value,
+        'is_significant': p_value < 0.05,
+        
+        # For plotting
+        'component_range': list(component_range),
+        'feature_names': feature_names if feature_names else [f'Feature_{i}' for i in range(n_features)],
+        
+        # Model objects (for further analysis)
+        'final_model': pls_final,
+        'scaler_X': scaler_X,
+        'scaler_y': scaler_y
+    }
+    
+    # Log key results
+    logger.log(f"Optimal components: {optimal_components}")
+    logger.log(f"Elbow point: {elbow_component}")
+    logger.log(f"Final R²X: {results['r2x_final']:.4f}")
+    logger.log(f"Final R²Y: {results['r2y_final']:.4f}")
+    logger.log(f"Final Q²: {results['q2_final']:.4f}")
+    logger.log(f"RMSECV: {results['rmsecv_final']:.4f}")
+    logger.log(f"RMSEP: {results['rmsep']:.4f}")
+    logger.log(f"First component correlation: {correlation_coeff:.4f} (p={correlation_p:.4f})")
+    logger.log(f"Important features (VIP > 1): {results['n_important_features']}/{n_features}")
+    logger.log(f"Permutation test p-value: {p_value:.4f}")
+    logger.log(f"Model is significant: {results['is_significant']}")
+    
+    return results
+
+def plot_pls_diagnostics(pls_results, save_dir):
+    """
+    Create comprehensive diagnostic plots for PLS results
+    
+    Args:
+        pls_results (dict): Results from compute_comprehensive_pls_metrics
+        save_dir (str): Directory to save plots
+    """
+    agent_name = pls_results['agent_name']
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Set up the plotting style
+    plt.style.use('default')
+    sns.set_palette("husl")
+    
+    # 1. Component Selection Plot (R²X, R²Y, Q² vs Components)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    components = pls_results['component_range']
+    ax.plot(components, pls_results['r2x_cum'], 'o-', label='R²X (cumulative)', linewidth=2, markersize=6)
+    ax.plot(components, pls_results['r2y_cum'], 's-', label='R²Y (cumulative)', linewidth=2, markersize=6)
+    ax.plot(components, pls_results['q2_scores'], '^-', label='Q² (cross-validation)', linewidth=2, markersize=6)
+    
+    # Mark optimal and elbow points
+    ax.axvline(x=pls_results['optimal_components'], color='red', linestyle='--', 
+               label=f'Optimal (Q²): {pls_results["optimal_components"]}', alpha=0.7)
+    ax.axvline(x=pls_results['elbow_component'], color='orange', linestyle='--', 
+               label=f'Elbow (PRESS): {pls_results["elbow_component"]}', alpha=0.7)
+    
+    ax.set_xlabel('Number of Components')
+    ax.set_ylabel('Variance Explained / Predictive Ability')
+    ax.set_title(f'{agent_name} - PLS Component Selection')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(-0.1, 1.1)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f'{agent_name}_component_selection.png'), dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
+    
+    # 2. PRESS Curve
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    ax.plot(components, pls_results['press_scores'], 'o-', linewidth=2, markersize=6, color='darkred')
+    ax.axvline(x=pls_results['elbow_component'], color='orange', linestyle='--', 
+               label=f'Elbow: {pls_results["elbow_component"]}', alpha=0.7)
+    
+    ax.set_xlabel('Number of Components')
+    ax.set_ylabel('PRESS (Predicted Residual Sum of Squares)')
+    ax.set_title(f'{agent_name} - PRESS Curve')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f'{agent_name}_press_curve.png'), dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
+    
+    # 3. VIP Scores
+    if len(pls_results['feature_names']) <= 50:  # Only plot if not too many features
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        vip_scores = pls_results['vip_scores']
+        feature_names = pls_results['feature_names']
+        colors = ['red' if vip > 1.0 else 'blue' for vip in vip_scores]
+        
+        bars = ax.bar(range(len(vip_scores)), vip_scores, color=colors, alpha=0.7)
+        ax.axhline(y=1.0, color='red', linestyle='--', label='VIP = 1.0 threshold')
+        
+        ax.set_xlabel('Features')
+        ax.set_ylabel('VIP Scores')
+        ax.set_title(f'{agent_name} - Variable Importance in Projection (VIP)')
+        ax.set_xticks(range(len(feature_names)))
+        ax.set_xticklabels(feature_names, rotation=45, ha='right')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(save_dir, f'{agent_name}_vip_scores.png'), dpi=300, bbox_inches='tight')
+        plt.show()
+        plt.close()
+    
+    # 4. Actual vs Predicted (if we have the data)
+    # Note: This would require storing predictions in the results
+    # For now, we'll create a summary table plot instead
+    
+    # Summary statistics table
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.axis('tight')
+    ax.axis('off')
+    
+    summary_data = [
+        ['Metric', 'Value'],
+        ['Optimal Components', f"{pls_results['optimal_components']}"],
+        ['Elbow Point', f"{pls_results['elbow_component']}"],
+        ['R²X (final)', f"{pls_results['r2x_final']:.4f}"],
+        ['R²Y (final)', f"{pls_results['r2y_final']:.4f}"],
+        ['Q² (final)', f"{pls_results['q2_final']:.4f}"],
+        ['RMSECV', f"{pls_results['rmsecv_final']:.4f}"],
+        ['RMSEP', f"{pls_results['rmsep']:.4f}"],
+        ['First Component Correlation', f"{pls_results['correlation_coeff']:.4f}"],
+        ['Correlation p-value', f"{pls_results['correlation_p']:.4f}"],
+        ['Important Features (VIP > 1)', f"{pls_results['n_important_features']}/{pls_results['n_features']}"],
+        ['Permutation p-value', f"{pls_results['permutation_p_value']:.4f}"],
+        ['Model Significant', f"{pls_results['is_significant']}"]
+    ]
+    
+    table = ax.table(cellText=summary_data, cellLoc='left', loc='center', colWidths=[0.4, 0.3])
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+    table.scale(1.2, 2)
+    
+    # Style the header row
+    for i in range(len(summary_data[0])):
+        table[(0, i)].set_facecolor('#40466e')
+        table[(0, i)].set_text_props(weight='bold', color='white')
+    
+    ax.set_title(f'{agent_name} - PLS Evaluation Summary', fontsize=16, fontweight='bold', pad=20)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, f'{agent_name}_summary.png'), dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
 
 def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True):
     """
     Visualize agent combinations using a multi-stage PCA approach with sigmoid transformation and filtering
+    PLUS comprehensive PLS evaluation for all models
     
     Args:
         results (list): List of evaluation results for each agent combination
@@ -779,10 +899,14 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
         is_3d (bool): Whether to create 3D visualizations (True) or 2D (False)
         
     Returns:
-        None
+        dict: Dictionary containing PLS evaluation results for each model
     """
     # Create directory for visualizations if it doesn't exist
     os.makedirs(VISUALIZATIONS_DIR, exist_ok=True)
+    
+    # Create subdirectory for PLS diagnostics
+    pls_diagnostics_dir = os.path.join(VISUALIZATIONS_DIR, "pls_diagnostics")
+    os.makedirs(pls_diagnostics_dir, exist_ok=True)
     
     # Extract performance metrics and weights for each agent combination
     combination_names = []
@@ -799,41 +923,13 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     for result in results:
         combination_names.append(result["combination"])
         combination_accuracies_raw.append(result["accuracy_raw"])
-        combination_accuracies_transformed.append(result["accuracy"])  # Already sigmoid-transformed
+        # combination_accuracies_transformed.append(result["accuracy"])  # Already sigmoid-transformed
         all_combination_weights.append(result["combination_weights"])
     
     # Convert to numpy arrays
     accuracies_raw = np.array(combination_accuracies_raw)
-    accuracies_transformed = np.array(combination_accuracies_transformed)  # Already sigmoid values 0-1
+    # accuracies_transformed = np.array(combination_accuracies_transformed)  # Already sigmoid values 0-1
     all_combination_weights = np.array(all_combination_weights)
-    
-    # Step 3: Filter out combinations with scores in the exclusion interval [0.5-a, 0.5+a]
-    # Use the already-transformed sigmoid scores
-    exclusion_lower = 0.5 - FILTERING_INTERVAL_WIDTH_A
-    exclusion_upper = 0.5 + FILTERING_INTERVAL_WIDTH_A
-    
-    # Create filter mask for combinations outside the exclusion interval
-    filter_mask = (accuracies_transformed < exclusion_lower) | (accuracies_transformed > exclusion_upper)
-    
-    # Apply filter to all data
-    filtered_combination_names = [name for i, name in enumerate(combination_names) if filter_mask[i]]
-    filtered_accuracies_raw = accuracies_raw[filter_mask]
-    filtered_accuracies_transformed = accuracies_transformed[filter_mask]
-    filtered_combination_weights = all_combination_weights[filter_mask]
-    
-    logger.log(f"\nSigmoid Transformation and Filtering:")
-    logger.log(f"  Normalization constant L: {NORMALIZATION_CONSTANT_L}")
-    logger.log(f"  Filtering interval width a: {FILTERING_INTERVAL_WIDTH_A}")
-    logger.log(f"  Exclusion interval: [{exclusion_lower:.2f}, {exclusion_upper:.2f}]")
-    logger.log(f"  Original combinations: {len(combination_names)}")
-    logger.log(f"  Filtered combinations: {len(filtered_combination_names)}")
-    logger.log(f"  Filtered out: {len(combination_names) - len(filtered_combination_names)}")
-    
-    # Check if we have enough filtered combinations for visualization
-    if len(filtered_combination_names) < 2:
-        logger.log("Not enough filtered combinations for PCA visualization (need at least 2)")
-        print("Warning: Not enough filtered combinations for PCA visualization")
-        return
     
     # Log the raw feature dimensions
     logger.log(f"\nRaw feature dimensions:")
@@ -843,132 +939,195 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     logger.log(f"  Total features per combination: {b_features + c_features + d_features}")
     
     # Split combination weights into agent-specific weights (using filtered data)
-    b_weights_all = filtered_combination_weights[:, :b_features]
-    c_weights_all = filtered_combination_weights[:, b_features:b_features + c_features]
-    d_weights_all = filtered_combination_weights[:, b_features + c_features:]
+    b_weights_all = all_combination_weights[:, :b_features]
+    c_weights_all = all_combination_weights[:, b_features:b_features + c_features]
+    d_weights_all = all_combination_weights[:, b_features + c_features:]
     
-    # Define the target dimensionality for per-agent PCA
-    pca_dim = 5
+    # Define the target dimensionality for per-agent PLS
+    pls_dim = 5
     
-    # Create scalers and PCA models for each agent type
+    # Create scalers and PLS models for each agent type
     b_scaler = StandardScaler()
     c_scaler = StandardScaler()
     d_scaler = StandardScaler()
     
-    b_pca = PCA(n_components=min(pca_dim, b_features))
-    c_pca = PCA(n_components=min(pca_dim, c_features))
-    d_pca = PCA(n_components=min(pca_dim, d_features))
+    b_weights_all_scaled = b_scaler.fit_transform(b_weights_all)
+    c_weights_all_scaled = c_scaler.fit_transform(c_weights_all)
+    d_weights_all_scaled = d_scaler.fit_transform(d_weights_all)
     
-    # Fit scalers and PCA models
-    b_scaled = b_scaler.fit_transform(b_weights_all)
-    c_scaled = c_scaler.fit_transform(c_weights_all)
-    d_scaled = d_scaler.fit_transform(d_weights_all)
+    # Normalize accuracies for PLS evaluation
+    mean = np.mean(accuracies_raw)
+    std = np.std(accuracies_raw)
+    accuracies_raw_normalized = (accuracies_raw - mean) / std
     
-    # Apply PCA to each agent type
-    b_pca_features = b_pca.fit_transform(b_scaled)
-    c_pca_features = c_pca.fit_transform(c_scaled)
-    d_pca_features = d_pca.fit_transform(d_scaled)
+    # ===== COMPREHENSIVE PLS EVALUATION =====
+    logger.log(f"\n{'='*60}")
+    logger.log("STARTING COMPREHENSIVE PLS EVALUATION FOR ALL MODELS")
+    logger.log(f"{'='*60}")
     
-    # Log explained variance
-    logger.log(f"\nExplained variance ratios for per-agent PCA:")
-    logger.log(f"  Agent B: {b_pca.explained_variance_ratio_}")
-    logger.log(f"  Agent C: {c_pca.explained_variance_ratio_}")
-    logger.log(f"  Agent D: {d_pca.explained_variance_ratio_}")
+    # Store PLS evaluation results for all models
+    pls_evaluation_results = {}
+    
+    # 1. Evaluate Agent B PLS Model
+    logger.log(f"\n{'-'*40}")
+    logger.log("EVALUATING AGENT B PLS MODEL")
+    logger.log(f"{'-'*40}")
+    
+    pls_results_b = compute_comprehensive_pls_metrics(
+        X=b_weights_all_scaled, 
+        y=accuracies_raw_normalized, 
+        agent_name="Agent_B",
+        feature_names=feature_names["b_features"],
+        max_components=min(10, b_features),
+        cv_folds=5,
+        n_permutations=500  # Reduced for faster execution
+    )
+    pls_evaluation_results['Agent_B'] = pls_results_b
+    plot_pls_diagnostics(pls_results_b, pls_diagnostics_dir)
+    
+    # 2. Evaluate Agent C PLS Model
+    logger.log(f"\n{'-'*40}")
+    logger.log("EVALUATING AGENT C PLS MODEL")
+    logger.log(f"{'-'*40}")
+    
+    pls_results_c = compute_comprehensive_pls_metrics(
+        X=c_weights_all_scaled, 
+        y=accuracies_raw_normalized, 
+        agent_name="Agent_C",
+        feature_names=feature_names["c_features"],
+        max_components=min(10, c_features),
+        cv_folds=5,
+        n_permutations=500
+    )
+    pls_evaluation_results['Agent_C'] = pls_results_c
+    plot_pls_diagnostics(pls_results_c, pls_diagnostics_dir)
+    
+    # 3. Evaluate Agent D PLS Model
+    logger.log(f"\n{'-'*40}")
+    logger.log("EVALUATING AGENT D PLS MODEL")
+    logger.log(f"{'-'*40}")
+    
+    pls_results_d = compute_comprehensive_pls_metrics(
+        X=d_weights_all_scaled, 
+        y=accuracies_raw_normalized, 
+        agent_name="Agent_D",
+        feature_names=feature_names["d_features"],
+        max_components=min(10, d_features),
+        cv_folds=5,
+        n_permutations=500
+    )
+    pls_evaluation_results['Agent_D'] = pls_results_d
+    plot_pls_diagnostics(pls_results_d, pls_diagnostics_dir)
+    
+    # Apply PLS to each agent type for visualization (using optimal components from evaluation)
+    b_pls = PLSRegression(n_components=min(pls_results_b['optimal_components'], pls_dim))
+    c_pls = PLSRegression(n_components=min(pls_results_c['optimal_components'], pls_dim))
+    d_pls = PLSRegression(n_components=min(pls_results_d['optimal_components'], pls_dim))
+    
+    # Apply PLS to each agent type
+    b_pls_features, _ = b_pls.fit_transform(b_weights_all_scaled, accuracies_raw_normalized)
+    c_pls_features, _ = c_pls.fit_transform(c_weights_all_scaled, accuracies_raw_normalized)
+    d_pls_features, _ = d_pls.fit_transform(d_weights_all_scaled, accuracies_raw_normalized)
     
     # Create color normalization and colormap for sigmoid scores
     # Sigmoid scores range from 0 to 1, with 0.5 as neutral (now filtered out)
-    norm = plt.Normalize(0, 1)
+    norm = plt.Normalize(-2, 2)
     colors = ["blue", "white", "red"]
     cmap = LinearSegmentedColormap.from_list("BWR", colors)
     
-    # Function to visualize agent-specific PCA
-    def visualize_agent_pca(agent_features, agent_type):
-        # Apply PCA to the agent features
-        n_components = 3 if is_3d else 2
-        agent_pca = PCA(n_components=n_components)
-        agent_embedding = agent_pca.fit_transform(agent_features)
-        
+    # Function to visualize agent-specific PLS
+    def visualize_agent_pls(agent_embedding, agent_type):
+        num_actual_components = agent_embedding.shape[1]
+
+        if num_actual_components == 0:
+            logger.log(f"Agent {agent_type} PLS: No components to plot (num_actual_components is 0).")
+            return
+
+        dim_label = f"{num_actual_components}d"
+        title_suffix = f"({num_actual_components}D)"
+
         # Create figure
-        if is_3d:
+        if is_3d and num_actual_components >= 3:
             fig = plt.figure(figsize=(12, 10))
             ax = fig.add_subplot(111, projection='3d')
-        else:
+            scatter = ax.scatter(
+                agent_embedding[:, 0], agent_embedding[:, 1], agent_embedding[:, 2],
+                c=accuracies_raw_normalized, cmap=cmap, norm=norm, s=SCATTER_SIZE, alpha=SCATTER_ALPHA
+            )
+            ax.set_xlabel("PLS Component 1")
+            ax.set_ylabel("PLS Component 2")
+            ax.set_zlabel("PLS Component 3")
+            ax.set_title(f"Agent {agent_type} PLS Projection {title_suffix}")
+        elif num_actual_components >= 2: # Handles 2D, or 3D request with only 2 components
             fig, ax = plt.subplots(figsize=(12, 10))
-            
-        # Plot the points using sigmoid scores for coloring
-        if is_3d:
             scatter = ax.scatter(
-                agent_embedding[:, 0],
-                agent_embedding[:, 1],
-                agent_embedding[:, 2],
-                c=filtered_accuracies_transformed,
-                cmap=cmap,
-                norm=norm,
-                s=SCATTER_SIZE,
-                alpha=SCATTER_ALPHA
+                agent_embedding[:, 0], agent_embedding[:, 1],
+                c=accuracies_raw_normalized, cmap=cmap, norm=norm, s=SCATTER_SIZE, alpha=SCATTER_ALPHA
             )
-        else:
+            ax.set_xlabel("PLS Component 1")
+            ax.set_ylabel("PLS Component 2")
+            if is_3d and num_actual_components == 2:
+                 ax.set_title(f"Agent {agent_type} PLS Projection (3D requested, 2D Fallback)")
+            else:
+                 ax.set_title(f"Agent {agent_type} PLS Projection {title_suffix}")
+        elif num_actual_components == 1:
+            fig, ax = plt.subplots(figsize=(12, 8))
+            # For 1D, scatter y values with some jitter for better visualization (strip plot like)
+            jitter = (np.random.rand(agent_embedding.shape[0]) - 0.5) * 0.1 
             scatter = ax.scatter(
-                agent_embedding[:, 0],
-                agent_embedding[:, 1],
-                c=filtered_accuracies_transformed,
-                cmap=cmap,
-                norm=norm,
-                s=SCATTER_SIZE,
-                alpha=SCATTER_ALPHA
+                agent_embedding[:, 0], jitter,
+                c=accuracies_raw_normalized, cmap=cmap, norm=norm, s=SCATTER_SIZE, alpha=SCATTER_ALPHA
             )
-            
+            ax.set_xlabel("PLS Component 1")
+            ax.set_yticks([]) # No meaningful y-axis for 1D PLS
+            ax.set_ylabel("") 
+            ax.set_title(f"Agent {agent_type} PLS Projection {title_suffix}")
+        
         # Add colorbar
         cbar = plt.colorbar(scatter)
-        cbar.set_label('Sigmoid-Transformed Accuracy (0=Poor, 1=Excellent)')
-        
-        # Add labels
-        ax.set_title(f"Agent {agent_type} PCA Projection (Filtered)")
-        ax.set_xlabel(f"PCA Dimension 1 (Explained Variance: {agent_pca.explained_variance_ratio_[0]:.2f})")
-        ax.set_ylabel(f"PCA Dimension 2 (Explained Variance: {agent_pca.explained_variance_ratio_[1]:.2f})")
-        if is_3d:
-            ax.set_zlabel(f"PCA Dimension 3 (Explained Variance: {agent_pca.explained_variance_ratio_[2]:.2f})")
+        cbar.set_label('Normalized Accuracy Score')
         
         plt.tight_layout()
         
         # Save the plot
-        dim_label = "3d" if is_3d else "2d"
-        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_pca_{dim_label}_filtered.png"))
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_{agent_type}_pls_{dim_label}.png"))
         plt.show()
         plt.close()
         
         # Log information
-        logger.log(f"\nAgent {agent_type} PCA Visualization (Filtered):")
-        logger.log(f"  Explained variance: {agent_pca.explained_variance_ratio_}")
+        logger.log(f"\nAgent {agent_type} PLS Visualization:")
+        logger.log(f"  PLS components plotted: {num_actual_components} (dim_label: {dim_label})")
         
         # Create a CSV file with the results
-        df = pd.DataFrame({
-            "combination": filtered_combination_names,
-            "pca_x": agent_embedding[:, 0],
-            "pca_y": agent_embedding[:, 1],
-            "accuracy_original": filtered_accuracies_raw,
-            "accuracy_sigmoid": filtered_accuracies_transformed
-        })
-        
-        if is_3d:
-            df["pca_z"] = agent_embedding[:, 2]
+        df_data = {
+            "combination": combination_names,
+            "accuracy_original": accuracies_raw,
+            "accuracy_normalized": accuracies_raw_normalized
+        }
+        if num_actual_components >= 1:
+            df_data["pls_x"] = agent_embedding[:, 0]
+        if num_actual_components >= 2:
+            df_data["pls_y"] = agent_embedding[:, 1]
+        if num_actual_components >= 3:
+            df_data["pls_z"] = agent_embedding[:, 2]
             
+        df = pd.DataFrame(df_data)
         # Save CSV file
         os.makedirs(CSV_DIR, exist_ok=True)
-        df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_pca_{dim_label}_filtered.csv"), index=False)
+        df.to_csv(os.path.join(CSV_DIR, f"agent_{agent_type}_pls_{dim_label}.csv"), index=False)
     
     # Visualize each agent type separately
-    visualize_agent_pca(b_pca_features, "B")
-    visualize_agent_pca(c_pca_features, "C")
-    visualize_agent_pca(d_pca_features, "D")
+    visualize_agent_pls(b_pls_features, "B")
+    visualize_agent_pls(c_pls_features, "C")
+    visualize_agent_pls(d_pls_features, "D")
     
-    # Normalize each agent's PCA features using L2 norm
+    # Normalize each agent's PLS features using L2 norm
     concatenated_features = []
-    for i in range(len(filtered_combination_names)):
-        # Get PCA features for this combination
-        b_features_i = b_pca_features[i]
-        c_features_i = c_pca_features[i]
-        d_features_i = d_pca_features[i]
+    for i in range(len(combination_names)):
+        # Get PLS features for this combination
+        b_features_i = b_pls_features[i]
+        c_features_i = c_pls_features[i]
+        d_features_i = d_pls_features[i]
         
         # Normalize each using L2 norm
         b_norm = np.linalg.norm(b_features_i)
@@ -998,253 +1157,275 @@ def visualize_agent_combinations(results, feature_counts, feature_names, is_3d=T
     global_scaler = StandardScaler()
     X_normalized = global_scaler.fit_transform(X)
     
-    # Apply global PCA
-    n_components = 3 if is_3d else 2
-    global_pca = PCA(n_components=n_components)
-    embedding = global_pca.fit_transform(X_normalized)
+    # 4. Evaluate Global Combination PLS Model
+    logger.log(f"\n{'-'*40}")
+    logger.log("EVALUATING GLOBAL COMBINATION PLS MODEL")
+    logger.log(f"{'-'*40}")
     
-    # Print global PCA explained variance
-    logger.log(f"\nGlobal PCA explained variance: {global_pca.explained_variance_ratio_}")
-    print(f"Global PCA explained variance: {global_pca.explained_variance_ratio_}")
+    # Create feature names for global model
+    global_feature_names = []
+    for i in range(b_pls_features.shape[1]):
+        global_feature_names.append(f"B_PLS_{i+1}")
+    for i in range(c_pls_features.shape[1]):
+        global_feature_names.append(f"C_PLS_{i+1}")
+    for i in range(d_pls_features.shape[1]):
+        global_feature_names.append(f"D_PLS_{i+1}")
     
+    pls_results_global = compute_comprehensive_pls_metrics(
+        X=X_normalized, 
+        y=accuracies_raw_normalized, 
+        agent_name="Global_Combination",
+        feature_names=global_feature_names,
+        max_components=min(10, X_normalized.shape[1]),
+        cv_folds=5,
+        n_permutations=500
+    )
+    pls_evaluation_results['Global_Combination'] = pls_results_global
+    plot_pls_diagnostics(pls_results_global, pls_diagnostics_dir)
+    
+    # Apply global PLS using optimal components from evaluation
+    n_components_pref = 3 if is_3d else 2 # Preferred number of components based on is_3d
+    # Actual components will be min(optimal_from_eval, preferred_for_is_3d, embedding_max_possible)
+    # optimal_global_components was already min(pls_results_global['optimal_components'], n_components_pref)
+    # So global_pls already fitted with a sensible number of components. embedding.shape[1] is the source of truth.
+    
+    global_pls = PLSRegression(n_components=pls_results_global['optimal_components'])
+    embedding, _ = global_pls.fit_transform(X_normalized, accuracies_raw_normalized)
+    
+    # Print global PLS explained variance (actual components used)
+    logger.log(f"\nGlobal PLS model fitted with {pls_results_global['optimal_components']} components based on evaluation.")
+    logger.log(f"Resulting Global PLS embedding dimensions: {embedding.shape[1]}")
+    print(f"Global PLS components in embedding: {embedding.shape[1]}")
+
     # Create the global visualization
-    if is_3d:
-        fig = plt.figure(figsize=(12, 10))
-        ax = fig.add_subplot(111, projection='3d')
+    global_num_actual_components = embedding.shape[1]
+    global_dim_label = "0d" # Default if no components
+
+    if global_num_actual_components > 0:
+        global_dim_label = f"{global_num_actual_components}d"
+        title_suffix = f"({global_num_actual_components}D)"
+
+        if is_3d and global_num_actual_components >= 3:
+            fig = plt.figure(figsize=(12, 10))
+            ax = fig.add_subplot(111, projection='3d')
+            scatter = ax.scatter(
+                embedding[:, 0], embedding[:, 1], embedding[:, 2],
+                c=accuracies_raw_normalized, cmap=cmap, norm=norm, s=SCATTER_SIZE, alpha=SCATTER_ALPHA
+            )
+            ax.set_title(f"Agent Combination Weight Space (Multi-Stage PLS - {title_suffix})")
+            ax.set_xlabel("Global PLS Component 1")
+            ax.set_ylabel("Global PLS Component 2")
+            ax.set_zlabel("Global PLS Component 3")
+        elif global_num_actual_components >= 2: # Handles 2D, or 3D request with only 2 components
+            fig, ax = plt.subplots(figsize=(12, 10))
+            scatter = ax.scatter(
+                embedding[:, 0], embedding[:, 1],
+                c=accuracies_raw_normalized, cmap=cmap, norm=norm, s=SCATTER_SIZE, alpha=SCATTER_ALPHA
+            )
+            if is_3d and global_num_actual_components == 2:
+                 ax.set_title(f"Agent Combination Weight Space (Multi-Stage PLS - 3D requested, 2D Fallback)")
+            else:
+                 ax.set_title(f"Agent Combination Weight Space (Multi-Stage PLS - {title_suffix})")
+            ax.set_xlabel("Global PLS Component 1")
+            ax.set_ylabel("Global PLS Component 2")
+        elif global_num_actual_components == 1:
+            fig, ax = plt.subplots(figsize=(12, 8))
+            jitter = (np.random.rand(embedding.shape[0]) - 0.5) * 0.1
+            scatter = ax.scatter(
+                embedding[:, 0], jitter,
+                c=accuracies_raw_normalized, cmap=cmap, norm=norm, s=SCATTER_SIZE, alpha=SCATTER_ALPHA
+            )
+            ax.set_title(f"Agent Combination Weight Space (Multi-Stage PLS - {title_suffix})")
+            ax.set_xlabel("Global PLS Component 1")
+            ax.set_yticks([])
+            ax.set_ylabel("")
         
-        scatter = ax.scatter(
-            embedding[:, 0],
-            embedding[:, 1],
-            embedding[:, 2],
-            c=filtered_accuracies_transformed,
-            cmap=cmap,
-            norm=norm,
-            s=SCATTER_SIZE,
-            alpha=SCATTER_ALPHA
-        )
-        
-        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 3D, Filtered)")
-        ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
-        ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
-        ax.set_zlabel(f"Global PCA Dimension 3 (Explained Variance: {global_pca.explained_variance_ratio_[2]:.2f})")
+        cbar = plt.colorbar(scatter)
+        cbar.set_label('Normalized Accuracy Score')
+        plt.tight_layout()
+        plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_combinations_pls_{global_dim_label}.png"))
+        plt.show()
+        plt.close()
     else:
-        fig, ax = plt.subplots(figsize=(12, 10))
-        
-        scatter = ax.scatter(
-            embedding[:, 0],
-            embedding[:, 1],
-            c=filtered_accuracies_transformed,
-            cmap=cmap,
-            norm=norm,
-            s=SCATTER_SIZE,
-            alpha=SCATTER_ALPHA
-        )
-        
-        ax.set_title("Agent Combination Weight Space (Multi-Stage PCA - 2D, Filtered)")
-        ax.set_xlabel(f"Global PCA Dimension 1 (Explained Variance: {global_pca.explained_variance_ratio_[0]:.2f})")
-        ax.set_ylabel(f"Global PCA Dimension 2 (Explained Variance: {global_pca.explained_variance_ratio_[1]:.2f})")
+        logger.log("Global PLS: No components to plot as embedding has 0 components.")
+
+    # ===== CREATE COMPREHENSIVE SUMMARY =====
+    logger.log(f"\n{'='*60}")
+    logger.log("COMPREHENSIVE PLS EVALUATION SUMMARY")
+    logger.log(f"{'='*60}")
     
-    # Add colorbar
-    cbar = plt.colorbar(scatter)
-    cbar.set_label('Sigmoid-Transformed Accuracy (0=Poor, 1=Excellent)')
+    # Create comparison table
+    comparison_data = []
+    comparison_data.append(['Model', 'Optimal Components', 'R²X', 'R²Y', 'Q²', 'RMSECV', 'RMSEP', 'First Comp. Corr.', 'VIP > 1', 'p-value', 'Significant'])
+    
+    for model_name, pls_result in pls_evaluation_results.items():
+        comparison_data.append([
+            model_name,
+            pls_result['optimal_components'],
+            f"{pls_result['r2x_final']:.3f}",
+            f"{pls_result['r2y_final']:.3f}",
+            f"{pls_result['q2_final']:.3f}",
+            f"{pls_result['rmsecv_final']:.3f}",
+            f"{pls_result['rmsep']:.3f}",
+            f"{pls_result['correlation_coeff']:.3f}",
+            f"{pls_result['n_important_features']}/{pls_result['n_features']}",
+            f"{pls_result['permutation_p_value']:.3f}",
+            "Yes" if pls_result['is_significant'] else "No"
+        ])
+    
+    # Log the comparison table
+    logger.log("\nCOMPREHENSIVE PLS MODEL COMPARISON:")
+    header = comparison_data[0]
+    log_header_str = f"{header[0]:<20} {header[1]:<15} {header[2]:<8} {header[3]:<8} {header[4]:<8} {header[5]:<10} {header[6]:<10} {header[7]:<18} {header[8]:<10} {header[9]:<10} {header[10]:<12}"
+    logger.log(log_header_str)
+    logger.log("-" * (len(log_header_str) + 5))
+    for row_idx in range(1, len(comparison_data)):
+        row = comparison_data[row_idx]
+        logger.log(f"{row[0]:<20} {str(row[1]):<15} {row[2]:<8} {row[3]:<8} {row[4]:<8} {row[5]:<10} {row[6]:<10} {row[7]:<18} {row[8]:<10} {row[9]:<10} {row[10]:<12}")
+
+    # Save the comprehensive summary table as an image
+    fig_table, ax_table = plt.subplots(figsize=(20, 4)) # Adjust figsize as needed
+    ax_table.axis('tight')
+    ax_table.axis('off')
+
+    # Create the table - colWidths might need tuning
+    col_widths = [0.12, 0.08, 0.05, 0.05, 0.05, 0.07, 0.07, 0.1, 0.07, 0.07, 0.07]
+    summary_mpl_table = ax_table.table(cellText=comparison_data[1:], 
+                                     colLabels=comparison_data[0],
+                                     cellLoc='center', 
+                                     loc='center', 
+                                     colWidths=col_widths)
+    
+    summary_mpl_table.auto_set_font_size(False)
+    summary_mpl_table.set_fontsize(9)
+    summary_mpl_table.scale(1.2, 1.2) # Adjust scale as needed
+
+    # Style the header cells
+    for i in range(len(comparison_data[0])):
+        summary_mpl_table[(0, i)].set_facecolor('#40466e')
+        summary_mpl_table[(0, i)].set_text_props(weight='bold', color='white')
+        
+    # Style data cells - optional, e.g., for alternating row colors or specific column alignment
+    for i in range(1, len(comparison_data)):
+        for j in range(len(comparison_data[0])):
+            summary_mpl_table[(i, j)].set_height(0.1) # Adjust cell height
+
+    ax_table.set_title('Comprehensive PLS Model Evaluation Summary', fontsize=14, fontweight='bold', pad=20)
+    plt.tight_layout(pad=1.5)
+    summary_table_path = os.path.join(pls_diagnostics_dir, 'pls_evaluation_summary_table.png')
+    plt.savefig(summary_table_path, dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close(fig_table)
+    logger.log(f"Comprehensive PLS summary table image saved to: {summary_table_path}")
+
+    # Create a comprehensive comparison plot
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
+    
+    models = list(pls_evaluation_results.keys())
+    
+    # 1. R² comparison
+    r2x_values = [pls_evaluation_results[model]['r2x_final'] for model in models]
+    r2y_values = [pls_evaluation_results[model]['r2y_final'] for model in models]
+    q2_values = [pls_evaluation_results[model]['q2_final'] for model in models]
+    
+    x_pos = np.arange(len(models))
+    width = 0.25
+    
+    ax1.bar(x_pos - width, r2x_values, width, label='R²X', alpha=0.7)
+    ax1.bar(x_pos, r2y_values, width, label='R²Y', alpha=0.7)
+    ax1.bar(x_pos + width, q2_values, width, label='Q²', alpha=0.7)
+    
+    ax1.set_xlabel('Models')
+    ax1.set_ylabel('Variance Explained / Predictive Power')
+    ax1.set_title('R² and Q² Comparison Across Models')
+    ax1.set_xticks(x_pos)
+    ax1.set_xticklabels(models, rotation=45)
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    # 2. RMSE comparison
+    rmsecv_values = [pls_evaluation_results[model]['rmsecv_final'] for model in models]
+    rmsep_values = [pls_evaluation_results[model]['rmsep'] for model in models]
+    
+    ax2.bar(x_pos - width/2, rmsecv_values, width, label='RMSECV', alpha=0.7)
+    ax2.bar(x_pos + width/2, rmsep_values, width, label='RMSEP', alpha=0.7)
+    
+    ax2.set_xlabel('Models')
+    ax2.set_ylabel('Root Mean Square Error')
+    ax2.set_title('RMSE Comparison Across Models')
+    ax2.set_xticks(x_pos)
+    ax2.set_xticklabels(models, rotation=45)
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+    
+    # 3. Correlation and significance
+    corr_values = [pls_evaluation_results[model]['correlation_coeff'] for model in models]
+    p_values = [pls_evaluation_results[model]['permutation_p_value'] for model in models]
+    
+    ax3.bar(models, corr_values, alpha=0.7, color='green')
+    ax3.set_xlabel('Models')
+    ax3.set_ylabel('First Component Correlation')
+    ax3.set_title('First Component vs Y Correlation')
+    ax3.tick_params(axis='x', rotation=45)
+    ax3.grid(True, alpha=0.3)
+    
+    # 4. p-values with significance threshold
+    colors = ['red' if p < 0.05 else 'blue' for p in p_values]
+    ax4.bar(models, p_values, alpha=0.7, color=colors)
+    ax4.axhline(y=0.05, color='red', linestyle='--', label='p = 0.05 threshold')
+    ax4.set_xlabel('Models')
+    ax4.set_ylabel('Permutation Test p-value')
+    ax4.set_title('Model Significance (Permutation Test)')
+    ax4.tick_params(axis='x', rotation=45)
+    ax4.legend()
+    ax4.grid(True, alpha=0.3)
+    ax4.set_yscale('log')
     
     plt.tight_layout()
-    
-    # Save the plot
-    dim_label = "3d" if is_3d else "2d"
-    plt.savefig(os.path.join(VISUALIZATIONS_DIR, f"agent_combinations_pca_{dim_label}_filtered.png"))
+    plt.savefig(os.path.join(pls_diagnostics_dir, 'comprehensive_comparison.png'), dpi=300, bbox_inches='tight')
     plt.show()
     plt.close()
     
-    # Log information
-    logger.log("\nAgent Combination PCA Visualization (Filtered):")
-    logger.log(f"  Total filtered combinations: {len(X)}")
-    logger.log(f"  Dimensions: {dim_label}")
-    logger.log(f"  Min accuracy (original): {min(filtered_accuracies_raw):.4f}")
-    logger.log(f"  Max accuracy (original): {max(filtered_accuracies_raw):.4f}")
-    logger.log(f"  Min sigmoid score: {min(filtered_accuracies_transformed):.4f}")
-    logger.log(f"  Max sigmoid score: {max(filtered_accuracies_transformed):.4f}")
+    # Save comprehensive results to CSV
+    comparison_df = pd.DataFrame(comparison_data[1:], columns=comparison_data[0])
+    comparison_df.to_csv(os.path.join(CSV_DIR, 'pls_comprehensive_comparison.csv'), index=False)
     
-    # Create a CSV file with the results
-    df = pd.DataFrame({
-        "combination": filtered_combination_names,
-        "pca_x": embedding[:, 0],
-        "pca_y": embedding[:, 1],
-        "accuracy_original": filtered_accuracies_raw,
-        "accuracy_sigmoid": filtered_accuracies_transformed
-    })
+    # Log information for global results
+    logger.log("\nAgent Combination PLS Visualization (Global Model):")
+    logger.log(f"  Total combinations processed: {len(X)}") # X is from concatenated_features
+    logger.log(f"  Dimensions plotted for global model: {global_dim_label}")
+    logger.log(f"  Min accuracy (original): {min(accuracies_raw):.4f}")
+    logger.log(f"  Max accuracy (original): {max(accuracies_raw):.4f}")
+    logger.log(f"  Min normalized score: {min(accuracies_raw_normalized):.4f}")
+    logger.log(f"  Max normalized score: {max(accuracies_raw_normalized):.4f}")
     
-    # Add z dimension if 3D
-    if is_3d:
-        df["pca_z"] = embedding[:, 2]
+    # Create a CSV file with the global PLS results
+    if global_num_actual_components > 0:
+        df_data_global = {
+            "combination": combination_names,
+            "accuracy_original": accuracies_raw,
+            "accuracy_normalized": accuracies_raw_normalized
+        }
+        if global_num_actual_components >= 1:
+            df_data_global["pls_x"] = embedding[:, 0]
+        if global_num_actual_components >= 2:
+            df_data_global["pls_y"] = embedding[:, 1]
+        if global_num_actual_components >= 3:
+            df_data_global["pls_z"] = embedding[:, 2]
+        
+        df_global = pd.DataFrame(df_data_global)
+        os.makedirs(CSV_DIR, exist_ok=True)
+        df_global.to_csv(os.path.join(CSV_DIR, f"agent_combinations_pls_{global_dim_label}.csv"), index=False)
+        logger.log(f"Global PLS CSV saved to: agent_combinations_pls_{global_dim_label}.csv")
+    else:
+        logger.log(f"Skipping CSV for global PLS as there are {global_num_actual_components} components.")
     
-    # Save CSV file
-    os.makedirs(CSV_DIR, exist_ok=True)
-    df.to_csv(os.path.join(CSV_DIR, f"agent_combinations_pca_{dim_label}_filtered.csv"), index=False)
+    logger.log(f"\n{'='*60}")
+    logger.log("PLS EVALUATION COMPLETE - All results saved to analysis_output/")
+    logger.log(f"{'='*60}")
+    
+    return pls_evaluation_results
 
-def train_accuracy_predictor(results, feature_counts, output_mode=None):
-    """
-    Train and evaluate a neural network to predict agent combination accuracy
-    
-    Args:
-        results (list): List of evaluation results for each agent combination
-        feature_counts (dict): Dictionary with feature counts for each agent
-        output_mode (int): Neural network output mode (1, 2, or 3). If None, uses NN_OUTPUT_MODE
-        
-    Returns:
-        AccuracyPredictor: Trained neural network model
-    """
-    if output_mode is None:
-        output_mode = NN_OUTPUT_MODE
-    
-    logger.log(f"\n{'='*50}")
-    logger.log(f"TRAINING NEURAL NETWORK PREDICTOR (MODE {output_mode})")
-    logger.log(f"{'='*50}")
-    
-    # Extract data from results
-    X = []  # Weight vectors
-    y_raw = []  # Raw accuracy values
-    combination_names = []
-    
-    for result in results:
-        X.append(result["combination_weights"])
-        y_raw.append(result["accuracy_raw"])
-        combination_names.append(result["combination"])
-    
-    # Convert to numpy arrays
-    X = np.array(X)
-    y_raw = np.array(y_raw)
-    
-    # Log dataset information
-    input_dim = X.shape[1]
-    n_samples = X.shape[0]
-    
-    logger.log(f"\nDataset Information:")
-    logger.log(f"  Number of samples: {n_samples}")
-    logger.log(f"  Input dimension: {input_dim}")
-    logger.log(f"  Feature breakdown:")
-    logger.log(f"    Agent B features: {feature_counts['b_features']}")
-    logger.log(f"    Agent C features: {feature_counts['c_features']}")
-    logger.log(f"    Agent D features: {feature_counts['d_features']}")
-    logger.log(f"  Raw accuracy range: [{y_raw.min():.4f}, {y_raw.max():.4f}]")
-    
-    print(f"\nTraining Neural Network Predictor (Mode {output_mode}):")
-    print(f"Dataset: {n_samples} samples, {input_dim} features")
-    print(f"Raw accuracy range: [{y_raw.min():.4f}, {y_raw.max():.4f}]")
-    
-    # Check if we have enough data
-    if n_samples < 10:
-        logger.log("Warning: Very small dataset, neural network training may not be effective")
-        print("Warning: Very small dataset, neural network training may not be effective")
-        
-    # Split data into train/validation/test sets
-    # First split: 80% train+val, 20% test
-    X_temp, X_test, y_temp, y_test = train_test_split(
-        X, y_raw, test_size=0.2, random_state=NN_RANDOM_STATE, stratify=None
-    )
-    
-    # Second split: 75% train, 25% val (of the remaining 80%)
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_temp, y_temp, test_size=0.25, random_state=NN_RANDOM_STATE, stratify=None
-    )
-    
-    logger.log(f"\nData Split:")
-    logger.log(f"  Training set: {len(X_train)} samples")
-    logger.log(f"  Validation set: {len(X_val)} samples")
-    logger.log(f"  Test set: {len(X_test)} samples")
-    
-    print(f"Data split: {len(X_train)} train, {len(X_val)} val, {len(X_test)} test")
-    
-    # For classification modes, show class distribution
-    if output_mode in [2, 3]:
-        logger.log(f"\nClass Distribution (based on raw accuracy):")
-        
-        if output_mode == 2:  # Binary
-            train_good = (y_train > 0).sum()
-            train_bad = (y_train <= 0).sum()
-            val_good = (y_val > 0).sum()
-            val_bad = (y_val <= 0).sum()
-            test_good = (y_test > 0).sum()
-            test_bad = (y_test <= 0).sum()
-            
-            logger.log(f"  Training: Good={train_good}, Bad={train_bad}")
-            logger.log(f"  Validation: Good={val_good}, Bad={val_bad}")
-            logger.log(f"  Test: Good={test_good}, Bad={test_bad}")
-            
-        elif output_mode == 3:  # Three-class
-            a = FILTERING_INTERVAL_WIDTH_A
-            for split_name, y_split in [("Training", y_train), ("Validation", y_val), ("Test", y_test)]:
-                bad = (y_split < -a).sum()
-                mid = ((y_split >= -a) & (y_split <= a)).sum()
-                good = (y_split > a).sum()
-                logger.log(f"  {split_name}: Bad={bad}, Mid={mid}, Good={good}")
-    
-    # Standardize input features
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_val_scaled = scaler.transform(X_val)
-    X_test_scaled = scaler.transform(X_test)
-    
-    # Create and train the model
-    predictor = AccuracyPredictor(input_dim=input_dim, output_mode=output_mode)
-    
-    print(f"\nTraining neural network...")
-    history = predictor.train(X_train_scaled, y_train, X_val_scaled, y_val, verbose=1)
-    
-    # Evaluate on test set
-    print(f"\nEvaluating on test set...")
-    test_results = predictor.evaluate(X_test_scaled, y_test, verbose=1)
-    
-    # Log test results
-    logger.log(f"\nTest Results:")
-    for key, value in test_results.items():
-        if key not in ['confusion_matrix', 'classification_report']:
-            logger.log(f"  {key}: {value}")
-    
-    if 'confusion_matrix' in test_results:
-        logger.log(f"  Confusion Matrix:")
-        logger.log(f"    {test_results['confusion_matrix']}")
-    
-    if 'classification_report' in test_results:
-        logger.log(f"  Classification Report:")
-        for class_name, metrics in test_results['classification_report'].items():
-            if isinstance(metrics, dict):
-                logger.log(f"    {class_name}: precision={metrics.get('precision', 'N/A'):.3f}, "
-                          f"recall={metrics.get('recall', 'N/A'):.3f}, "
-                          f"f1-score={metrics.get('f1-score', 'N/A'):.3f}")
-    
-    # Plot training history
-    predictor.plot_training_history()
-    
-    # Save model summary to CSV
-    model_info = {
-        'output_mode': output_mode,
-        'input_dim': input_dim,
-        'hidden_layers': predictor.hidden_layers,
-        'n_train_samples': len(X_train),
-        'n_val_samples': len(X_val),
-        'n_test_samples': len(X_test),
-        'epochs': NN_EPOCHS,
-        'batch_size': NN_BATCH_SIZE,
-        'learning_rate': NN_LEARNING_RATE,
-    }
-    
-    # Add test results to model info
-    model_info.update(test_results)
-    
-    # Convert arrays to lists for JSON serialization
-    if 'confusion_matrix' in model_info:
-        model_info['confusion_matrix'] = model_info['confusion_matrix'].tolist()
-    
-    # Save model information
-    os.makedirs(CSV_DIR, exist_ok=True)
-    model_df = pd.DataFrame([model_info])
-    model_df.to_csv(os.path.join(CSV_DIR, f'nn_model_info_mode_{output_mode}.csv'), index=False)
-    
-    logger.log(f"\nNeural network training completed for mode {output_mode}")
-    print(f"Neural network training completed for mode {output_mode}")
-    
-    return predictor
 
 def run_performance_evaluation():
     """
@@ -1303,7 +1484,8 @@ def run_performance_evaluation():
         results.append(result)
     
     # Sort results by accuracy 
-    sorted_results = sorted(results, key=lambda x: x["accuracy"], reverse=True)
+    # sorted_results = sorted(results, key=lambda x: x["accuracy"], reverse=True)
+    sorted_results = sorted(results, key=lambda x: x["accuracy_raw"], reverse=True)
     
     # Display final comparison
     print("\n" + "="*50)
@@ -1318,37 +1500,44 @@ def run_performance_evaluation():
     print("-" * 70)
     
     for rank, result in enumerate(sorted_results):
-        print(f"{rank+1:^6}|{result['combination']:^15}|{result['accuracy_raw']:^10.4f}|{result['accuracy_normalized']:^10.4f}|{result['accuracy']:^10.4f}")
+        print(f"{rank+1:^6}|{result['combination']:^15}|{result['accuracy_raw']:^10.4f}|")    
     
     logger.log(f"\n{'Rank':^6}|{'Combination':^15}|{'Raw Acc':^10}|{'Norm Acc':^10}|{'Trans Acc':^10}")
     logger.log("-" * 70)
     
     for rank, result in enumerate(sorted_results):
-        logger.log(f"{rank+1:^6}|{result['combination']:^15}|{result['accuracy_raw']:^10.4f}|{result['accuracy_normalized']:^10.4f}|{result['accuracy']:^10.4f}")
+        logger.log(f"{rank+1:^6}|{result['combination']:^15}|{result['accuracy_raw']:^10.4f}|")       
     
     # Print the best combination
     best_combo = sorted_results[0]['combination']
     best_accuracy_raw = sorted_results[0]['accuracy_raw']
-    best_accuracy_normalized = sorted_results[0]['accuracy_normalized']
-    best_accuracy_transformed = sorted_results[0]['accuracy']
+    
     
     print(f"\nBest agent combination: {best_combo}")
     print(f"Raw accuracy (negative slope): {best_accuracy_raw:.4f}")
-    print(f"Normalized accuracy: {best_accuracy_normalized:.4f}")
-    print(f"Transformed accuracy (sigmoid): {best_accuracy_transformed:.4f}")
+   
     
     logger.log(f"\nBest agent combination: {best_combo}")
     logger.log(f"Raw accuracy (negative slope): {best_accuracy_raw:.4f}")
-    logger.log(f"Normalized accuracy: {best_accuracy_normalized:.4f}")
-    logger.log(f"Transformed accuracy (sigmoid): {best_accuracy_transformed:.4f}")
+
     
     # Visualize agent combinations using a multi-stage PCA approach
     logger.log("\nVisualizing agent combinations using a multi-stage PCA approach...")
-    visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True)
+    pls_evaluation_results = visualize_agent_combinations(results, feature_counts, feature_names, is_3d=True)
+
+    # Print comprehensive PLS evaluation summary
+    print("\n" + "="*80)
+    print("COMPREHENSIVE PLS EVALUATION SUMMARY")
+    print("="*80)
     
-    # Train and evaluate neural network to predict agent combination accuracy
-    logger.log("\nTraining neural network to predict agent combination accuracy...")
-    predictor = train_accuracy_predictor(results, feature_counts, output_mode=NN_OUTPUT_MODE)
+    print(f"\n{'Model':<20} {'Opt. Comp.':<10} {'R²X':<8} {'R²Y':<8} {'Q²':<8} {'RMSECV':<10} {'RMSEP':<10} {'Corr.':<8} {'Significant':<10}")
+    print("-" * 95)
+    
+    for model_name, pls_result in pls_evaluation_results.items():
+        significance = "Yes" if pls_result['is_significant'] else "No"
+        print(f"{model_name:<20} {pls_result['optimal_components']:<10} {pls_result['r2x_final']:<8.3f} {pls_result['r2y_final']:<8.3f} {pls_result['q2_final']:<8.3f} {pls_result['rmsecv_final']:<10.3f} {pls_result['rmsep']:<10.3f} {pls_result['correlation_coeff']:<8.3f} {significance:<10}")
+    
+    print(f"\nAll PLS diagnostic plots and comprehensive results saved to: {os.path.join(OUTPUT_DIR, 'visualizations', 'pls_diagnostics')}")
     
     return sorted_results
 
