@@ -1,0 +1,5 @@
+Model,Optimal Components,R²X,R²Y,Q²,RMSECV,RMSEP,First Comp. Corr.,VIP > 1,p-value,Significant
+Agent_B,4,0.086,0.930,0.920,0.283,0.286,-0.939,42/50,0.000,Yes
+Agent_C,1,0.088,0.020,-0.016,1.009,1.002,-0.142,3/12,0.296,No
+Agent_D,2,0.095,0.079,0.010,0.996,0.955,-0.278,13/21,0.000,Yes
+Global_Combination,3,0.430,0.867,0.865,0.368,0.339,-0.929,5/7,0.000,Yes
